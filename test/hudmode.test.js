@@ -13,7 +13,7 @@ const A = require('./_assert.js');
 const H = require('../frontend/app/hudmode.js');
 
 const ROOT = path.join(__dirname, '..');
-const read = rel => fs.readFileSync(path.join(ROOT, rel), 'utf8');
+const read = rel => fs.readFileSync(path.join(ROOT, rel), 'utf8').split(String.fromCharCode(13)).join('');
 const names = { agent: { name: 'NOVA', color: '#4af' }, researcher: { name: 'ORION', color: '#4c8' } };
 const who = id => names[id] || null;
 const T0 = 1_800_000_000_000;

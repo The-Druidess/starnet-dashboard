@@ -204,7 +204,7 @@ async function plugin(id, source) {
       const worker = require('fs').readFileSync(path.join(__dirname, '..', 'sidecar', 'plugin-worker.js'), 'utf8');
       A.ok(/jobsPaused = m\.jobsPaused === true;\s*if \(!jobsPaused\) startJobs\(\);/.test(worker) && /if \(m\.t === 'jobs'\) \{ jobsPaused = m\.paused === true; if \(jobsPaused\) stopJobs\(\); else startJobs\(\); return; \}/.test(worker),
         'the worker starts no job timers while paused and stops/starts them on { t: jobs }');
-      const idx = require('fs').readFileSync(path.join(__dirname, '..', 'sidecar', 'index.js'), 'utf8');
+      const idx = require('fs').readFileSync(path.join(__dirname, '..', 'sidecar', 'index.js'), 'utf8').split(String.fromCharCode(13)).join('');
       A.ok(/let cronHalted = loadCronHalted\(\);\n[^\n]*\npluginRuntime\.setJobsPaused\(cronHalted\);/.test(idx) && /try \{ pluginRuntime\.setJobsPaused\(true\); \} catch \(e\) \{ failNote\('plugins\.halt', e\); \}/.test(idx) && !/pluginRuntime\.stopAll\(\)\.catch\(\(e\) => failNote\('plugins\.halt'/.test(idx),
         'E-STOP pauses plugin jobs (never kills the guards) and a boot while halted starts them paused');
     }

@@ -86,7 +86,8 @@ function libraryToSkillMd(recipe, opts) {
     '  author: ' + q(opts.author || 'StarNet')];
   if (opts.version) lines.push('  version: ' + q(opts.version));
   lines.push('---', '');
-  return lines.join('\n') + '\n' + str(recipe.body).trim() + '\n';
+  const body = str(recipe.body).replace(/\r\n/g, '\n').trim();
+  return lines.join('\n') + '\n' + body + '\n';
 }
 
 /* readSkillMd — parse and check an authored market SKILL.md. Throws a sentence naming the problem. */

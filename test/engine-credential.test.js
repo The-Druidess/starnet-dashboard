@@ -179,7 +179,7 @@ A.ok(NR.bindingPhrase('no-provider').indexOf(EC.UNATTENDED_REMEDY) >= 0, 'nightr
 
 /* ---------- the page copy is ONE credential: its endpoint + backups ride only its own key (index.js, executed) ---------- */
 {
-  const raw = fs.readFileSync(path.join(__dirname, '..', 'sidecar', 'index.js'), 'utf8');
+  const raw = fs.readFileSync(path.join(__dirname, '..', 'sidecar', 'index.js'), 'utf8').split(String.fromCharCode(13)).join('');
   const fn = name => { const i = raw.indexOf('\nfunction ' + name + '('); A.ok(i >= 0, 'index.js has ' + name); return i < 0 ? '' : raw.slice(i, raw.indexOf('\n}\n', i) + 3); };
   const code = ['providerRuntimeKey', 'providerOperatorKey', 'providerRuntimeKeyPool', 'providerFallbackKeyPool', 'pageCopyRidesWith', 'providerRuntimeBaseUrl'].map(fn).join('\n');
   const PROFILES = {

@@ -100,7 +100,9 @@ export function planPull(submissions, ctx) {
 
 // NOTICE.md keeps a credits row per uploaded skill under its own heading inside "## Skill Market"
 export function creditNotice(text, rows) {
-  const lines = str(text).split('\n');
+  const raw = str(text);
+  const newline = raw.includes('\r\n') ? '\r\n' : '\n';
+  const lines = raw.replace(/\r\n/g, '\n').split('\n');
   let at = lines.indexOf(NOTICE_HEAD);
   if (at < 0) {
     const next = lines.findIndex((l, i) => i > lines.indexOf('## Skill Market (skills-catalog/)') && /^## /.test(l));
@@ -124,7 +126,7 @@ export function creditNotice(text, rows) {
       table.splice(last + 1, 0, row);
     }
   }
-  return lines.slice(0, at).concat(table, lines.slice(end)).join('\n');
+  return lines.slice(0, at).concat(table, lines.slice(end)).join(newline);
 }
 
 function reviewToken() {

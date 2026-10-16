@@ -9,7 +9,7 @@ const path = require('path');
 const vm = require('vm');
 const A = require('./_assert.js');
 
-const source = fs.readFileSync(path.join(__dirname, '../frontend/app/stationui.js'), 'utf8');
+const source = fs.readFileSync(path.join(__dirname, '../frontend/app/stationui.js'), 'utf8').split(String.fromCharCode(13)).join('');
 const laneMatch = source.match(/function abilitySkillsLane\(body\) \{[\s\S]*?\n  \}\n  window\.AbilityLanes/);
 A.ok(laneMatch, 'the ABILITIES Skills lane is present');
 

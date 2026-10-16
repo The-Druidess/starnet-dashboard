@@ -11,7 +11,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const ROOT = path.join(__dirname, '..');
-const read = rel => fs.readFileSync(path.join(ROOT, rel), 'utf8');
+const read = rel => fs.readFileSync(path.join(ROOT, rel), 'utf8').split(String.fromCharCode(13)).join('');
 const DOOR = 'SETTINGS › SPENDING LIMITS';
 
 // the door exists: the SPENDING LIMITS section is the 'budget' pane every budget door opens
@@ -78,12 +78,14 @@ for (const [scope, cap, want] of [
   } finally { globalThis.StationUI = prevUI; }
   // the flag rides from the stream to the stop line and the door
   const harness = read('frontend/app/harness.js');
-  A.ok(/budgetCapIsBalance = payload\.budgetCapIsBalance === true;/.test(harness) && /budgetScope, budgetCapUsd, budgetCapIsBalance \};\n    return \{ text: full,[^\n]*budgetCapIsBalance \};/.test(harness), 'Harness.chat latches the lead end\'s budgetCapIsBalance and returns it');
+  A.ok(/budgetCapIsBalance = payload\.budgetCapIsBalance === true;/.test(harness) && /budgetScope, budgetCapUsd, budgetCapIsBalance \};\r?\n    return \{ text: full,[^\n]*budgetCapIsBalance \};/.test(harness), 'Harness.chat latches the lead end\'s budgetCapIsBalance and returns it');
   A.ok(/budgetStopLine\(budgetScope, budgetCapUsd, budgetCapIsBalance\)/.test(chat) && /offerBudgetDoor\(budgetCapIsBalance\)/.test(chat), 'COMMS passes it to the stop line and the door');
   // the sidecar owns the fact: admission's clamp sets it, the lead's own per-run stop at that ceiling carries it
   const idx = read('sidecar/index.js');
   A.ok(/const chosenCapUsd = \(runCapUsd > 0 && isFinite\(runCapUsd\)\) \? runCapUsd : 0;[^\n]*\n    runCapUsd = budgetCaps\.managedRunCapUsd\([^\n]*\);\n(?:    \/\/[^\n]*\n)*    runCapIsBalance = budgetCaps\.managedCapIsBalance\(chosenCapUsd, runCapUsd, avail\);/.test(idx),
     'managed admission marks a ceiling the clamp set to the reported balance (from the cap chosen before the clamp)');
+    A.ok(/const chosenCapUsd = \(runCapUsd > 0 && isFinite\(runCapUsd\)\) \? runCapUsd : 0;[^\n]*\r?\n    runCapUsd = budgetCaps\.managedRunCapUsd\([^\n]*\);\r?\n(?:    \/\/[^\n]*\r?\n)*    runCapIsBalance = budgetCaps\.managedCapIsBalance\(chosenCapUsd, runCapUsd, avail\);/.test(idx),
+    'managed admission also accepts CRLF source');
   // which ceilings ARE the balance (review 2026-10-08: a PER RUN that merely equals the wallet is the user's cap)
   const bc = require('../sidecar/budgetcaps.js');
   const D = bc.DEFAULT_MANAGED_PER_RUN_USD;
@@ -96,7 +98,8 @@ for (const [scope, cap, want] of [
   A.eq(isBal(0, 79), false, 'no PER RUN, a big wallet: the managed default is the ceiling, not the balance');
   A.eq([bc.managedCapIsBalance(0, 0, 0), bc.managedCapIsBalance(5, 5, NaN), bc.managedCapIsBalance(5, 5, null)], [false, false, false], 'an empty or unknown wallet never marks a balance stop');
   A.ok(/if \(runCapIsBalance && name === 'agent\.run\.end' && payload && payload\.runId === runId && payload\.reason === 'budget' && payload\.budgetScope === 'run'\n\s+&& typeof payload\.budgetCapUsd === 'number' && Math\.abs\(payload\.budgetCapUsd - runCapUsd\) < 1e-9\) payload = Object\.assign\(\{\}, payload, \{ budgetCapIsBalance: true \}\);/.test(idx),
-    'loopEmit stamps budgetCapIsBalance only on the run\'s own per-run stop at that exact ceiling');
+    A.ok(/if \(runCapIsBalance && name === 'agent\.run\.end' && payload && payload\.runId === runId && payload\.reason === 'budget' && payload\.budgetScope === 'run'\r?\n\s+&& typeof payload\.budgetCapUsd === 'number' && Math\.abs\(payload\.budgetCapUsd - runCapUsd\) < 1e-9\) payload = Object\.assign\(\{\}, payload, \{ budgetCapIsBalance: true \}\);/.test(idx),
+    'loopEmit stamps budgetCapIsBalance only on the run\'s own per-run stop at that exact ceiling'));
 }
 
 // ---- the SLAG toast (world.js → SlagLog) on the same stop: it must not tell a balance stop to "raise the budget" ----
