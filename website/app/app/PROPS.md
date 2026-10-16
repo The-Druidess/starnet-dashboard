@@ -2,6 +2,84 @@
 
 Placeable, animated furniture ported from the v7 StarNet sim. Companion to `BUILDER.md`.
 
+## Treasurer hybrid officer and finance controls
+
+A computer workstation bound to the reserved `portal-treasurer` identifier hosts the
+Treasurer avatar. Before activation this is a service entry; `TreasurerPortal.activateAdviser()`
+uses the existing recruitment/persistence path to add the local `qwen3.5:4b` Ollama adviser
+under that same identity, reusing the existing desk and body without another workflow bay.
+Activation requires an enabled, valid strict policy approving that model.
+The activated officer uses the standard **Brief, Growth, Record, Memory, Config** dossier,
+COMMS sessions, appearance and personality controls. Growth measures actual AI work,
+not financial interception checks. Advice cannot override deterministic enforcement.
+Clicking the avatar or desk opens the dossier; Brief also opens the separate finance controls.
+
+The panel reads `/api/budget/status`, shows unknown accounting explicitly, and opens
+the existing Settings > Spending Limits controls for edits. Opening or refreshing it
+does not change caps or call a model. The displayed $50/calendar-day,
+$500/Monday-Sunday-week, and $1,000/calendar-month (America/Phoenix) policy is a
+requested policy. Enforcement status comes from the runtime, not the avatar.
+Current rolling-day governor settings are shown separately.
+
+### Strict local-only finance
+
+Before adviser activation, the CREW rail shows a separate **PORTAL - FINANCE** entry.
+After activation it shows one actual officer, not a duplicate service entry. His crew
+and dossier status follows the same live execution rules as every other AI officer
+(IDLE/WORKING/IN CONVERSATION in the crew rail; ONLINE/WORKING/THINKING/OFFLINE in the dossier).
+Separately, the financial gate status in Brief and Record
+is read from server evidence every five seconds: **GUARDING**, **LOCKED** (invalid policy),
+**DEGRADED** (audit failure), **DISABLED**, or **UNAVAILABLE** (failed/stale telemetry).
+No autonomous AI monitoring loop is created. Avatar and tone changes use normal agent
+persistence. An idle adviser does not mean the independent financial gate has stopped.
+The crew rail places Treasurer immediately after the other officers sharing his actual
+workstation room (the Bridge in this station), ahead of the shop crew. Original roster
+indices remain intact for dossier selection and portraits; no workflow routing is changed.
+
+Brief shows the live gate and calendar totals; Record adds the latest 100 durable
+allow/block interception events alongside normal run history. Lifetime counters persist
+in `finance-audit.json` across restarts. These are gate checks, not transactions or a
+complete ledger; failed dispatches can still have an allowed admission check. Logs
+contain operation identifiers, not prompts, keys, URLs or tool arguments. A corrupt or
+unwritable audit store explicitly degrades status and blocks new inference/tool work;
+read-only treasury telemetry and emergency interruption remain accessible.
+
+Every Treasurer request receives an authoritative server snapshot. The read-only
+`treasury.status` tool provides fresh state to Treasurer and the Bridge. AI memory,
+COMMS, personality and appearance never grant financial authority. Local memory
+keep/edit/pin/forget operations remain available; autonomous reflection is not enabled.
+
+An enabled `strict-finance.json` in the station workspace activates the runtime's
+fail-closed local-only gate across agents and background work. It admits only
+explicitly named local Ollama models at the standard loopback port, with a $0
+maximum new charge. Cloud/subscription inference, fallback calls, outbound
+network requests, connector transports, plugins/shell hooks, arbitrary
+subprocesses and unverified tool actions are blocked. Only an explicit set of
+local station reads and existing consent-gated safety stops remain callable.
+ASK, Full Power, legacy caps and RESUME cannot override the gate.
+
+No positive-cost adapter currently has a guaranteed maximum-charge contract.
+**All paid work is blocked**, not reserved or permitted up to the policy caps.
+Before adding paid admission, implement durable atomic reservations, settlement
+and recovery for verified charge bounds; estimates are not bounds. This is a
+runtime guard, not a bank/card limit or an operating-system sandbox: manually
+incurred charges, other applications, existing subscriptions and electricity
+are outside its coverage.
+
+Stop the sidecar before activation. The configuration command claims the workspace
+exclusively, writes durably and verifies the policy:
+
+```powershell
+node scripts\enable-strict-finance.cjs "C:\absolute\station-workspace" "qwen3.5:4b"
+```
+
+Restart Starnet and verify `/api/finance/strict` and the Treasurer panel. An
+unreadable/invalid policy fails closed, never falls back to disabled mode.
+The panel computes settled metered ledger totals for local calendar days,
+Monday-start weeks and calendar months in America/Phoenix; incomplete accounting
+is shown as UNKNOWN. Changing the older budget inputs does not change this policy.
+Business-finance ingestion, category budgets and reports remain unimplemented.
+
 ## Data model (worldmodel.js — additive, no `shared/` change)
 
 A prop lives in `doc.props[]`:

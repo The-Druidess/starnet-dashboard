@@ -13,6 +13,11 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 const os = require('node:os');
 const dns = require('node:dns');
+const strictFinanceMod = require('./strict-finance.js');
+let strictFinance = null;
+const nativeFetch = globalThis.fetch;
+globalThis.fetch = (input, init) => strictFinance
+  ? strictFinance.fetch(nativeFetch, input, init) : nativeFetch(input, init);
 // Consume the native envelope key before any subsystem can snapshot process.env
 // or launch a worker. The key stays in the vault closure, never a child environment.
 const connectorVaultMod = require('./connector-vault.js');
@@ -152,7 +157,13 @@ function selectProvider(opts) {
     opts = Object.assign({}, opts, { baseUrl: kimiRegion.resolveBaseUrl(opts.kimiRegion || kimiPrimaryRegion(), opts.baseUrl) });
   }
   const built = selectProviderRaw(opts);
-  return opts && normalizeProvider(opts.provider) === 'starnet' ? googleRelayGuard().guardProvider(built) : built;
+  const guarded = opts && normalizeProvider(opts.provider) === 'starnet' ? googleRelayGuard().guardProvider(built) : built;
+  return Object.assign({}, guarded, {
+    stream: async function* (request) {
+      if (strictFinance) strictFinance.assertProvider(normalizeProvider(opts && opts.provider), opts && opts.baseUrl, request);
+      yield* guarded.stream(request);
+    }
+  });
 }
 /* PROACTIVE QUOTA. One tracker for the whole process, attached to the factory so every provider adapter's
    injected fetch is instrumented at a single seam (see providers/ratelimits.js). Quota used to be learned only
@@ -402,6 +413,13 @@ const cronGuard = require('./cron-guard.js');                        // routine 
 // git in user repos, shell hooks, loop checks, the folder picker, fs.search's rg. An explicit `env` (the agent
 // shell's sanitizeChildEnv) is passed through untouched.
 const stationChildProcess = require('./child-env.js').guardChildProcess(require('node:child_process'));
+for (const name of ['spawn', 'spawnSync', 'execFile', 'execFileSync', 'exec', 'execSync', 'fork']) {
+  const original = stationChildProcess[name];
+  stationChildProcess[name] = (...args) => {
+    if (strictFinance) strictFinance.assertProcess();
+    return original(...args);
+  };
+}
 const { execFile, spawn: childSpawn } = stationChildProcess;   // shadow-git runner + shell subprocess — ambient, here only
 let lspManager = null;   // initialized beside procLedger so abrupt desktop-sidecar death is recoverable on next boot
 const loopbackListenerProbe = makeLoopbackListenerProbe({ execFile, platform: process.platform, env: process.env });
@@ -642,6 +660,19 @@ if (!workspaceOwnerClaim.ok) {
 // Synchronous and idempotent: covers ordinary returns and every process.exit path. SIGKILL/TerminateProcess
 // cannot run handlers, so their valid PID-stamped claim is recovered by the next boot instead.
 process.once('exit', () => { try { workspaceOwner.release(); } catch (_) {} });
+const STRICT_FINANCE_FILE = path.join(WORKSPACES, 'strict-finance.json');
+strictFinance = strictFinanceMod.makeStrictFinance({
+  audit: require('./finance-audit.js').makeFinanceAudit({
+    fs, path, workspace: WORKSPACES, now: () => Date.now(),
+    onError: error => console.error('[strict-finance] AUDIT UNAVAILABLE: ' + error.message)
+  }),
+  read: () => {
+    try { return JSON.parse(fs.readFileSync(STRICT_FINANCE_FILE, 'utf8')); }
+    catch (error) { if (error.code === 'ENOENT') return undefined; throw error; }
+  },
+  onError: error => console.error('[strict-finance] FAIL CLOSED: ' + error.message)
+});
+require('./tools/registry.js').attachFinancialGuard((call, tool) => strictFinance.assertTool(call, tool));
 
 // Capture lineage before this process stamps schema/cache/runtime files. It is bounded metadata only: names and
 // counts, never file contents. In packaged mode we also inspect known legacy roots and verified update snapshots;
@@ -679,6 +710,7 @@ function publicWorkspaceLineage() {
 let livePricesRefreshTimer = null;
 const livePrices = (function () {
   try {
+    if (strictFinance.enabled()) return null;
     if (String(ENV('LIVE_PRICES') || '').trim() === '0') return null;
     const { makeLivePrices } = require('./providers/liveprices.js');
     const prices = require('./providers/prices.js');
@@ -3906,6 +3938,12 @@ let hooksInstalled = { installed: [], pending: [], errors: [] };
 let extReloadChain = Promise.resolve();
 function reloadExtensions() {
   const run = extReloadChain.then(async () => {
+    if (strictFinance.enabled()) {
+      hookSpine.clear();
+      await pluginRuntime.stopAll();
+      console.warn('[strict-finance] plugins and shell hooks are suspended: unbounded execution cost');
+      return;
+    }
     const staged = [];
     const collector = { register: (event, fn, meta) => { staged.push([event, fn, meta]); return () => {}; }, events: () => hookSpine.events() };
     const pl = await pluginLoader.load(collector);
@@ -4056,6 +4094,10 @@ const pluginAuthor = makePluginAuthorTools({
   }
 });
 async function installShellHooks() {
+  if (strictFinance.enabled()) {
+    console.warn('[strict-finance] plugins and shell hooks are suspended: unbounded execution cost');
+    return;
+  }
   /* ORDER IS LOAD-BEARING: plugins register BEFORE shell hooks, mirroring the reference harness. The spine
      reports the FIRST block's reason, so on a blocking event this decides who gets to explain the refusal —
      and an in-process plugin is the more specific authority. */
@@ -5495,6 +5537,7 @@ function mcpStdioIsolationError(cfg) {
 }
 const connectors = makeConnectorManager({
   makeTransport: (cfg) => {
+    if (strictFinance.enabled()) throw Object.assign(new Error('Strict finance: connector transport suspended; no trusted maximum charge.'), { code: strictFinanceMod.CODE });
     if (connectorStorageError) throw new Error(connectorStorageError);
     if (googleConnectorDeferred(cfg)) throw new Error(googleDeferredMessage(cfg));
     if (cfg && cfg.transport === 'http' && googleApiTransport.productForUrl(cfg.url)) return googleApiTransport.makeGoogleTransport(cfg);
@@ -5678,6 +5721,10 @@ async function ensureConnectorOauthToken(id, force) {
 }
 // configure a connector, injecting a fresh OAuth bearer for oauth connectors (kept out of the persisted config).
 async function configureConnectorCfg(cfg, options) {
+  if (strictFinance.enabled()) {
+    await connectors.configure(cfg.id, Object.assign({}, cfg, { enabled: false, token: '', tokenProvider: null }), options);
+    return { ok: false, state: 'down', toolCount: 0, error: 'Strict finance: connector suspended; no trusted maximum charge.' };
+  }
   if (connectorStorageError) {
     await connectors.configure(cfg.id, Object.assign({}, cfg, { enabled: false, token: '', tokenProvider: null }), options);
     return { ok: false, state: 'down', toolCount: 0, error: connectorStorageError };
@@ -10429,6 +10476,11 @@ const server = http.createServer((req, res) => {
     res.writeHead(204); return res.end();
   }
   if (isApi && rejectBadApiToken(req, res)) return;
+  const financeRefusal = strictFinance.routeRefusal(req.method, req.url);
+  if (financeRefusal) {
+    res.writeHead(423, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+    return res.end(JSON.stringify({ ok: false, code: strictFinanceMod.CODE, error: financeRefusal }));
+  }
   const mutationTicket = updatePreparation.beginRequest(req.method, req.url);
   if (!mutationTicket.ok) {
     res.writeHead(423, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
@@ -11144,6 +11196,7 @@ const ROUTES = [
   { m: 'GET', qsplit: '/api/line-jobs', h: handleLineJobsList },
   { m: ['GET', 'POST'], rx: LINE_JOB_RX, h: handleLineJobId },
   { m: 'GET', exact: '/api/budget/status', h: handleBudgetStatus },
+  { m: 'GET', exact: '/api/finance/strict', h: (req, res) => respondJson(res, 200, strictFinance.status(ledger, Date.now())) },
   { m: 'GET', qsplit: '/api/credits', h: handleCredits },   // 404s (no surface) unless managed credits are configured
   { m: 'GET', qsplit: '/api/credits/linkable', h: handleCreditsLinkable },   // {available} — is device linking offered (STARNET_CLOUD_URL set + not already configured)?
   { m: 'POST', exact: '/api/credits/link/start', h: handleCreditsLinkStart },   // begin a pairing: returns a STAR-XXXX code + verifyUrl
@@ -12875,6 +12928,7 @@ function handleBudgetStatus(req, res) {
      documented shape wins, and expose its pool view under its own `pools` key instead of losing it. */
   const governor = budget.status(now);
   res.end(JSON.stringify(Object.assign({}, governor, {
+    strictFinance: strictFinance.status(ledger, now),
     caps: {
       perRun: effectiveCaps.perRun, perAgent: effectiveCaps.perAgent,
       perDay: effectiveCaps.perDay, global: effectiveCaps.global
@@ -18592,6 +18646,9 @@ async function runOnceCore(o) {
   if (o.streamId) runStartExtra.streamId = String(o.streamId);
   const runStartedAt = Date.now();
   let system = rawSystem;
+  if (agentId === 'portal-treasurer' && !o.internal && !o.outputOnly) {
+    system = String(system || '') + require('./tools/builtin/treasury.js').treasuryContext(strictFinance.status(ledger, runStartedAt));
+  }
   if (o.workdir) {
     const cronRoot = cronCanonicalWorkdir(o.workdir); // re-check at every fire; revocation is immediate
     let rules = '';
@@ -19037,6 +19094,9 @@ async function runOnceCore(o) {
   // HARNESS SELF-KNOWLEDGE: always-present COMPUTER grant, local/read-only and secret-free. The reader
   // closes over this run's identity while every mutable section is collected fresh at call time from the
   // same helpers that serve /api/version, /api/cron, /api/connectors and /api/diagnostics.
+  require('./tools/builtin/treasury.js').makeTreasuryTool({
+    status: () => strictFinance.status(ledger, Date.now())
+  }).register(registry);
   makeStationInspectTool({
     inspect: () => harnessSnapshotForRun({ provider: providerId, model, agentId, runId, surface, trigger })
   }).register(registry);

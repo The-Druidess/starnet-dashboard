@@ -9855,7 +9855,7 @@ const World = (() => {
   }
   // give a summoned agent a real floor body (idempotent). Static like crew, but flagged `summoned` so the
   // floor-reset paths (loadStation / syncCrewFromPlan) preserve it, and lit by setActivityFor on a real run.
-  function spawnAgent(a) {
+  function spawnAgent(a, opts) {
     if (!a || !a.id || (agent && a.id === agent.id)) return;
     // already on the floor as a plan-derived bay body (loadStation's rederive runs before this on boot):
     // REHYDRATE its inner life instead of bailing. `summoned` is runtime-only, so across a relaunch a
@@ -9875,7 +9875,9 @@ const World = (() => {
       if (a.skin && typeof DATA !== 'undefined' && DATA.SKINS && DATA.SKINS[a.skin]) ex.skin = a.skin;
       return;
     }
-    const f = geo ? workerFoot() : { x: 0, y: 0 };                        // pre-geo: parked at origin, re-footed on first syncCrewFromPlan
+    const home = opts && opts.atWorkstation && deskPropFor(a.id);
+    const seat = home && deskSeat(home);
+    const f = seat ? seatFoot(seat) : geo ? workerFoot() : { x: 0, y: 0 }; // pre-geo: re-footed on first syncCrewFromPlan
     const b = makeCrewBody(a.id, a.name || a.id, a.color || crewColor(a.id), f.x, f.y, a.skin);
     b.summoned = true; b.wakeAt = fnow;                                   // a small materialize ripple
     b.idleUntil = fnow + U.irnd(1400, 3200);                              // hold a beat after materializing, then it strolls

@@ -681,6 +681,7 @@ const App = (() => {
   // the same live registry StationUI receives so a summoned specialist opens its own record without changing
   // COMMS focus. Unknown/stale bodies fail closed instead of silently opening the Overseer.
   function openWorldAgent(agentId) {
+    if (typeof TreasurerPortal !== 'undefined' && TreasurerPortal.openFor(agentId)) return true;
     const i = liveAgents().findIndex(a => a && a.id === agentId);
     if (i < 0 || typeof StationUI === 'undefined' || !StationUI.openAgent) return false;
     StationUI.openAgent(i);
@@ -3347,7 +3348,10 @@ const App = (() => {
         // the run's own conversation when this page launched it, else the agent's (selectAgent never rebinds a thread with content)
         openChat: (aid, wsId) => { if (wsId && Workstreams.get(wsId)) openWorkstream(wsId); else selectAgent(aid); }
       });
-      World.setOnDesk(o => DeskScreen.open(o.agentId));
+      World.setOnDesk(o => {
+        if (typeof TreasurerPortal !== 'undefined' && TreasurerPortal.openFor(o.agentId)) return;
+        DeskScreen.open(o.agentId);
+      });
     }
     if (World.setOnBayAssign) World.setOnBayAssign(pid => { if (typeof Build !== 'undefined' && Build.openAssign) Build.openAssign(pid); });   // belt legibility: click an unbound BAY's "NO AGENT" nag → BUILD MODE opens straight into its agent picker
     if (World.setOnIntakeFeed) World.setOnIntakeFeed(() => { if (typeof StationUI !== 'undefined' && StationUI.openTerm) StationUI.openTerm('messaging'); });   // belt legibility: click a starved INTAKE's "NO FEED" nag → the CHANNELS panel (wire a real feed)
@@ -3387,6 +3391,7 @@ const App = (() => {
     // give resumed summoned crew their real floor bodies now that the station/geo is loaded (no-op for a
     // single-agent save; summon-during-game spawns its own body directly).
     for (const a of liveAgents()) if (a.id !== agent.id && typeof World.spawnAgent === 'function') World.spawnAgent(a);
+    if (typeof TreasurerPortal !== 'undefined') TreasurerPortal.init(station);
     World.start();   // first frame now paints the fresh floor + crew, never a stale frame of the prior world
     if (World.resumeBridge) World.resumeBridge();   // re-arm the channel SSE + connector poll if a prior disconnect released them (no-op on first entry)
     if (typeof Build !== 'undefined') {

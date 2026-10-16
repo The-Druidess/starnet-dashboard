@@ -15,7 +15,7 @@ A.ok(/function agHead\(a, act\)[\s\S]{0,500}const live = !!\(a && agentLive\(a\.
   'the dossier headline derives WORKING from the selected agent');
 A.ok(/x\.id === focusedId && act === 'talk' \? 'talking' : 'working'/.test(station),
   'a different worker never inherits the focused agent conversation label');
-A.ok(/const selectedLive = !!\(selected && agentLive\(selected\.id\)\)[\s\S]{0,500}selectedLive \? 'WORKING'/.test(station),
+A.ok(/const selectedLive = !!\(selected && agentLive\(selected\.id\)\)[\s\S]*?const statusText = dn \? 'OFFLINE'[\s\S]*?selectedLive \? 'WORKING'/.test(station),
   'live dossier repaint remains scoped to the selected worker');
 // Exercise the crew projection instead of locking the old presentation wording.
 // Three concurrent agents include one pending approval; a fourth agent is idle.
@@ -23,7 +23,7 @@ const crewIds = ['hero', 'worker', 'approval', 'idle'];
 const crewRows = Object.fromEntries(crewIds.map(id => [id, { hidden: false, classList: { toggle() {} } }]));
 const crewLabels = Object.fromEntries(crewIds.map(id => [id, { textContent: '', closest: () => crewRows[id], getAttribute: () => null, setAttribute() {}, removeAttribute() {} }]));
 const crewContext = vm.createContext({
-  present: crewIds.map(id => ({ id })), runningAgents: new Map(), runSeenAt: new Map(),
+  present: crewIds.map(id => ({ id })), crewPortals: [], runningAgents: new Map(), runSeenAt: new Map(),
   activity: () => 'talk', App: { currentAgent: () => ({ id: 'hero' }) },
   agentLive: id => id !== 'idle', crewQuery: '', lineTestOnly: () => false, LINE_TEST_TIP: '',
   Channels: { pendingIds: () => ['approval-session'] },

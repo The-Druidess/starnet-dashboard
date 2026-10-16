@@ -51,6 +51,7 @@
     output_cap:             { retryable: false, shouldRotateCredential: false, shouldFallback: false, shouldCompress: false },
     model_not_found:        { retryable: false, shouldRotateCredential: false, shouldFallback: true,  shouldCompress: false },
     content_policy_blocked: { retryable: false, shouldRotateCredential: false, shouldFallback: false, shouldCompress: false },
+    strict_finance_blocked: { retryable: false, shouldRotateCredential: false, shouldFallback: false, shouldCompress: false },
     format_error:           { retryable: false, shouldRotateCredential: false, shouldFallback: false, shouldCompress: false },
     /* A TLS CERTIFICATE the machine does not trust (expired, self-signed, a corporate proxy re-signing HTTPS).
        Waiting never fixes a certificate, so no retry — but a DIFFERENT provider is a different host and may
@@ -302,6 +303,7 @@
   function isQuotaExhausted(low) { return QUOTA_EXHAUSTED_RE.test(low) && !SHORT_WINDOW_RE.test(low); }
 
   function pickReason(status, code, low, err, ctx) {
+    if (code === 'strict_finance_blocked') return 'strict_finance_blocked';
     // 0. errors that never reached an API: a certificate the machine rejects, or a crash in our own code. First,
     //    because neither carries a status or a body — so no later rule can be describing the provider's intent.
     if (!status && isTlsFailure(err, low)) return 'tls_certificate';

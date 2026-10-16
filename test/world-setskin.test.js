@@ -55,8 +55,8 @@ A.ok(/b\.skin = sk/.test(wBody), 'world.setSkin repoints the live body skin (the
 A.ok(/setSkin\b/.test(worldSrc) && /return \{[\s\S]*\bsetSkin\b/.test(worldSrc), 'world.js exports setSkin on the World surface');
 
 /* ---- 2b. BAY-BOUND REHYDRATE: loadStation creates these bodies before spawnAgent restores the roster. ---- */
-const sm = /function spawnAgent\(a\)\s*\{([\s\S]*?)\n  \}/.exec(worldSrc);
-A.ok(sm, 'world.js still defines spawnAgent(a)');
+const sm = /function spawnAgent\(a, opts\)\s*\{([\s\S]*?)\n  \}/.exec(worldSrc);
+A.ok(sm, 'world.js defines spawnAgent(a, opts) with optional workstation placement');
 const existing = sm && /const ex = crew\.find\([^;]+\);[\s\S]*?if \(ex\)\s*\{([\s\S]*?)return;\s*\}/.exec(sm[1]);
 A.ok(existing, 'spawnAgent has the existing bay-body rehydrate path');
 const exBody = existing ? existing[1] : '';

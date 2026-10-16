@@ -363,7 +363,7 @@
   const SECTIONS = {
     crew: { page: true },   // crew, sessions, look + the options for each (the page's own state)
     // unsettled: interrupted runs whose spend is unknown — the Commander settles them in SPENDING LIMITS, never an agent
-    spending: [['GET', '/api/budget/status', j => ({ caps: j.caps, envDefaults: j.envDefaults, spentToday: j.spentToday, lifetime: j.lifetime, unsettled: j.unsettled })], ['GET', '/api/fallback/chain']],
+    spending: [['GET', '/api/budget/status', j => ({ caps: j.caps, envDefaults: j.envDefaults, spentToday: j.spentToday, lifetime: j.lifetime, unsettled: j.unsettled, strictFinance: j.strictFinance })], ['GET', '/api/fallback/chain']],
     permissions: [['GET', '/api/permissions'], ['GET', '/api/halt', j => ({ halted: j.halted })]],
     autonomy: [['GET', '/api/autonomy/posture', j => ({ summary: j.summary })], ['GET', '/api/cron', j => ({ routinesOn: j.enabled, halted: j.halted, jobs: (j.jobs || []).length })], ['GET', '/api/nightshift/focus'], ['GET', '/api/halt', j => ({ halted: j.halted })]],
     memory: [['GET', a => '/api/memory/records?agent=' + enc(a.agent || 'agent'), j => ({ agentId: j.agentId, records: (j.records || []).slice(0, 60).map(r => ({ id: r.id, kind: r.kind, title: r.title, body: clip(r.body, 160), pinned: !!r.pinned })) })],

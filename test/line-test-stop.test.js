@@ -93,7 +93,7 @@ A.ok(/else \{ runningAgents\.delete\(id\); runSeenAt\.delete\(id\); dropTestRuns
   const tips = {};
   const labels = Object.fromEntries(ids.map(id => [id, { textContent: '', closest: () => rows[id], getAttribute: () => tips[id] || null, setAttribute: (k, v) => { tips[id] = v; }, removeAttribute: () => { delete tips[id]; } }]));
   const ctx = vm.createContext({
-    present: ids.map(id => ({ id })), runningAgents: new Map(), runSeenAt: new Map(),
+    present: ids.map(id => ({ id })), crewPortals: [], runningAgents: new Map(), runSeenAt: new Map(),
     activity: () => 'task', App: { currentAgent: () => ({ id: 'worker' }) },
     agentLive: id => id !== 'idle', crewQuery: '', lineTestOnly: id => id === 'tester',
     LINE_TEST_TIP: (station.match(/const LINE_TEST_TIP = ('[^\n]+');/) || [])[1] ? eval((station.match(/const LINE_TEST_TIP = ('[^\n]+');/) || [])[1]) : '',

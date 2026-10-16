@@ -10,7 +10,7 @@
    }
 
    dispatch order (each step short-circuits to an isError result; run() is reached only if all pass):
-     parseError -> unknown-tool -> capability gate (ctx.canUse) -> schema-validate ->
+     parseError -> unknown-tool -> host financial guard -> capability gate (ctx.canUse) -> schema-validate ->
      consent gate (tool.requiresConsent && ctx.consent) -> pre-tool hook -> durable dispatch callback ->
      per-tool timeout (+ run-abort grace race) -> run() once.
    effectUnknown:true marks a non-read tool that timed out or was cancelled without confirming it stopped.
@@ -28,6 +28,8 @@
   'use strict';
   // failopen.note — the tagged SYNC swallow (per-tag count + throttled warn): a fail-open catch must never be invisible.
   const { note: failNote } = (typeof require === 'function') ? require('../failopen.js') : { note: function (tag, e) { console.warn('[failopen] ' + tag + ':', (e && e.message) || e); } };
+  let financialGuard = null;
+  function attachFinancialGuard(guard) { financialGuard = guard; }
 
   /* CENTRAL TOOL-OUTPUT CAP (ref-parity: the reference harness's tool_output_limits). Every builtin clamps its own output today,
      which means the protection is a CONVENTION — a new tool, or an MCP server behind a new connector,
@@ -459,6 +461,10 @@
       // STOP MEANS STOP: an already-aborted run signal is refused at the door. childAbort below only THREADS an
       // aborted signal into the child — a tool that ignores ctx.signal would still run to completion.
       if (ctx.signal && ctx.signal.aborted) return errResult('skipped: cancelled — the run was stopped before ' + call.name + ' ran', 'skipped - cancelled');
+      if (financialGuard) {
+        try { financialGuard(call, tool); }
+        catch (error) { return errResult(error.message, 'strict-finance-blocked'); }
+      }
 
       // User-control authority is a host hardline and runs before capability/consent. Full
       // Access, cached approvals, model wording, or a lying external tool annotation cannot
@@ -643,5 +649,5 @@
     return { register, get, list, wireFormat, dispatch };
   }
 
-  return { makeRegistry, closestToolNames, unknownToolMessage, outputBudgetFor, outputWindowFor, OUTPUT_MAX, jsonBreakAt, explainArgsParseError };
+  return { makeRegistry, attachFinancialGuard, closestToolNames, unknownToolMessage, outputBudgetFor, outputWindowFor, OUTPUT_MAX, jsonBreakAt, explainArgsParseError };
 });

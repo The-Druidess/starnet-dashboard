@@ -66,6 +66,7 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
   const THEMES = [['amber', '#ffaa33'], ['green', '#3dff70'], ['blue', '#46c8ff'], ['purple', '#b46bff'], ['red', '#ff4136'], ['white', '#e8f0e8']];
 
   let present = [];          // agent objects currently on the station
+  let crewPortals = [];     // selectable services, excluded from the runnable roster
   const runningAgents = new Map();   // agentId -> live-run COUNT (concurrent streams can share an agentId, e.g. 'agent')
   const runSeenAt = new Map();       // agentId -> performance.now() of the last counted run.start (agentLive's veto grace)
   /* LINE TEST (2026-09-29, handed over by the steptest-stuck investigation): a run on a line test's OWN stream — a step
@@ -1755,13 +1756,14 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
   function crewRender() {
     wireCrewLive();   // ensure the per-agent run-state listener is live
     const ul = $('#crew'); if (!ul) return;
-    if (!present.length) {
+    if (!present.length && !crewPortals.length) {
       ul.innerHTML = '<li class="crew-empty"><div class="empty-state"><span class="es-glyph">▯</span><b>NO AGENTS ON STATION</b><span>Commission one from RECRUITMENT to begin.</span></div></li>';
       $('#crew-sum').innerHTML = '';
       return;
     }
-    ul.innerHTML = present.map((a, i) =>
-      '<li class="crew-row" role="button" tabindex="0" aria-label="' + (present.length > 1 ? 'Show sessions with ' + esc(a.name || a.id) + '; Shift+F10 for the dossier" aria-keyshortcuts="Shift+F10' : 'Open dossier for ' + esc(a.name || a.id)) + '" data-i="' + i + '" data-agent-id="' + esc(a.id) + '" style="--ci:' + i + '">' +
+    const ordered = typeof TreasurerPortal !== 'undefined' ? TreasurerPortal.crewOrder(present) : present.map((a, i) => ({ a, i }));
+    ul.innerHTML = ordered.map(({ a, i }, order) =>
+      '<li class="crew-row" role="button" tabindex="0" aria-label="' + (present.length > 1 ? 'Show sessions with ' + esc(a.name || a.id) + '; Shift+F10 for the dossier" aria-keyshortcuts="Shift+F10' : 'Open dossier for ' + esc(a.name || a.id)) + '" data-i="' + i + '" data-agent-id="' + esc(a.id) + '" style="--ci:' + order + '">' +
       crewPortrait(a) +
       '<span class="dot on"></span>' +
       '<div class="crew-main">' +
@@ -1775,9 +1777,13 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
       '</div>' +
       // the dossier stays one step away: this key (or a right-click) opens it; the row itself shows the sessions
       (present.length > 1 ? '<button type="button" class="crew-dossier" tabindex="-1" aria-label="Open dossier for ' + esc(a.name || a.id) + '" data-tip="Open ' + esc(a.name || a.id) + '&#39;s dossier">DOSSIER</button>' : '') +
-      '</li>').join('');
+      '</li>').join('') + crewPortals.map((p, i) =>
+      '<li class="crew-row" role="button" tabindex="0" aria-label="Open ' + esc(p.name) + ' finance portal" data-portal-id="' + esc(p.id) + '" style="--ci:' + (present.length + i) + '">' +
+      crewPortrait(p) + '<span class="dot on"></span><div class="crew-main">' +
+      '<div class="crew-name" style="color:' + esc(p.color) + '">' + esc(p.name) + '</div>' +
+      '<div class="crew-status">PORTAL - FINANCE</div></div></li>').join('');
     // (the head's roster count moved out — #crew-sum below the list already totals the same crew)
-    ul.querySelectorAll('.crew-row').forEach(li => {
+    ul.querySelectorAll('.crew-row[data-agent-id]').forEach(li => {
       if (typeof AgentPortraits !== 'undefined') AgentPortraits.paint(li.querySelector('.crew-portrait img'), present[+li.dataset.i]);
       // PER-AGENT THREADS: a row click narrows the SESSIONS rail to this agent's sessions (again = all of them).
       // A one-agent station has nothing to narrow — every session is already that agent's — so there the
@@ -1796,13 +1802,29 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
         else if (ev.key === 'ContextMenu' || (ev.shiftKey && ev.key === 'F10')) { ev.preventDefault(); sfx('click'); openAgent(+li.dataset.i); }
       });
     });
+    ul.querySelectorAll('.crew-row[data-portal-id]').forEach(li => {
+      const portal = crewPortals.find(p => p.id === li.dataset.portalId);
+      if (typeof AgentPortraits !== 'undefined') AgentPortraits.paint(li.querySelector('.crew-portrait img'), portal);
+      li.addEventListener('click', () => { sfx('click'); portal.open(); });
+      li.addEventListener('contextmenu', ev => { ev.preventDefault(); portal.open(); });
+      li.addEventListener('keydown', ev => {
+        if (ev.key === 'Enter' || ev.key === ' ' || ev.key === 'ContextMenu' || (ev.shiftKey && ev.key === 'F10')) {
+          ev.preventDefault(); li.click();
+        }
+      });
+    });
     crewTick();
+  }
+  function setCrewPortals(portals) {
+    if (crewPortals.length === portals.length && crewPortals.every((p, i) => p === portals[i])) return;
+    crewPortals = portals.slice();
+    crewRender();
   }
   // a crew member is WORKING iff IT has a live run — read from the real agent.run.start/end events, NOT the
   // single global hero activity (which used to mark the whole crew WORKING in lockstep with the hero). The
   // talk/task text flavor still comes from the global activity (right for the common single-agent station).
   function crewTick() {
-    if (!present.length) return;
+    if (!present.length && !crewPortals.length) return;
     // self-heal: drop any tracked id no longer on the roster (a left agent, or a stale id left behind when an
     // aborted/dropped run's agent.run.end never reached the bus) so the panel can't get stuck showing it WORKING.
     for (const id of Array.from(runningAgents.keys())) { if (!present.some(a => a.id === id)) { runningAgents.delete(id); runSeenAt.delete(id); } }
@@ -1832,18 +1854,27 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
       // H: mark the row WORKING so the in-flight shimmer bar shows only while it's actually running.
       if (e && e.parentElement && e.parentElement.parentElement) e.parentElement.parentElement.classList.toggle('working', live);
     });
+    crewPortals.forEach(p => {
+      const row = $('#crew')?.querySelector('[data-portal-id="' + p.id + '"]');
+      if (!row) return;
+      const hide = !!crewQuery && ![p.name, p.id, 'finance portal'].some(s => s.toLowerCase().includes(crewQuery));
+      if (row.hidden !== hide) row.hidden = hide;
+      if (!row.hidden) visible++;
+    });
     const sum = $('#crew-sum');
     const empty = $('#crew-search-empty');
     if (empty) empty.hidden = !crewQuery || visible > 0;
     // crewcards.js seats this beside the CREW title ("2 WORKING · 1 IDLE"); the ▮ ▯ marks were fallback-font glyphs
     if (sum) sum.innerHTML =
       '<span class="pos">' + working + ' WORKING</span>' +
-      '<span class="dim">' + (present.length - working) + ' IDLE</span>';
+      '<span class="dim">' + (present.length - working) + ' IDLE</span>' +
+      (crewPortals.length ? '<span class="dim">' + crewPortals.length + ' PORTAL' + (crewPortals.length === 1 ? '' : 'S') + '</span>' : '');
     // #8: keep the canvas's screen-reader live region in sync (the <canvas> itself is opaque to AT).
     // Update only when the text actually changes so the region doesn't spam announcements every tick.
     const stageSum = $('#stage-summary');
     if (stageSum) {
-      const txt = 'Station crew: ' + working + ' working, ' + (present.length - working) + ' idle.';
+      const txt = 'Station crew: ' + working + ' working, ' + (present.length - working) + ' idle.' +
+        (crewPortals.length ? ' ' + crewPortals.length + ' service portal' + (crewPortals.length === 1 ? '' : 's') + '.' : '');
       if (txt !== lastStageSummary) { lastStageSummary = txt; stageSum.textContent = txt; }
     }
   }
@@ -2029,6 +2060,7 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
         ? '<div class="ag-mission-text">' + esc(a.purpose) + '</div>'
         : '<div class="ag-mission-cta">No purpose set — tell your agent what you need in COMMS, or write it in CONFIG › purpose.md.</div>') +
       '</div>' +
+      (typeof TreasurerPortal !== 'undefined' ? TreasurerPortal.dossierHTML(a) : '') +
       // the two questions the landing tab used to answer with 39 words of nothing: how is it set up, and what can it do.
       '<div class="sec ag-brief-sec"><span class="sec-l">SET UP AS</span><span class="sec-r"></span><span class="sec-nd"></span></div>' +
       agSetupStrip(a) +
@@ -3411,6 +3443,7 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
         build: frag(agGrowth(a)) },
       { id: 'record', label: 'RECORD', glyph: '▦', desc: 'Review work, understand failed runs, and find restore points.',
         build: (elx) => {
+          if (typeof TreasurerPortal !== 'undefined') elx.insertAdjacentHTML('beforeend', TreasurerPortal.dossierHTML(a, true));
           mountLane('logbook')(elx);
           elx.insertAdjacentHTML('beforeend', '<div class="sec"><span class="sec-l">RESTORE POINTS</span><span class="sec-r"></span><span class="sec-nd"></span></div>');
           mountLane('restore')(elx);
@@ -3453,6 +3486,7 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
     // memory live-refresh never wipe CONFIG/MEMORY DOM, so open editors survive.
     wireHead(host);
     wireConfig(host);
+    if (typeof TreasurerPortal !== 'undefined') TreasurerPortal.wireDossier(host, a);
     loadEffectiveAccess(host, a);
     wireMemoryLive();
     loadMemoryCore(a);
@@ -6403,6 +6437,13 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
     const paint = (st) => {
       if (!st || !st.caps || !BG_KEYS.every(k => typeof st.caps[k] === 'number' && Number.isFinite(st.caps[k]) && st.caps[k] >= 0)) throw new Error('invalid budget response');
       loaded = true; enable(true);
+      const strictEl = body.querySelector('#budget-strict');
+      if (strictEl) {
+        strictEl.hidden = !st.strictFinance?.enabled;
+        strictEl.textContent = st.strictFinance?.enabled
+          ? 'STRICT FINANCE ACTIVE - LOCAL ONLY. Paid and unknown-cost actions are blocked before dispatch. These legacy caps and RESUME cannot override it. Calendar policy: $50/day, $500/Monday-Sunday week, $1000/month (America/Phoenix). No paid reservation adapter is enabled.'
+          : '';
+      }
       const caps = st.caps;
       const saved = (st && st.saved) || {};
       const envd = (st && st.envDefaults) || {};
@@ -7187,6 +7228,7 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
       // per-agent / per-day / global pools). Persisted server-side + applied live; a live spend readout below.
       '<h4 class="ms-h">Spending limits <span class="dim">— in USD</span></h4>' +
       '<p class="set-about">Limits apply to recorded agent spending. <b>Blank or 0 means no cap.</b> Changes take effect when you save; unsaved limits follow their environment defaults.</p>' +
+      '<p id="budget-strict" class="set-about" role="status" hidden></p>' +
       '<div id="budget-spend" class="set-row dim">reading spend…</div>' +
       '<div id="budget-unsettled"></div>' +   // interrupted runs whose charge is unknown + their SETTLE (only rendered when one exists)
       '<div id="budget-pools"></div>' +   // soft-pool cap state + the one-click RESUME (only rendered when a pool is actually hit)
@@ -11255,7 +11297,7 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
   // GROWTH Tier 3: repaint the Settings AUTONOMY panel's EARNED badge if it is open (no-op otherwise — the paint fn
   // queries its own (possibly detached) host nodes, so a closed panel costs nothing). Called after a trust accept.
   const repaintAutonomy = () => { try { if (repaintAutonomyDial) repaintAutonomyDial(); } catch (_) {} };
-  return { init, enter, setRoster, leave, clearRunning, runningCount: () => runningAgents.size, isAgentRunning: (id) => agentLive(id), notify, warnIfStationLacksKey, settleNotifs, waitingNotifKeys, seenSession, flashSave, openAgent, refreshCrew: () => crewTick(), openArcade, toggleTerm, openTerm, showTerm, showAgent, notifsMarkRead, notifsClear, openDesk, closeTerm, rerender, refreshBoard: refreshBoardLive, pokeQuests, setTheme, getTheme, setLook, lookNow, lookOptions, repaintAutonomy, refreshSystems, toggleFamily, familyOf, registerWindow, h, motionRestState };
+  return { init, enter, setRoster, setCrewPortals, leave, clearRunning, runningCount: () => runningAgents.size, isAgentRunning: (id) => agentLive(id), notify, warnIfStationLacksKey, settleNotifs, waitingNotifKeys, seenSession, flashSave, openAgent, refreshCrew: () => crewTick(), openArcade, toggleTerm, openTerm, showTerm, showAgent, notifsMarkRead, notifsClear, openDesk, closeTerm, rerender, refreshBoard: refreshBoardLive, pokeQuests, setTheme, getTheme, setLook, lookNow, lookOptions, repaintAutonomy, refreshSystems, toggleFamily, familyOf, registerWindow, h, motionRestState };
 })();
 
 if (typeof module !== 'undefined' && module.exports) module.exports = { visibleTerminalRect, clampTerminalSize };
