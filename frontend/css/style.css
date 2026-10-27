@@ -38,7 +38,7 @@
 }
 
 :root {
-  /* Green phosphor terminal — dark interiors, the glow lives on borders. */
+  /* Neon-green phosphor terminal — dark interiors, the glow lives on borders. */
   --ph: #3dff70;
   --ph-bright: #ccffdb;
   --ph-dim: #1fae4e;          /* structural lines */
@@ -53,9 +53,8 @@
   --bad: #ff5c4d;
   --gold: #d8f25a;
   --text: #8fe3ac;
-  /* RGB TRIPLETS for the translucent fills (rgba(var(--x-rgb), a)). Every rgba() that used to bake
-     the amber/gold literals routes through these, so beat cards / chips / insets re-tint with the
-     theme instead of leaking amber onto a green/blue/purple station. Plain value tokens (no var()
+  /* RGB TRIPLETS for translucent fills (rgba(var(--x-rgb), a)). Themeable accents route through
+     these so cards, chips, and insets follow the selected palette. Plain value tokens (no var()
      inside), so :root is safe — the body.theme-* blocks override them alongside their hex twins. */
   --ph-rgb: 61, 255, 112;
   --ph-bright-rgb: 204, 255, 219;
@@ -103,15 +102,8 @@
      (--ph, --ph-glow2, --ph-dim), and a var() inside a custom property resolves
      against the element where that custom property is DECLARED. The theme is
      swapped by a `body.theme-*` class, so these recipes MUST be declared at the
-     body level (or below) — otherwise their var(--ph) bakes to the :root amber
-     and the bezel "borders" stay amber no matter which theme is picked. */
-}
-body.theme-amber {
-  --ph: #ffaa33; --ph-bright: #ffd9a3; --ph-dim: #b9791c; --ph-faint: #1e1404;
-  --ink: #190f02; --ph-glow: rgba(255, 170, 51, 0.5); --ph-glow2: rgba(255,170,51,0.14);
-  --bg: #030201; --panel: rgba(5, 3, 1, 0.95); --panel2: #0c0704; --warn: #ffe97a; --text: #eec88f;
-  --gold: #ffd34a; --ph-rgb: 255, 170, 51; --ph-bright-rgb: 255, 228, 180; --gold-rgb: 255, 211, 74;
-  --cam-grade: saturate(1.06) contrast(1.1) brightness(0.94);
+     body level (or below) — otherwise their var(--ph) bakes to the :root green
+     and the bezel "borders" stay green no matter which theme is picked. */
 }
 body.theme-green {
   --ph: #3dff70; --ph-bright: #ccffdb; --ph-dim: #1fae4e; --ph-faint: #0c3a1d;

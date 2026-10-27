@@ -56,10 +56,10 @@
       '.hint-bubble{' +
         'position:fixed;z-index:100000;max-width:280px;pointer-events:none;' +
         'padding:7px 10px;font-family:inherit;font-size:15px;line-height:1.35;' +
-        'color:var(--text,#eec88f);background:var(--panel2,#0c0704);' +
-        'border:1px solid rgba(var(--gold-rgb,255,211,74),0.55);border-radius:6px;' +
-        'box-shadow:0 2px 14px rgba(0,0,0,0.6), 0 0 10px rgba(var(--ph-rgb,255,170,51),0.18);' +
-        'text-shadow:0 0 3px var(--ph-glow2,rgba(255,170,51,0.14));' +
+        'color:var(--text,#8fe3ac);background:var(--panel2,#041c0d);' +
+        'border:1px solid rgba(var(--gold-rgb,216,242,90),0.55);border-radius:6px;' +
+        'box-shadow:0 2px 14px rgba(0,0,0,0.6), 0 0 10px rgba(var(--ph-rgb,61,255,112),0.18);' +
+        'text-shadow:0 0 3px var(--ph-glow2,rgba(61,255,112,0.14));' +
         'opacity:0;transform:translateY(2px);transition:opacity .12s ease, transform .12s ease;' +
         'letter-spacing:.2px;}' +
       '.hint-bubble.on{opacity:1;transform:translateY(0);}' +

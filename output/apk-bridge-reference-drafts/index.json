@@ -1,0 +1,91 @@
+{
+  "title": "USS Theseus bridge crew reference drafts",
+  "source": "Officer sprite art directly reused from the local decompiled Star Trek Trexels 2 APK.",
+  "status": "Draft composite studies, not original full-body APK art. Source character matches are visual interpretations, not confirmed by embedded asset labels. Lower bodies are pixel-art extensions; Data-as-Sherlock also has constructed coat and hat overlays. Treat as draft references for review before final sprite generation.",
+  "characters": [
+    {
+      "id": "deanna-troi",
+      "name": "Deanna Troi",
+      "file": "deanna-troi.png",
+      "sourceAtlas": "C:\\Users\\devin\\Downloads\\star-trek-trexels-2-4.apk_Decompiler.com\\unity\\assets\\textures\\0443_0001_4c5c3a47823ed7343809f0c11dbfab4c.assets\\officers_1.png",
+      "sourceCrop": {
+        "left": 588,
+        "top": 439,
+        "width": 71,
+        "height": 118
+      },
+      "sourceArtScale": 4,
+      "constructionNote": "Dark-haired officer crop selected by visual match; the entire jumpsuit, including its waist and trousers, was recolored purple, and the lower body was reconstructed."
+    },
+    {
+      "id": "beverly-crusher",
+      "name": "Beverly Crusher",
+      "file": "beverly-crusher.png",
+      "sourceAtlas": "C:\\Users\\devin\\Downloads\\star-trek-trexels-2-4.apk_Decompiler.com\\unity\\assets\\textures\\0443_0001_4c5c3a47823ed7343809f0c11dbfab4c.assets\\officers_1.png",
+      "sourceCrop": {
+        "left": 470,
+        "top": 328,
+        "width": 58,
+        "height": 107
+      },
+      "sourceArtScale": 4,
+      "constructionNote": "Red-haired blue-uniform sprite crop selected by visual match; lower body reconstructed."
+    },
+    {
+      "id": "data-sherlock",
+      "name": "Data as Sherlock",
+      "file": "data-sherlock.png",
+      "sourceAtlas": "C:\\Users\\devin\\Downloads\\star-trek-trexels-2-4.apk_Decompiler.com\\unity\\assets\\textures\\0443_0001_4c5c3a47823ed7343809f0c11dbfab4c.assets\\officers_1.png",
+      "sourceCrop": {
+        "left": 757,
+        "top": 324,
+        "width": 97,
+        "height": 113
+      },
+      "sourceArtScale": 4,
+      "constructionNote": "Pale, red-eyed android sprite crop selected by visual match; Sherlock coat and hat overlays and lower body are constructed."
+    },
+    {
+      "id": "geordi-la-forge",
+      "name": "Geordi La Forge",
+      "file": "geordi-la-forge.png",
+      "sourceAtlas": "C:\\Users\\devin\\Downloads\\star-trek-trexels-2-4.apk_Decompiler.com\\unity\\assets\\textures\\0443_0001_4c5c3a47823ed7343809f0c11dbfab4c.assets\\officers_1.png",
+      "sourceCrop": {
+        "left": 677,
+        "top": 324,
+        "width": 78,
+        "height": 113
+      },
+      "sourceArtScale": 4,
+      "constructionNote": "Visor-wearing Black officer in gold uniform selected by visual match; lower body reconstructed."
+    },
+    {
+      "id": "worf",
+      "name": "Worf",
+      "file": "worf.png",
+      "sourceAtlas": "C:\\Users\\devin\\Downloads\\star-trek-trexels-2-4.apk_Decompiler.com\\unity\\assets\\textures\\0443_0001_4c5c3a47823ed7343809f0c11dbfab4c.assets\\officers_1.png",
+      "sourceCrop": {
+        "left": 843,
+        "top": 439,
+        "width": 78,
+        "height": 119
+      },
+      "sourceArtScale": 4,
+      "constructionNote": "Ridged Klingon in red uniform selected by visual match; lower body reconstructed."
+    },
+    {
+      "id": "quork",
+      "name": "Quork",
+      "file": "quork.png",
+      "sourceAtlas": "C:\\Users\\devin\\Downloads\\star-trek-trexels-2-4.apk_Decompiler.com\\unity\\assets\\textures\\0443_0001_4c5c3a47823ed7343809f0c11dbfab4c.assets\\officers_1.png",
+      "sourceCrop": {
+        "left": 349,
+        "top": 214,
+        "width": 102,
+        "height": 108
+      },
+      "sourceArtScale": 4,
+      "constructionNote": "Ridged orange-skinned alien in dark uniform selected as a tentative Ferengi/Quork match; lower body reconstructed."
+    }
+  ]
+}

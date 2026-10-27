@@ -121,10 +121,10 @@
     input.type = 'range'; input.min = min; input.max = max; input.step = step;
     input.setAttribute('aria-label',key);
     input.value = (target()[key] != null ? target()[key] : 0);
-    input.style.cssText = 'flex:1;min-width:0;accent-color:#ffaa33;';
+    input.style.cssText = 'flex:1;min-width:0;accent-color:var(--ph);';
     const val = document.createElement('span');
     val.textContent = (+input.value).toFixed(2);
-    val.style.cssText = 'flex:0 0 34px;text-align:right;font-size:11px;color:#ffd9a3;';
+    val.style.cssText = 'flex:0 0 34px;text-align:right;font-size:11px;color:var(--ph-bright);';
     input.addEventListener('input', () => {
       const v = parseFloat(input.value);
       target()[key] = v; val.textContent = v.toFixed(2);
@@ -140,7 +140,7 @@
   function section(parent, title) {
     const h = document.createElement('div');
     h.textContent = title;
-    h.style.cssText = 'margin:9px 0 2px;font-size:10px;letter-spacing:2px;color:#ffaa33;border-bottom:1px solid rgba(255,170,51,.3);padding-bottom:2px;';
+    h.style.cssText = 'margin:9px 0 2px;font-size:10px;letter-spacing:2px;color:var(--ph);border-bottom:1px solid rgba(var(--ph-rgb),.3);padding-bottom:2px;';
     parent.appendChild(h);
     return parent;
   }
@@ -149,8 +149,8 @@
     const b = document.createElement('button');
     b.textContent = text;
     b.style.cssText = 'font:inherit;font-size:10px;padding:4px 6px;cursor:pointer;background:' +
-      (accent ? '#ffaa33' : 'rgba(255,170,51,.12)') + ';color:' + (accent ? '#190f02' : '#ffd9a3') +
-      ';border:1px solid rgba(255,170,51,.5);border-radius:3px;';
+      (accent ? 'var(--ph)' : 'rgba(var(--ph-rgb),.12)') + ';color:' + (accent ? 'var(--ink)' : 'var(--ph-bright)') +
+      ';border:1px solid rgba(var(--ph-rgb),.5);border-radius:3px;';
     b.addEventListener('click', cb);
     parent.appendChild(b);
     return b;
@@ -180,8 +180,8 @@
     box.id = 'crt-lab';
     box.style.cssText = [
       'position:fixed', 'top:64px', 'right:12px', 'width:248px', 'z-index:100000',
-      'background:rgba(8,6,4,.94)', 'border:2px solid #ffaa33', 'border-radius:7px',
-      'box-shadow:0 8px 30px rgba(0,0,0,.7)', 'padding:10px 11px', 'color:#eec88f',
+      'background:var(--panel)', 'border:2px solid var(--ph)', 'border-radius:7px',
+      'box-shadow:0 8px 30px rgba(0,0,0,.7)', 'padding:10px 11px', 'color:var(--text)',
       "font-family:'VT323','Courier New',monospace", 'user-select:none',
     ].join(';');
 
@@ -189,10 +189,10 @@
     head.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;';
     const title = document.createElement('b');
     title.textContent = '▮ CRT LAB';
-    title.style.cssText = 'color:#ffaa33;letter-spacing:2px;font-size:13px;';
+    title.style.cssText = 'color:var(--ph);letter-spacing:2px;font-size:13px;';
     const collapse = document.createElement('button');
     collapse.textContent = '–';
-    collapse.style.cssText = 'font:inherit;cursor:pointer;background:none;border:none;color:#ffaa33;font-size:18px;line-height:1;';
+    collapse.style.cssText = 'font:inherit;cursor:pointer;background:none;border:none;color:var(--ph);font-size:18px;line-height:1;';
     head.append(title, collapse);
     box.appendChild(head);
 
@@ -294,7 +294,7 @@
     section(body, 'VALUES');
     readout = document.createElement('textarea');
     readout.readOnly = true;
-    readout.style.cssText = 'width:100%;height:46px;margin-top:3px;font:inherit;font-size:10px;background:rgba(0,0,0,.5);color:#9adcb0;border:1px solid rgba(255,170,51,.3);border-radius:3px;resize:none;';
+    readout.style.cssText = 'width:100%;height:46px;margin-top:3px;font:inherit;font-size:10px;background:rgba(0,0,0,.5);color:var(--ph-bright);border:1px solid rgba(var(--ph-rgb),.3);border-radius:3px;resize:none;';
     body.appendChild(readout);
 
     const actions = document.createElement('div');

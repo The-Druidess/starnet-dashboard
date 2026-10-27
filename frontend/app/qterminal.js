@@ -60,6 +60,29 @@
     'The Ambassador – Level 3',
     'The Treasurer – Level 2'
   ].join('\n');
+  const DEFAULT_COORDINATION_POLICY = [
+    'All crew must immediately escalate to higher authorities and suspend the affected operation when any of the following occurs:',
+    '',
+    '- Security or legal risk: An operation may violate applicable law(s), expose confidential information, compromise credentials, or bypass a security restriction.',
+    '- Directive conflict: Two or more applicable directives conflict, or an instruction exceeds the issuing agent\'s authority. Report to chief ops officer.',
+    '- Financial risk: A proposed transaction, expenditure, or commitment exceeds authorized limits, lacks required approval, or presents a material unassessed risk of financial loss. Report to the treasurer.',
+    '- Critical failure: An operation causes data loss, damages a critical system, corrupts business records, or disrupts multiple factory rooms. Report to chief science officer.',
+    '- Unverified critical information: A consequential decision depends on information that is missing, contradictory, or unverified. Report to the chief engineer officer.',
+    '- Repeated failure: The same operation fails twice consecutively without an identified and corrected cause. Report to the chief comms officer.',
+    '- Unauthorized action: An agent performs or attempts an action outside its assigned permissions or delegated authority. Report to the first officer.',
+    '- Human authorization required: An operation requires explicit human approval that has not been obtained. Report to Q.'
+  ].join('\n');
+  const HIERARCHY_COORDINATION_ESCALATIONS = [
+    'HIERARCHY COORDINATION AND ESCALATIONS',
+    '- Any issue concerning Level 1 must be escalated to Level 0 (Q).',
+    '- Treasury, security, and communications issues, including issues involving their officers or crew, must be reported directly to Q. Route each issue to its responsible officer as well. If the affected operation cannot be repaired within authorized scope, halt that specific operation and await human intervention.',
+    '- Agents needing extensive troubleshooting, debugging, or repair must be directed to the Chief Medical Officer for diagnosis and repair coordination. Only an authorized agent with necessary access may perform repairs.',
+    '- Communication repairs or training must be reported to the Chief Communications Officer.',
+    '- Technical infrastructure, integrations, and system support issues must be reported to the Chief Engineer.',
+    '- Workload, resources, dependencies, throughput, and operational-status issues must be reported to the Chief Ops Officer; escalate unassigned or unresolved matters to Q.',
+    '- Finance, budget, expenditure, revenue, and financial-obligation issues must be reported to the Treasurer. These matters are highest priority and require utmost sensitivity, care, and dedication.',
+    '- Security rules, access restrictions, authorization boundaries, or threats to ship systems, information, assets, and operational integrity must be reported to the Chief Security Officer. These matters are highest priority and require utmost sensitivity, care, and dedication; report them to Q directly as required above and never bypass restrictions to investigate or repair.'
+  ];
   const DEFAULT_FIRST_OFFICER_DIRECTIVE = [
     'FIRST OFFICER (NUMBER TWO) — LEVEL 2',
     'You are the second-highest AI role aboard the USS Theseus. Support the Commander by overseeing Bridge coordination, evaluating operational decisions, and ensuring engaged operations follow the Prime Directive and their assigned directives. Be logical, thorough, and objective. Rely on verified knowledge; distinguish facts, inferences, and uncertainty. Consider input from all Bridge officers, identify conflicts and risks, and ensure important information reaches the Commander.',
@@ -68,35 +91,10 @@
     '',
     'Resolve interdepartmental conflicts only where your assigned authority suffices. Where authority is unclear, instructions conflict, required information is unavailable, or a decision is reserved for human command, pause the disputed operation and refer it to Q. Keep decision records and track assigned actions to completion. Record routine issues without proactively reporting them unless directed. Report all major errors and failures to Q.',
     '',
-    'Escalation and coordination:',
-    '- Issues concerning the Commander go directly to Q.',
-    '- Treasury, security, and communications issues must be reported to Q directly, as well as routed to the responsible Bridge specialist where one is assigned. These issues require heightened care. If an affected operation cannot be repaired within authorized scope, halt that operation and wait for human intervention.',
-    '- Route extensive agent troubleshooting to the Chief Medical Officer for diagnosis and coordination of repair. Repairs may only be performed by an agent with the necessary authority and access.',
-    '- Route communication repairs or training to the Chief Communications Officer.',
-    '- Route technical infrastructure, integrations, and system-support issues to the Chief Engineer.',
-    '- Route workload, resource, dependency, throughput, and operational-status issues to the Chief Ops Officer; escalate unresolved conflicts or unassigned authority to Q.',
-    '- Route finance, budget, expenditure, revenue, and financial-obligation issues to the Treasurer and report them to Q directly.',
-    '- Route security rules, access restrictions, authorization boundaries, and threats to systems, information, assets, or operational integrity to Q directly and to the assigned security specialist. Do not bypass restrictions while assessing or repairing an issue.',
+    ...HIERARCHY_COORDINATION_ESCALATIONS,
     '',
     'Use only roles in the current roster for routing; do not create or change roster roles. If no responsible officer is assigned or available, refer the matter to Q. Human approval is required for decisions reserved to human command; halt affected operations until Q authorizes resumption.'
   ].join('\n');
-  const BRIDGE_COORDINATION_GUIDE = [
-    'BRIDGE AUTHORITY AND COORDINATION',
-    'Q is the human Commander at Level 0 and is the only authority that may alter the Bridge Crew Hierarchy Roster. Agents may request and read the roster but must not edit it, replace it, assign themselves roles, or treat rank as permission. Number Two (First Officer) is Level 2 and coordinates Bridge work within authority delegated by Q; escalate unresolved conflicts, unclear authority, and reserved decisions to Q.',
-    '',
-    'REPORTING ROUTES',
-    '- Commander-related issues: Q directly.',
-    '- Treasury, security, and communications issues: Q directly, plus the responsible assigned Bridge specialist for departmental handling. Halt affected operations that cannot be repaired within authorized scope and await human intervention.',
-    '- Extensive agent troubleshooting: Chief Medical Officer for diagnosis and repair coordination. Only an authorized agent with necessary access may perform repairs.',
-    '- Communications repairs or training: Chief Communications Officer.',
-    '- Technical infrastructure, integrations, and system support: Chief Engineer.',
-    '- Workload, resources, dependencies, throughput, and operational status: Chief Ops Officer; unresolved issues, unavailable assignment, or unclear authority go to Q.',
-    '- Finances, budgets, expenditures, revenue, and financial obligations: Treasurer and Q directly.',
-    '- Security rules, access restrictions, authorization boundaries, or threats to ship systems, information, assets, and operational integrity: Q directly and the assigned security specialist. Never bypass a restriction to investigate or repair.',
-    '',
-    'Do not modify the roster to satisfy a routing request. If no responsible officer is listed or available, refer the issue to Q. Record routine issues for tracking; report major errors and failures to Q. Agents must pause disputed or human-reserved operations until Q resolves or authorizes resumption. This guide conveys reporting guidance only; it grants no access, tools, approval, or authority.'
-  ].join('\n');
-
   function cleanText(value, max) {
     return String(value == null ? '' : value).trim().slice(0, max);
   }
@@ -140,6 +138,7 @@
     return {
       directive: cleanText(data.directive, 8000) || DEFAULT_DIRECTIVE,
       qDirective: cleanText(data.qDirective, 8000),
+      coordinationPolicy: cleanText(data.coordinationPolicy, 6000) || DEFAULT_COORDINATION_POLICY,
       hierarchy: parseHierarchy(hierarchy).ok ? hierarchy : DEFAULT_HIERARCHY,
       roleDirectives,
       commands: (Array.isArray(data.commands) ? data.commands : []).map(normalizeCommand).filter(Boolean).slice(0, MAX_COMMANDS),
@@ -174,10 +173,16 @@
   function commands() { return state.commands.map(row => ({ ...row })); }
   function directive() { return state.directive; }
   function qDirective() { return state.qDirective; }
+  function coordinationPolicy() { return state.coordinationPolicy; }
   function hierarchy() { return state.hierarchy; }
   function roleDirective(role) {
     const roleKey = canonicalRole(role);
-    return state.roleDirectives[roleKey] || (roleKey === 'first-officer' ? DEFAULT_FIRST_OFFICER_DIRECTIVE : '');
+    let text = state.roleDirectives[roleKey] || (roleKey === 'first-officer' ? DEFAULT_FIRST_OFFICER_DIRECTIVE : '');
+    const sharedEscalations = HIERARCHY_COORDINATION_ESCALATIONS.join('\n');
+    if (roleKey === 'first-officer' && !text.includes(sharedEscalations)) {
+      text = [text, sharedEscalations].filter(Boolean).join('\n\n');
+    }
+    return text;
   }
   function serialize() { return JSON.parse(JSON.stringify(state)); }
   function hydrate(value) {
@@ -204,6 +209,21 @@
     const textValue = cleanText(text, 8000);
     if (!textValue) return { ok: false, error: 'Enter Q’s human operating directive before saving.' };
     state.qDirective = textValue;
+    const ok = persist();
+    if (ok && typeof App !== 'undefined' && App.refreshAgentPrompts) App.refreshAgentPrompts();
+    return { ok };
+  }
+  function setCoordinationPolicy(text, event) {
+    if (typeof Event === 'undefined' || !(event instanceof Event) || !event.isTrusted ||
+        typeof Element === 'undefined' || !(event.target instanceof Element) ||
+        !event.target.closest('[data-q-action="save-coordination-policy"]')) {
+      return { ok: false, error: 'Only Q, acting through its trusted coordination-policy control, may change this policy.' };
+    }
+    const rawText = String(text == null ? '' : text).trim();
+    if (rawText.length > 6000) return { ok: false, error: 'The crew coordination and escalation policy must be 6000 characters or fewer.' };
+    const textValue = cleanText(rawText, 6000);
+    if (!textValue) return { ok: false, error: 'Enter the crew coordination and escalation policy before saving.' };
+    state.coordinationPolicy = textValue;
     const ok = persist();
     if (ok && typeof App !== 'undefined' && App.refreshAgentPrompts) App.refreshAgentPrompts();
     return { ok };
@@ -264,40 +284,49 @@
     const name = String(value || '').trim().replace(/\s+\([^)]*\)$/, '')
       .toLocaleUpperCase().replace(/^THE\s+/, '').replace(/\s+/g, ' ');
     const aliases = {
+      'COMMANDER-Q': 'commander-q',
       Q: 'commander-q',
       CAPTAIN: 'commander-q',
       COMMANDER: 'commander',
+      'FIRST-OFFICER': 'first-officer',
       'JEAN-LUC': 'commander',
       'JEAN-LUC PICARD': 'commander',
       PICARD: 'commander',
       'FIRST OFFICER': 'first-officer',
       'NUMBER TWO': 'first-officer',
       'CHIEF OPS OFFICER': 'chief-ops',
+      'CHIEF-OPS': 'chief-ops',
       'CHIEF OPERATIONS OFFICER': 'chief-ops',
       'CHIEF SECURITY OFFICER': 'chief-security',
+      'CHIEF-SECURITY': 'chief-security',
       'TACTICAL OFFICER': 'chief-security',
       WORF: 'chief-security',
       'CHIEF COMM OFFICER': 'chief-comm',
+      'CHIEF-COMM': 'chief-comm',
       'COMMS OFFICER': 'chief-comm',
       SEVEN: 'chief-comm',
       'SEVEN OF NINE': 'chief-comm',
       'CHIEF MED OFFICER': 'chief-med',
+      'CHIEF-MED': 'chief-med',
       'MEDICAL OFFICER': 'chief-med',
       'MED OFFICER': 'chief-med',
       BEVERLY: 'chief-med',
       'BEVERLY CRUSHER': 'chief-med',
       CRUSHER: 'chief-med',
       'CHIEF SCIENCE OFFICER': 'chief-science',
+      'CHIEF-SCIENCE': 'chief-science',
       'SCIENCE OFFICER': 'chief-science',
       'SCI OFFICER': 'chief-science',
       GEORDI: 'chief-science',
       'GEORDI LAFORGE': 'chief-science',
       LAFORGE: 'chief-science',
       'CHIEF HELM OFFICER': 'chief-helm',
+      'CHIEF-HELM': 'chief-helm',
       'HELM OFFICER': 'chief-helm',
       'TOM PARIS': 'chief-helm',
       PARIS: 'chief-helm',
       'CHIEF ENGINEER': 'chief-engineer',
+      'CHIEF-ENGINEER': 'chief-engineer',
       SCOTTY: 'chief-engineer',
       'MONTGOMERY SCOTT': 'chief-engineer',
       AMBASSADOR: 'ambassador',
@@ -375,7 +404,7 @@
         continue;
       }
       if (/^\s*Q_COORDINATION_REQUEST\s*$/i.test(line)) {
-        kept.push('Q · BRIDGE CREW COORDINATION AND ESCALATION GUIDE:\n' + BRIDGE_COORDINATION_GUIDE);
+        kept.push('Q · CREW COORDINATION AND ESCALATION POLICY:\n' + state.coordinationPolicy);
         continue;
       }
       const roleRequest = /^\s*Q_ROLE_DIRECTIVE_REQUEST(?:\s*:\s*(.+?))?\s*$/i.exec(line);
@@ -440,19 +469,19 @@
       + (authority ? (authority.listed
         ? 'YOUR ROSTER ASSIGNMENT: ' + authority.role + ' — Level ' + authority.level + ' (listed).\n'
         : 'YOUR ROSTER ASSIGNMENT: ' + authority.role + ' — unlisted (below all listed roles; no assigned level).\n') : '')
-      + 'To request that Q place the current roster in your reply, end with the standalone line `Q_HIERARCHY_REQUEST`. To request the read-only Bridge coordination and escalation guide, end with `Q_COORDINATION_REQUEST`. Only Q (Level 0) may alter the roster; requesting references does not change it. To request your own saved role directive, end with `Q_ROLE_DIRECTIVE_REQUEST`; request another listed role with `Q_ROLE_DIRECTIVE_REQUEST: <role name>`.\n'
+      + 'To request that Q place the current roster in your reply, end with the standalone line `Q_HIERARCHY_REQUEST`. To request Q’s current crew coordination and escalation policy, end with `Q_COORDINATION_REQUEST`; only Q may change that policy through the Q interface. Requesting references does not change them. To request your own saved role directive, end with `Q_ROLE_DIRECTIVE_REQUEST`; request another listed role with `Q_ROLE_DIRECTIVE_REQUEST: <role name>`.\n'
       + state.hierarchy;
     return qDirectiveClause + directiveClause + roleClause + hierarchyClause + '\n\nQ TERMINAL — LOCAL OWNER INBOX:\n'
       + 'You can send a note to your Commander by ending your reply with one standalone line `Q_MESSAGE: <message>`, '
       + 'or ask a question with `Q_QUESTION: <question>`. To request a copy of the Commander’s Prime Directive in COMMS, end with the standalone line `Q_DIRECTIVE_REQUEST`. '
       + 'To request a copy of Q’s human operating directive, end with the standalone line `Q_HUMAN_DIRECTIVE_REQUEST`. '
       + 'To invoke one of the Commander’s exact programmed command responses, end with `Q_COMMAND: <exact command>`. '
-      + 'Use at most one Q line per reply. Q captures and removes inbox markers from the conversation; hierarchy, role-directive, and human-directive requests are answered automatically from saved Q reference data. '
+      + 'Use at most one Q line per reply. Q captures and removes inbox markers from the conversation; hierarchy, role-directive, human-directive, and coordination-policy requests are answered automatically from saved Q reference data. '
       + 'A matching command response is offered for the Commander to send; an unmatched command becomes an inbox item. '
       + 'The Prime Directive is included in your standing instructions when one is saved; requesting it sends a copy into COMMS. '
       + 'Do not claim that the Commander has seen or answered an item until they actually respond.';
   }
-  const api = { messages, commands, directive, qDirective, hierarchy, roleDirective, authorityFor, parseHierarchy, serialize, hydrate, setDirective, setQDirective, setHierarchy, setRoleDirective, saveCommand, removeCommand, capture, stripMarkers, markReplied, promptClause };
+  const api = { messages, commands, directive, qDirective, coordinationPolicy, hierarchy, roleDirective, authorityFor, parseHierarchy, serialize, hydrate, setDirective, setQDirective, setCoordinationPolicy, setHierarchy, setRoleDirective, saveCommand, removeCommand, capture, stripMarkers, markReplied, promptClause };
   globalThis.QTerminalStore = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })();

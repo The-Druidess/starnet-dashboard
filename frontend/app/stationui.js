@@ -56,6 +56,12 @@ function clampTerminalSize(size, limits, viewport) {
   return { width: Math.max(minW, Math.min(width, maxW)), height: Math.max(minH, Math.min(height, maxH)) };
 }
 
+function qPresenceStatus(now, lastInteractionAt, lastBusyAt, connected) {
+  if (!connected) return 'OFFLINE';
+  if (Number.isFinite(lastBusyAt) && now - lastBusyAt <= 10000) return 'BUSY';
+  return now - lastInteractionAt > 90000 ? 'AWAY' : 'ONLINE';
+}
+
 const StationUI = typeof document === 'undefined' ? {} : (() => {
   const $ = s => document.querySelector(s);
   const esc = s => U.esc(String(s == null ? '' : s));
@@ -63,7 +69,7 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
   const sfx = n => { try { if (typeof SFX === 'object' && SFX[n]) SFX[n](); } catch (_) {} };
 
   const KEY = 'starnet.station.v1';
-  const THEMES = [['amber', '#ffaa33'], ['green', '#3dff70'], ['blue', '#46c8ff'], ['purple', '#b46bff'], ['red', '#ff4136'], ['white', '#e8f0e8']];
+  const THEMES = [['green', '#3dff70'], ['blue', '#46c8ff'], ['purple', '#b46bff'], ['red', '#ff4136'], ['white', '#e8f0e8']];
 
   let present = [];          // agent objects currently on the station
   let crewPortals = [];     // selectable services, excluded from the runnable roster
@@ -84,6 +90,9 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
   function dropTestRuns(id) { for (const [r, a] of Array.from(testRunIds)) if (a === id) testRunIds.delete(r); }
   const LINE_TEST_TIP = 'working on a workflow — it shows in WORK › AUTOMATE › WORKFLOWS (a step test: in BUILD › the line’s TEST view), not in COMMS; ■ STOP there ends it';
   let crewLiveWired = false;         // the crew-status live listener is registered exactly once
+  let qPresenceWired = false;
+  let qLastInteractionAt = Date.now();
+  let qLastBusyAt = null;
   let repaintAutonomyDial = null;    // GROWTH Tier 3: the open Settings AUTONOMY panel's paint fn (null when closed) — lets an accepted trust offer repaint the EARNED badge live
   // Same idiom for the open Settings PERMISSIONS panel's per-agent APPROVAL list. The list is painted from
   // the live roster, so a SUMMON or a DELETE while the panel is open must repaint it — otherwise it keeps
@@ -182,6 +191,11 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
       const r = JSON.parse(localStorage.getItem(KEY));
       if (r && r.v === 1) {
         r.settings = Object.assign(defaults(), r.settings || {});
+        if (r.settings.theme === 'amber') {
+          r.settings.theme = 'green';
+          r.settings.themeHue = 136;
+          r.settings.themeSat = 100;
+        }
         r.settings.notifyPrefs = Object.assign(notifyDefaults(), r.settings.notifyPrefs || {});   // merge new keys onto an old save
         if (!Array.isArray(r.tasks)) r.tasks = [];
         if (!Array.isArray(r.notifs)) r.notifs = [];
@@ -223,8 +237,7 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
   // One hue + saturation → the full themed token set, applied as inline vars on <body> (inline
   // beats the body.theme-* class, and the composite --bezel/--well recipes declared on body
   // resolve their var(--ph) against these — the theming trap stays respected). Derivation math
-  // is calibrated against the shipped amber reference (#ffaa33 = hsl(35,100%,60%)), so a custom
-  // hue 35 / sat 100 lands visually beside the hand-tuned preset. Semantic status colours
+  // uses the default green phosphor; semantic status colours
   // (--ok / --bad / --link-down / --warn) are NOT derived — they stay constant by law.
   const THEME_VARS = ['--ph', '--ph-bright', '--ph-dim', '--ph-faint', '--ink', '--ph-glow', '--ph-glow2',
     '--bg', '--panel', '--panel2', '--text', '--gold', '--ph-rgb', '--ph-bright-rgb', '--gold-rgb', '--cam-grade'];
@@ -238,7 +251,7 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
   const hexRgb = c => [parseInt(c.slice(1, 3), 16), parseInt(c.slice(3, 5), 16), parseInt(c.slice(5, 7), 16)];
   const clampN = (v, lo, hi, dflt) => { v = Number(v); return isFinite(v) ? Math.max(lo, Math.min(hi, v)) : dflt; };
   function deriveCustomTheme(hue, sat, glowPct) {
-    const h = ((clampN(hue, 0, 359, 35) % 360) + 360) % 360;
+    const h = ((clampN(hue, 0, 359, 136) % 360) + 360) % 360;
     const s = clampN(sat, 0, 100, 100);
     const g = clampN(glowPct, 0, 150, 100) / 100;
     const at = (l, so) => hslToRgb(h, so == null ? s : so, l);
@@ -258,9 +271,9 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
   }
   // per-preset base glow alphas (from the hand-tuned body.theme-* blocks) so the GLOW dial can
   // scale a preset's bloom without re-deriving its locked palette.
-  const PRESET_GLOW = { amber: [0.5, 0.14], white: [0.35, 0.10] };
+  const PRESET_GLOW = { white: [0.35, 0.10] };
   // per-preset hue/sat so clicking a preset snaps the CUSTOM sliders to a matching start point.
-  const PRESET_HS = { amber: [35, 100], green: [136, 100], blue: [198, 100], purple: [270, 100], red: [3, 100], white: [120, 8] };
+  const PRESET_HS = { green: [136, 100], blue: [198, 100], purple: [270, 100], red: [3, 100], white: [120, 8] };
 
   /* ---------- settings → DOM ---------- */
   /* SCREEN FLICKER clock (#69): the station's 7s CRT flicker used to be an `infinite` CSS opacity animation on the
@@ -357,7 +370,7 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
     const dim = Math.max(0, -knob) / 100 * 0.85;   // below 0: the same three ground tokens mix toward black
     if (lift > 0.001) {
       const cs = getComputedStyle(document.body);
-      const phRgb = (cs.getPropertyValue('--ph-rgb') || '255, 170, 51').split(',').map(Number);
+      const phRgb = (cs.getPropertyValue('--ph-rgb') || '61, 255, 112').split(',').map(Number);
       const parseCol = str => {
         str = (str || '').trim();
         const m = /rgba?\(([^)]+)\)/.exec(str);
@@ -1796,12 +1809,13 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
     wireCrewLive();   // ensure the per-agent run-state listener is live
     const ul = $('#crew'); if (!ul) return;
     const ordered = crewManifestOrder(present, typeof App !== 'undefined' && App.station ? App.station() : null);
-    const qRow = '<li class="crew-row crew-q-row" role="button" tabindex="0" aria-label="Open Q communications terminal; human Captain and Commander, Level 0" aria-keyshortcuts="Enter Space" data-q-terminal data-authority-level="0" style="--ci:0">' +
-      '<span class="crew-portrait" aria-hidden="true"><span class="crew-q-mark">Q</span></span>' +
+    const qRow = '<li class="crew-row crew-q-row" role="button" tabindex="0" aria-label="Q, Captain and Commander, Level 0" aria-keyshortcuts="Enter Space" data-q-terminal data-authority-level="0" style="--ci:0">' +
+      '<span class="crew-portrait" aria-hidden="true"><img alt="" draggable="false" hidden></span>' +
       '<span class="dot on"></span><div class="crew-main">' +
-      '<div class="crew-eyebrow" title="HUMAN COMMANDER">CAPTAIN</div>' +
+      '<div class="crew-eyebrow" title="Captain and Commander">CAPTAIN</div>' +
       '<div class="crew-name">Q<span class="crew-room" title="Assigned hierarchy level">Level 0</span></div>' +
-      '<div class="crew-status">HUMAN · OPEN Q TERMINAL</div></div></li>';
+      '<div class="crew-status" data-q-presence>ONLINE</div></div>' +
+      '<button type="button" class="crew-dossier crew-interface" aria-label="Open Q interface" data-tip="Open Q interface">INTERFACE</button></li>';
     ul.innerHTML = qRow + ordered.map(({ a, i, roomName, authorityLevel }, order) =>
       '<li class="crew-row" role="button" tabindex="0" aria-label="' + (present.length > 1 ? 'Show sessions with ' + esc(a.name || a.id) + ', ' + esc(roomName) + '; Shift+F10 for the dossier" aria-keyshortcuts="Shift+F10' : 'Open dossier for ' + esc(a.name || a.id) + ', ' + esc(roomName)) + '" data-i="' + i + '" data-agent-id="' + esc(a.id) + '" data-room-name="' + esc(roomName) + '" data-authority-level="' + (authorityLevel == null ? '' : authorityLevel) + '" style="--ci:' + (order + 1) + '">' +
       crewPortrait(a) +
@@ -1825,10 +1839,16 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
       '<div class="crew-status">PORTAL - FINANCE</div></div></li>').join('');
     ul.querySelectorAll('.crew-row[data-q-terminal]').forEach(li => {
       const openQ = () => { sfx('click'); openTerm('q'); };
+      if (typeof AgentPortraits !== 'undefined' && AgentPortraits.paint) {
+        AgentPortraits.paint(li.querySelector('.crew-portrait img'), { id: 'human-q', name: 'Q', skin: 'q_judge', color: '#e8c85b' });
+      }
       li.addEventListener('click', openQ);
       li.addEventListener('keydown', ev => {
+        if (ev.target && ev.target.closest && ev.target.closest('.crew-interface')) return;
         if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); openQ(); }
       });
+      const interfaceButton = li.querySelector('.crew-interface');
+      if (interfaceButton) interfaceButton.addEventListener('click', ev => { ev.stopPropagation(); openQ(); });
     });
     // (the head's roster count moved out — #crew-sum below the list already totals the same crew)
     ul.querySelectorAll('.crew-row[data-agent-id]').forEach(li => {
@@ -1913,6 +1933,12 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
       const hide = !!crewQuery && !['q', 'captain', 'human commander', 'terminal'].some(value => value.includes(crewQuery));
       if (qRow.hidden !== hide) qRow.hidden = hide;
       if (!qRow.hidden) visible++;
+      const status = qRow.querySelector && qRow.querySelector('[data-q-presence]');
+      if (status) {
+        const presence = qPresenceStatus(Date.now(), qLastInteractionAt, qLastBusyAt, qFrontendConnected());
+        if (status.textContent !== presence) status.textContent = presence;
+        if (status.dataset.presence !== presence) status.dataset.presence = presence;
+      }
     }
     const sum = $('#crew-sum');
     const empty = $('#crew-search-empty');
@@ -1930,6 +1956,30 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
         (crewPortals.length ? ' ' + crewPortals.length + ' service portal' + (crewPortals.length === 1 ? '' : 's') + '.' : '');
       if (txt !== lastStageSummary) { lastStageSummary = txt; stageSum.textContent = txt; }
     }
+  }
+  function qFrontendConnected() {
+    return !document.hidden && !(typeof navigator !== 'undefined' && navigator.onLine === false);
+  }
+  function wireQPresence() {
+    if (qPresenceWired || typeof window === 'undefined' || typeof document === 'undefined') return;
+    qPresenceWired = true;
+    const refresh = () => crewTick();
+    const humanActivity = ev => {
+      if (ev && ev.isTrusted === false) return;
+      if (ev && ev.type === 'keydown' && ['Shift', 'Control', 'Alt', 'Meta'].includes(ev.key)) return;
+      const now = Date.now();
+      qLastInteractionAt = now;
+      qLastBusyAt = now;
+      crewTick();
+    };
+    window.addEventListener('pointerdown', humanActivity, true);
+    window.addEventListener('keydown', humanActivity, true);
+    window.addEventListener('input', humanActivity, true);
+    window.addEventListener('online', refresh);
+    window.addEventListener('offline', refresh);
+    window.addEventListener('focus', refresh);
+    document.addEventListener('visibilitychange', refresh);
+    window.setInterval(crewTick, 1000);
   }
   // ref-counted so two concurrent runs sharing an agentId (e.g. two hero streams as 'agent') both count, and
   // one finishing doesn't prematurely flip the pill to IDLE while the other is still live. Deleted at 0 so
@@ -11237,6 +11287,7 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
     runningAgents.clear(); runSeenAt.clear();   // fresh station view — never inherit stale run-state across a (re)connect
     sel = 0;
     importLegacyTasks();
+    wireQPresence();
     crewRender();
     wireCompactBeat();
     wireNotifyLive();

@@ -1539,7 +1539,7 @@
       const notice = document.createElement('dialog');
       notice.className = 'ext-editor mc-form github-device-code';
       notice.setAttribute('aria-label', 'Sign in with GitHub');
-      notice.style.cssText = 'position:fixed;inset:0;margin:auto;width:min(520px,calc(100vw - 32px));max-height:calc(100vh - 32px);overflow:auto;padding:24px;background:#17140e;color:var(--ph,#ddbd83);border:1px solid var(--gold,#ac853e);z-index:10000;box-shadow:0 0 0 100vmax #0009';
+      notice.style.cssText = 'position:fixed;inset:0;margin:auto;width:min(520px,calc(100vw - 32px));max-height:calc(100vh - 32px);overflow:auto;padding:24px;background:var(--panel2,#041c0d);color:var(--ph-bright,#ccffdb);border:1px solid var(--gold,#d8f25a);z-index:10000;box-shadow:0 0 0 100vmax #0009';
       notice.innerHTML = '<strong>CONNECT GITHUB</strong><p>1. Copy this code: <code style="font-size:20px;user-select:all">' + esc(device.userCode) + '</code> <button class="bb sm" data-device-copy>COPY CODE</button></p>' +
         '<p>2. Open GitHub, enter the code, and approve StarNet’s repository and organization access.</p>' +
         '<p>3. Return here. StarNet will check and save your connection on this device.</p>' +

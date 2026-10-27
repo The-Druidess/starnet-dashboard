@@ -42,11 +42,11 @@
   display: inline-flex; align-items: center; gap: 8px; flex: 0 0 auto;
   position: relative; padding: 3px 10px; max-height: 34px;
   background:
-    linear-gradient(180deg, rgba(var(--ph-rgb, 255,170,51), 0.055) 0%, rgba(0,0,0,0.0) 45%),
+    linear-gradient(180deg, rgba(var(--ph-rgb, 61,255,112), 0.055) 0%, rgba(0,0,0,0.0) 45%),
     linear-gradient(180deg, rgba(0,0,0,0.30), rgba(0,0,0,0.52));
   border: 1px solid var(--ph-faint); border-radius: 4px;
   box-shadow:
-    inset 0 1px 0 rgba(var(--ph-rgb, 255,170,51), 0.10),   /* the machined top hairline */
+    inset 0 1px 0 rgba(var(--ph-rgb, 61,255,112), 0.10),   /* the machined top hairline */
     inset 0 -4px 10px rgba(0,0,0,0.45),                     /* seated into the bar */
     0 1px 0 rgba(0,0,0,0.6);
   cursor: grab; touch-action: none;
@@ -57,7 +57,7 @@
 .wg:hover {
   border-color: var(--ph-dim);
   box-shadow:
-    inset 0 1px 0 rgba(var(--ph-rgb, 255,170,51), 0.16),
+    inset 0 1px 0 rgba(var(--ph-rgb, 61,255,112), 0.16),
     inset 0 -4px 10px rgba(0,0,0,0.45),
     0 0 12px var(--ph-glow2);
 }
@@ -65,7 +65,7 @@
 
 /* AGENT-FED: a gold-edged instrument — the provenance accent runs the whole left edge,
    echoing the gold provenance dot, so a fed readout reads as a different trust class at a glance */
-.wg-fed { border-left: 2px solid rgba(var(--gold-rgb, 255,211,74), 0.55); }
+.wg-fed { border-left: 2px solid rgba(var(--gold-rgb, 216,242,90), 0.55); }
 .wg-fed:hover { border-left-color: var(--gold); }
 
 .wg-meta { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; }
@@ -106,7 +106,7 @@
 /* ---- spark: line + soft area fill + bright endpoint dot (the "now" reading) ---- */
 .wg-spark { width: 46px; height: 16px; flex: 0 0 auto; }
 .wg-spark polyline { stroke: var(--ph); stroke-width: 1.2; }
-.wg-spark polygon { fill: rgba(var(--ph-rgb, 255,170,51), 0.13); }
+.wg-spark polygon { fill: rgba(var(--ph-rgb, 61,255,112), 0.13); }
 .wg-spark circle { fill: var(--ph-bright); }
 .wg[data-tone="ok"]   .wg-spark polyline { stroke: var(--ok); }
 .wg[data-tone="ok"]   .wg-spark circle   { fill: var(--ok); }
@@ -180,8 +180,8 @@
 #screen-game .widget-rail[data-empty="1"] .wg-add {
   width: auto; height: 22px; padding: 0 9px; gap: 6px;
   --ui-key-label: var(--ph-dim); --ui-key-edge: var(--ph-faint);
-  --ui-key-face: rgba(var(--ph-rgb, 255,170,51), 0.04);
-  --ui-key-shadow: inset 0 1px 0 rgba(var(--ph-rgb, 255,170,51), 0.08);
+  --ui-key-face: rgba(var(--ph-rgb, 61,255,112), 0.04);
+  --ui-key-shadow: inset 0 1px 0 rgba(var(--ph-rgb, 61,255,112), 0.08);
   color: var(--ui-key-label); border-color: var(--ui-key-edge);
   background: var(--ui-key-face); box-shadow: var(--ui-key-shadow); border-radius: 2px;
 }
@@ -192,7 +192,7 @@
 #screen-game .widget-rail[data-empty="1"] .wg-add:hover, #screen-game .widget-rail[data-empty="1"] .wg-add:focus-visible,
 #screen-game .widget-rail[data-empty="1"] .wg-add[aria-expanded="true"] {
   --ui-key-label: var(--ph); --ui-key-edge: var(--ph-dim);
-  --ui-key-shadow: inset 0 1px 0 rgba(var(--ph-rgb, 255,170,51), 0.14);
+  --ui-key-shadow: inset 0 1px 0 rgba(var(--ph-rgb, 61,255,112), 0.14);
 }
 #screen-game .widget-rail[data-empty="1"] .wg-add:focus-visible { outline: 1px solid var(--ph); outline-offset: 2px; }
 
@@ -201,7 +201,7 @@
   position: fixed; z-index: 995; min-width: 224px; padding: 6px;
   background: var(--panel, rgba(5,3,1,0.95)); border: 1px solid var(--ph-dim); border-radius: 4px;
   box-shadow: 0 0 0 1px rgba(0,0,0,0.9), 0 12px 30px rgba(0,0,0,0.75), 0 0 18px var(--ph-glow2),
-    inset 0 1px 0 rgba(var(--ph-rgb, 255,170,51), 0.08);
+    inset 0 1px 0 rgba(var(--ph-rgb, 61,255,112), 0.08);
   animation: wg-pop-in var(--t-fast, 120ms) var(--ease-out, ease);
 }
 @keyframes wg-pop-in { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }

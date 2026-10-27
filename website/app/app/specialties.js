@@ -84,7 +84,7 @@
       manual: s.manual || '',                         // -> operating-manual.md (standing orders)
       persona: s.persona || 'friendly',              // recommended personaId (the Commander can override)
       model: TIERS[s.model] ? s.model : 'balanced',   // tier KEY (see TIERS); advisory
-      accent: s.accent || '#ffaa33',                  // suggested avatar suit
+      accent: s.accent || '#3dff70',                  // suggested avatar suit
       tags: Object.freeze(normTags(s.tags)),          // interest-lane weights the recommender ranks by
       starters: Object.freeze((s.starters || []).slice()),
       // ---- LOADOUT (Class Loadouts S1): applied at summon; the user can override everything after ----
@@ -125,7 +125,7 @@
       emoji: s.emoji || '✦', tagline, blurb: s.blurb || '',
       purpose, manual,
       persona: s.persona || 'friendly', model: TIERS[s.model] ? s.model : 'balanced',
-      accent: s.accent || '#ffaa33',
+      accent: s.accent || '#3dff70',
       // a saved custom carries its own ranking tags; pre-tags customs (or older saves) get them classified
       // from their own text — so the Commander's own specialists rank in the feed just like the built-ins.
       tags: normTags(s.tags && Object.keys(s.tags).length ? s.tags : deriveTags(purpose + ' ' + manual + ' ' + tagline)),
@@ -174,7 +174,7 @@
       purpose: (typeof d.purpose === 'string' && d.purpose) || (agent && agent.purpose) || '',
       manual: (typeof d.manual === 'string' && d.manual) || '',
       persona: (agent && agent.personaId) || 'friendly',
-      accent: (agent && agent.color) || '#ffaa33',
+      accent: (agent && agent.color) || '#3dff70',
       model: 'balanced',
       starters: []
     };

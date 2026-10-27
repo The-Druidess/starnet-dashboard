@@ -175,6 +175,20 @@ test('custom skin IDs resolve standing height by render set and keep feet flush 
   }
 });
 
+test('the Treasurer renders the candidate sprite set throughout the in-world preview', async () => {
+  const { sprites, catalog } = await harness(true);
+  assert.equal(catalog.quark.set, 'theseus_quark_review');
+  await sprites.ensureSkin('quark');
+  for (const dir of ['south', 'south-east', 'east', 'north-east', 'north', 'north-west', 'west', 'south-west']) {
+    const standing = draw(sprites, body({ id: 'treasurer', skin: 'quark', dir }), 0, {});
+    assert.equal(standing.frame.image.path,
+      `assets/sprites/theseus_quark_review/rot_${dir}.png`, `${dir} idle appearance`);
+    const walking = draw(sprites, body({ id: 'treasurer', skin: 'quark', dir, state: 'walk' }), 0, {});
+    assert.ok(walking.frame.image.path.startsWith(`assets/sprites/theseus_quark_review/walk_${dir}_`),
+      `${dir} walk cycle`);
+  }
+});
+
 test('standing breath fixes the real measured foot line, keeps native masters and restores sampling state', async () => {
   const { sprites } = await harness();
   const b = body(); const frames = [1000, 2200, 4000].map(t => draw(sprites, b, t, {}).frame);

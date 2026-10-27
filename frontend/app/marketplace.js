@@ -54,7 +54,7 @@ const Marketplace = (() => {
   let archiveOpen = false;                       // SPECIALIST ARCHIVE (deep-cut archetypes) — collapsed by default
   let catFilter = 'all';                         // 'all' | 'mine' | <rail bucket>          (RECIPES tab, R6)
   let query = '';
-  let buildAccent = '#ffaa33', buildModel = 'balanced';   // the custom-class builder's picked accent + tier
+  let buildAccent = '#3dff70', buildModel = 'balanced';   // the custom-class builder's picked accent + tier
   let buildKit = [], buildSkills = [], buildEffort = null;   // the custom-class builder's picked loadout (Class Loadouts S3)
   let buildDraft = null;            // Slice 4: a station-drafted prospect pre-filling the builder (name/tagline/purpose/manual/emoji)
   let acceptingProspectId = null;   // Slice 4: the prospect id being reviewed → removed from staging on a successful CREATE
@@ -2046,7 +2046,7 @@ const Marketplace = (() => {
     if (saveas) saveas.addEventListener('click', () => { sfx('click'); view = 'save'; editingId = null; renderStage(); });
     const build = stage.querySelector('.mkt-build');
     // editingId cleared: ＋ is always a FRESH class, never a stale upsert (the edit view can be abandoned by closing the window)
-    if (build) build.addEventListener('click', () => { sfx('click'); editingId = null; buildDraft = null; acceptingProspectId = null; buildAccent = '#ffaa33'; buildModel = 'balanced'; buildKit = []; buildSkills = []; buildEffort = null; view = 'build'; renderStage(); });
+    if (build) build.addEventListener('click', () => { sfx('click'); editingId = null; buildDraft = null; acceptingProspectId = null; buildAccent = '#3dff70'; buildModel = 'balanced'; buildKit = []; buildSkills = []; buildEffort = null; view = 'build'; renderStage(); });
     const recipeSaveas = stage.querySelector('.mkt-recipe-saveas');
     if (recipeSaveas) recipeSaveas.addEventListener('click', () => { sfx('click'); pendingMintKey = null; pendingMintTemplate = null; pendingScoutRecipeId = null; scoutSeedDraft = null; enterRecipeEditor(null, 'create'); });
 
@@ -2129,7 +2129,7 @@ const Marketplace = (() => {
   function prefillBuilderFromProspect(p) {
     const d = p.draft || {};
     editingId = null;                                  // a brand-new custom, not an upsert of an existing class
-    buildAccent = d.accent || '#ffaa33';
+    buildAccent = d.accent || '#3dff70';
     buildModel = (d.model && ['reasoning', 'balanced', 'fast'].indexOf(d.model) >= 0) ? d.model : 'balanced';
     buildKit = Array.isArray(d.kit) ? d.kit.slice() : [];
     buildSkills = Array.isArray(d.skills) ? d.skills.slice() : [];
@@ -2323,7 +2323,7 @@ const Marketplace = (() => {
       // A custom class is edited in the same builder form it was made in. Its carried loadout (kit/skills/effort/tier)
       // is prefilled from the saved spec so the save round-trips it untouched. (Only customs carry an EDIT button.)
       const s = Specialties.get(editingId);
-      buildAccent = (s && s.accent) || '#ffaa33';
+      buildAccent = (s && s.accent) || '#3dff70';
       buildModel = (s && s.model) || 'balanced';
       buildKit = (s && Array.isArray(s.kit)) ? s.kit.slice() : [];
       buildSkills = (s && Array.isArray(s.skills)) ? s.skills.slice() : [];

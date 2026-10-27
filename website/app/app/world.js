@@ -7789,7 +7789,7 @@ const World = (() => {
     const dpr = window.devicePixelRatio || 1;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.imageSmoothingEnabled = false;
     const Wc = cv.width / dpr, Hc = cv.height / dpr;
-    const suit = who.color || '#ffaa33';
+    const suit = who.color || '#3dff70';
     const name = floorDisplayName(who);
     // per-body XP: the hero keeps its exact xpByAgent-or-xpAgent fallback; a crew body reads its own snapshot
     const xp = xpByAgent.get(who.id) || (who === agent ? xpAgent : null);
@@ -7809,12 +7809,12 @@ const World = (() => {
     const x = Math.round(Math.max(4, Math.min(Wc - w - 4, ax - w / 2)));
     const y = Math.round(Math.max(4, Math.min(Hc - h - 4, topY - 9 - h)));
 
-    // plate: dark CRT glass + scanlines + an amber structural frame with a suit accent along the top
+    // plate: dark CRT glass + scanlines + a phosphor-green frame with a suit accent along the top
     ctx.fillStyle = 'rgba(6,5,4,0.92)'; ctx.fillRect(x, y, w, h);
     ctx.globalAlpha = 0.13; ctx.fillStyle = '#000';
     for (let sy = y + 2; sy < y + h - 1; sy += 3) ctx.fillRect(x + 1, sy, w - 2, 1);
     ctx.globalAlpha = 1;
-    ctx.strokeStyle = '#b9791c'; ctx.lineWidth = 1; ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
+    ctx.strokeStyle = '#1fae4e'; ctx.lineWidth = 1; ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
     ctx.globalAlpha = 0.6; ctx.fillStyle = suit; ctx.fillRect(x + 1, y, w - 2, 1); ctx.globalAlpha = 1;
 
     // codename (suit) + level (gold) in VT323, with a faint phosphor bloom (mirrors the DOM text-shadow)
@@ -7902,8 +7902,8 @@ const World = (() => {
       else { ax = b.px + 7; ay = b.py - 6; }
       ctx.save();
       ctx.font = GLYPH_FONT; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-      ctx.shadowBlur = 4; ctx.shadowColor = '#ffae3a';
-      ctx.fillStyle = '#ffc978';
+      ctx.shadowBlur = 4; ctx.shadowColor = '#3dff70';
+      ctx.fillStyle = '#ccffdb';
       ctx.fillText(label, ax, ay);
       ctx.restore();
     }
@@ -7933,8 +7933,8 @@ const World = (() => {
     ctx.restore();
   }
 
-  /* ---------- the PIN FLOURISH (G4 feature 2): a brief amber pin-burst at the MISSION BOARD the instant the
-     agent pins a proposal there. World-space, over the board; a short expanding ring of amber motes + a "PINNED"
+  /* ---------- the PIN FLOURISH (G4 feature 2): a brief phosphor-green pin-burst at the MISSION BOARD the instant the
+     agent pins a proposal there. World-space, over the board; a short expanding ring of green motes + a "PINNED"
      phosphor tick. Self-expires (~900ms). A juicy confirmation that the proposal now has a body. */
   function drawPinFlourish(now) {
     const DUR = 900;
@@ -7945,18 +7945,18 @@ const World = (() => {
     const t = (now - pinFlourishAt) / DUR, e = 1 - Math.pow(1 - t, 2), a = (1 - t);
     ctx.save();
     ctx.globalAlpha = 0.9 * a;
-    // expanding amber ring
-    ctx.strokeStyle = '#ffc24a'; ctx.lineWidth = 1;
+    // expanding phosphor ring
+    ctx.strokeStyle = '#3dff70'; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.arc(cx, cy, 3 + e * 12, 0, Math.PI * 2); ctx.stroke();
     // a few motes flung outward
     for (let i = 0; i < 6; i++) {
       const ang = (i / 6) * Math.PI * 2, r = 2 + e * 14;
-      ctx.fillStyle = i % 2 ? '#ffdc8a' : '#ff9a3a';
+      ctx.fillStyle = i % 2 ? '#ccffdb' : '#1fae4e';
       ctx.fillRect(Math.round(cx + Math.cos(ang) * r), Math.round(cy + Math.sin(ang) * r), 1, 1);
     }
     // the phosphor confirmation tick
-    ctx.globalAlpha = a; ctx.shadowBlur = 4; ctx.shadowColor = '#ffae3a';
-    ctx.fillStyle = '#ffd9a3'; ctx.font = "7px 'VT323','Courier New',monospace";
+    ctx.globalAlpha = a; ctx.shadowBlur = 4; ctx.shadowColor = '#3dff70';
+    ctx.fillStyle = '#ccffdb'; ctx.font = "7px 'VT323','Courier New',monospace";
     ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
     ctx.fillText('PINNED', cx, cy - 6 - e * 4);
     ctx.restore();
@@ -7986,7 +7986,7 @@ const World = (() => {
     const dpr = window.devicePixelRatio || 1;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.imageSmoothingEnabled = false;
     const Wc = cv.width / dpr, Hc = cv.height / dpr;
-    const suit = who.color || '#ffaa33';
+    const suit = who.color || '#3dff70';
 
     // Wrap to <=3 lines; ellipsize overflow, including unbroken identifiers.
     const fontSz = 16, lh = 17, padX = 6, padY = 5, tailW = 4, tailH = 5;
@@ -8101,7 +8101,7 @@ const World = (() => {
     const dpr = window.devicePixelRatio || 1;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.imageSmoothingEnabled = false;
     const Wc = cv.width / dpr, Hc = cv.height / dpr;
-    const suit = who.color || '#ffaa33';
+    const suit = who.color || '#3dff70';
     const padX = 6, padY = 5, tailW = 5, tailH = 6;
 
     // the phrase's own width — bounded by construction (<=3 words of <=4 runes), so unlike the text

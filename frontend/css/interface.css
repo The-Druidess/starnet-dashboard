@@ -143,9 +143,16 @@ body {
 #crew .crew-dossier { position: absolute; bottom: 8px; right: 7px; padding: 2px 6px; font: 12px 'VT323',monospace; letter-spacing: .8px; color: var(--ph-dim); background: rgba(0,0,0,.28); border: 1px solid var(--ui-edge); border-radius: 3px; cursor: pointer; opacity: 0; transition: opacity var(--t-fast) var(--ease-soft); }
 #crew .crew-row:is(:hover,:focus-within,.filtering) .crew-dossier { opacity: 1; }
 #crew .crew-dossier:is(:hover,:focus-visible) { color: var(--ph-bright); border-color: var(--ph); }
+#crew .crew-q-row .crew-main { padding-right: 64px; }
+#crew .crew-q-row .crew-interface { opacity: 0; }
+#crew .crew-q-row:is(:hover,:focus-within,.filtering) .crew-interface { opacity: 1; }
+#crew .crew-q-row .crew-interface:focus-visible { color: var(--ph-bright); border-color: var(--ph); outline: 2px solid var(--ph-bright); outline-offset: 2px; }
 #crew .crew-portrait { width: 35px; height: 43px; }
 #crew .crew-portrait img { width: 27px; height: 33px; object-fit: contain; image-rendering: pixelated; }
-#crew .crew-q-mark { color: var(--ph); font-size: 24px; font-weight: 700; line-height: 1; text-shadow: 0 0 8px rgba(var(--ph-rgb), .45); }
+#crew .crew-q-row [data-q-presence="BUSY"] { color: var(--gold); }
+#crew .crew-q-row [data-q-presence="ONLINE"] { color: var(--ph-bright); }
+#crew .crew-q-row [data-q-presence="AWAY"] { color: var(--ph-dim); }
+#crew .crew-q-row [data-q-presence="OFFLINE"] { color: var(--ph-dim); opacity: .55; }
 /* SKIN THUMB (AgentPortraits.thumbHTML) — an agent shown by its body wherever a letter used to stand in. The image is
    already rendered at the box's DEVICE size (integer NN / sharp downscale), so it is laid 1:1: no object-fit, and
    pixelated as a safety net should a zoom step land between device pixels. A well draws its edge as an INSET ring

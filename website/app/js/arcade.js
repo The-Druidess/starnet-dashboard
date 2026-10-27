@@ -147,8 +147,8 @@ const ARCADE = (() => {
     const cs = getComputedStyle(document.body);
     const v = n => (cs.getPropertyValue(n) || '').trim();
     C = {
-      ph: v('--ph') || '#ffaa33', bright: v('--ph-bright') || '#ffd9a3',
-      dim: v('--ph-dim') || '#b9791c', faint: v('--ph-faint') || '#1e1404',
+      ph: v('--ph') || '#3dff70', bright: v('--ph-bright') || '#ccffdb',
+      dim: v('--ph-dim') || '#1fae4e', faint: v('--ph-faint') || '#0c3a1d',
       red: '#ff4a3d', cyan: '#2ee6c8'
     };
   }

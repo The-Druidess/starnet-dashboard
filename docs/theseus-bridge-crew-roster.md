@@ -24,15 +24,34 @@ The Q hierarchy reference lists all eleven Bridge posts and their levels. The
 Chief Ops Officer is assigned to an existing Bridge agent at Level 3; its
 character name is not recorded here. Saved Chief Ops assignments at Level 4
 are corrected to Level 3 when the hierarchy is loaded. The left crew list
-includes Q as a human Level 0 entry that opens the Q terminal, without creating
-an agent or agent slot. The eleven AI Bridge crew members resolve through
-character and role aliases. Unlisted station agents have no hierarchy level
-and remain below all listed roles. Only Q (Level 0) may alter the hierarchy roster. The default
-First Officer directive is supplied to that role, and agents may request the
-read-only Bridge coordination and escalation guide from Q with
-`Q_COORDINATION_REQUEST`. The guide routes security issues to the Chief
-Security Officer and workload or operational-status coordination to the Chief
-Ops Officer; if that post has no assigned agent, escalate to Q.
+shows Q with the existing Q pixel-art sprite and an `INTERFACE` button that
+opens the Q terminal, without creating an agent or agent slot. Q's presence is
+`BUSY` for 10 seconds after a click or typed input, `ONLINE` while connected
+and not busy for up to 90 seconds of inactivity, then `AWAY`; Q is `OFFLINE`
+when the frontend is hidden or the browser reports offline. The eleven AI
+Bridge crew members resolve through character and role aliases. Unlisted
+station agents have no hierarchy level and remain below all listed roles.
+Only Q (Level 0) may alter the hierarchy roster. The default
+The First Officer directive is supplied to that role and contains its own
+Bridge coordination guidance. Q separately maintains the editable crew
+coordination and escalation policy below.
+
+Q’s saved, Commander-editable crew coordination and escalation policy is
+returned to agents that request it with `Q_COORDINATION_REQUEST`. The default
+policy requires all crew to immediately escalate and suspend the affected
+operation for security/legal risk, directive conflict, financial risk, critical
+failure, unverified critical information, repeated failure, unauthorized
+action, and missing human authorization. Only Q may change the saved policy in
+the Q interface.
+
+The Chief Security Officer has a built-in Level 2 operating manual attached
+directly to that agent’s configuration (`operating-manual.md`), not to Q’s role
+directive settings. It covers security/legal risks, directive conflicts,
+financial risks, critical failures, unverified critical information, repeated
+failures, unauthorized actions, and missing human authorization, with the
+specified Bridge escalation routes. Security stops apply to the specific
+affected operation; the directive grants no additional access, tools,
+authority, or enforcement capability.
 
 The sidecar's default simultaneous-agent limit is ten, so ten of the eleven
 currently assigned AI Bridge crew members can run at once. This is a
@@ -58,8 +77,8 @@ Additional Commander-supplied references:
 Preserve his bald, ridged Ferengi head, large ears, burgundy-trimmed multicolor
 patchwork jacket, striped shirt, and olive-green trousers. **Boots must be brown,
 not green**, overriding the photos. Match the existing bridge crew's pixel-art
-style and low top-down perspective. Review the initial directional sprite before
-generating animations or changing the Treasurer's saved appearance.
+style and low top-down perspective. The supplied directional sprite is now
+previewed in the station before it is offered as a selectable appearance.
 
 Initial [PixelLab directional draft](https://www.pixellab.ai/create-character/6127edea-51c5-43ff-8d71-c870742b4af7):
 Pro mode, 80px character size, eight directions, low top-down view, auto-add off.
@@ -72,23 +91,26 @@ with the original directional PNGs.
 
 ## Quark runtime preview
 
-The `quark` appearance uses `theseus_quark`: eight standing turns, eight six-frame
+The `quark` appearance currently previews the supplied Treasurer art as
+`theseus_quark_review`: eight standing turns, eight six-frame
 walk cycles, four seated poses, and four north-facing typing frames (64 PNGs,
-21 tracks), mirrored in both apps. The approved combined south face is used.
-Brown boots and loose trousers are retained. Frames are normalized to 144x144,
+21 tracks), mirrored in both apps. Frames are normalized to 144x144,
 76px standing height, with standing feet at row 111.
 
-Regenerate with `python scripts\generate-quark-sprites.py` after finalizing review
-art. Motion is retargeted from the existing `approved_tom_paris` walking, seated,
-and typing frames: preserve the donor's articulated silhouettes and pose timing,
-register each pose at the neck, and fit the body to Quark's proportions.
-The approved head is retained, the jacket texture is sampled from Quark's art,
-and trousers/boots use his olive/brown palette. This replaces the rejected
-standing-art offsets and compressed-leg poses; it does not consume PixelLab
-generations. An [animated all-angle review](../output/theseus-quark-review/animation-preview.gif)
+The supplied Treasurer sprite export is preserved at
+[`frontend/assets/sprites/theseus_quark_candidate/`](../frontend/assets/sprites/theseus_quark_candidate/)
+and normalized for the in-world preview. The existing `quark` appearance uses
+the candidate sprite set, so the Treasurer can be reviewed in the station.
+The candidate is not yet an additional selectable appearance; the picker option
+can be added after approval.
+
+Regenerate the candidate runtime set with
+`python scripts\generate-quark-review-sprites.py`. The generator keeps the
+supplied source export unchanged and derives all runtime poses from its idle,
+walking, seated, and typing frames. An [animated all-angle review](../output/theseus-quark-review/animation-preview.gif)
 and [donor motion reference](../output/theseus-quark-review/donor-motion-reference.png)
-are available alongside the frame sheet. Validate with
-`node scripts\run-fast-tests.mjs quark-skin.test.js chief-science-officer-skin.test.js world-setskin.test.js agent-skin-thumbs.test.js`.
+remain alongside the earlier Quark frame sheet. Validate with
+`node scripts\run-fast-tests.mjs treasurer-sprite-preview.test.js quark-skin.test.js world-immersion-characters.test.js`.
 The Treasurer assignment is a temporary runtime preview until approved.
 
 ## Remaining crew reference drafts

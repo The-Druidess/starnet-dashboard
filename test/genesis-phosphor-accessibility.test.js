@@ -40,7 +40,7 @@ const wrap = {
   set innerHTML(v) { if (v === '') this.children.length = 0; },
   appendChild(child) { this.children.push(child); return child; }
 };
-const body = { className: 'theme-amber' };
+const body = { className: 'theme-blue' };
 body.classList = classList(body);
 const document = {
   body,
@@ -48,16 +48,16 @@ const document = {
   createElement(tag) { A.eq(tag, 'button', 'the picker creates only button controls'); return button(); }
 };
 let savedTheme = '', clicks = 0;
-const StationUI = { getTheme: () => 'amber', setTheme: t => { savedTheme = t; } };
+const StationUI = { getTheme: () => 'blue', setTheme: t => { savedTheme = t; } };
 const SFX = { click: () => { clicks++; } };
 const picker = Function('document', 'StationUI', 'SFX',
   "'use strict'; const el = id => document.getElementById(id);\n" + src.slice(start, end) + '\nreturn { buildPhosphor };'
 )(document, StationUI, SFX);
 
 picker.buildPhosphor();
-A.eq(wrap.children.length, 6, 'all six phosphor choices render');
-A.eq(wrap.children.map(b => b.getAttribute('aria-pressed')), ['true', 'false', 'false', 'false', 'false', 'false'],
-  'the saved amber tint initializes as the one accessible selection');
+A.eq(wrap.children.length, 5, 'all five phosphor choices render without the retired amber tint');
+A.eq(wrap.children.map(b => b.getAttribute('aria-pressed')), ['false', 'true', 'false', 'false', 'false'],
+  'the saved blue tint initializes as the one accessible selection');
 A.eq(wrap.children.filter(b => b.className.split(/\s+/).includes('sel')).length, 1,
   'the visual picker also initializes with one selection');
 
@@ -67,7 +67,7 @@ green.onclick();
 A.eq(savedTheme, 'green', 'selection still persists through StationUI');
 A.ok(body.className.includes('theme-green'), 'selection still recolors the live screen');
 A.eq(clicks, 1, 'selection still emits one station click');
-A.eq(wrap.children.map(b => b.getAttribute('aria-pressed')), ['false', 'true', 'false', 'false', 'false', 'false'],
+A.eq(wrap.children.map(b => b.getAttribute('aria-pressed')), ['true', 'false', 'false', 'false', 'false'],
   'accessible selection moves to green with the visual selection');
 A.eq(wrap.children.filter(b => b.className.split(/\s+/).includes('sel')).map(b => b.dataset.t), ['green'],
   'exactly the same green choice remains visually selected');

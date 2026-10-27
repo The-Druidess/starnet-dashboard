@@ -1,8 +1,42 @@
 'use strict';
 const fs = require('node:fs');
 const path = require('node:path');
+const vm = require('node:vm');
 const A = require('./_assert');
 const source = fs.readFileSync(path.join(__dirname, '../frontend/app/stationui.js'), 'utf8');
+const qPresenceStatus = Function(A.fnBody(source, 'function qPresenceStatus(') + '; return qPresenceStatus;')();
+A.eq(['OFFLINE', 'BUSY', 'ONLINE', 'ONLINE', 'AWAY'], [
+  qPresenceStatus(5000, 0, null, false),
+  qPresenceStatus(10000, 0, 0, true),
+  qPresenceStatus(10001, 0, 0, true),
+  qPresenceStatus(90000, 0, null, true),
+  qPresenceStatus(90001, 0, null, true)
+], 'Q presence follows connection, 10-second BUSY, and 90-second AWAY thresholds');
+A.ok(/pointerdown', humanActivity[\s\S]*keydown', humanActivity[\s\S]*input', humanActivity/.test(source),
+  'Q BUSY state tracks trusted pointer, keyboard, and text input activity');
+A.ok(/online', refresh[\s\S]*offline', refresh[\s\S]*visibilitychange', refresh[\s\S]*setInterval\(crewTick, 1000\)/.test(source),
+  'Q presence refreshes on frontend connection changes and its idle thresholds');
+let presenceNow = 10000, lastInteractionAt = 0, lastBusyAt = 0, frontendConnected = true;
+const presenceLabel = { textContent: '', dataset: {} };
+const presenceRow = { hidden: false, querySelector: () => presenceLabel };
+const presenceList = { querySelector: selector => selector === '[data-q-terminal]' ? presenceRow : null };
+const presenceContext = vm.createContext({
+  present: [], crewPortals: [], runningAgents: new Map(), runSeenAt: new Map(),
+  activity: () => '', App: { currentAgent: () => null }, agentLive: () => false,
+  crewQuery: '', lineTestOnly: () => false, LINE_TEST_TIP: '', lastStageSummary: '',
+  qLastInteractionAt: lastInteractionAt, qLastBusyAt: lastBusyAt, qFrontendConnected: () => frontendConnected,
+  qPresenceStatus, Date: { now: () => presenceNow },
+  $: selector => selector === '#crew' ? presenceList : null
+});
+const presenceTick = vm.runInContext('(' + A.fnBody(source, 'function crewTick()') + ')', presenceContext);
+presenceTick();
+A.eq(presenceLabel.textContent, 'BUSY', 'crew tick paints the active Q presence state');
+presenceNow = 10001; presenceTick();
+A.eq(presenceLabel.textContent, 'ONLINE', 'crew tick transitions Q to ONLINE after the busy window');
+presenceNow = 90001; presenceTick();
+A.eq(presenceLabel.textContent, 'AWAY', 'crew tick transitions Q to AWAY after 90 seconds');
+frontendConnected = false; presenceTick();
+A.eq(presenceLabel.textContent, 'OFFLINE', 'crew tick reports Q offline when the frontend disconnects');
 const levels = { 'Tactical Officer': 2, 'Treasurer': 2, 'Chief Engineer': 3 };
 const QTerminalStore = {
   authorityFor: agent => ({ level: Object.prototype.hasOwnProperty.call(levels, agent.name) ? levels[agent.name] : null })
@@ -53,20 +87,33 @@ A.ok(source.includes("row.dataset.roomName || ''"), 'crew search includes room n
 delete rooms.fiverr;
 A.eq(order(roster, station).find(r => r.a.id === 'f').roomName, 'UNASSIGNED', 'deleted rooms do not leave stale assignments');
 const qEvents = {};
-const qRow = { addEventListener: (type, handler) => { qEvents[type] = handler; } };
+const interfaceEvents = {};
+const qPortrait = {};
+const qPresence = { textContent: '', dataset: {} };
+const qInterface = { addEventListener: (type, handler) => { interfaceEvents[type] = handler; } };
+const qRow = {
+  addEventListener: (type, handler) => { qEvents[type] = handler; },
+  querySelector: selector => selector === '.crew-portrait img' ? qPortrait
+    : selector === '.crew-interface' ? qInterface : selector === '[data-q-presence]' ? qPresence : null
+};
 const ul = {
   innerHTML: '',
   querySelectorAll: selector => selector === '.crew-row[data-q-terminal]' ? [qRow] : []
 };
 const escapeHTML = value => String(value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const openedTerms = [];
-const render = Function('crewManifestOrder', 'wireCrewLive', '$', 'present', 'crewPortals', 'App', 'esc', 'crewPortrait', 'duplicateAgentName', 'crewTick', 'openTerm', 'sfx',
+const paintedQPortraits = [];
+const render = Function('crewManifestOrder', 'wireCrewLive', '$', 'present', 'crewPortals', 'App', 'esc', 'crewPortrait', 'duplicateAgentName', 'crewTick', 'openTerm', 'sfx', 'AgentPortraits',
   A.fnBody(source, 'function crewRender(') + '; return crewRender;')(
-  order, () => {}, () => ul, roster, [], { station: () => station }, escapeHTML, () => '', () => '', () => {}, name => openedTerms.push(name), () => {});
+  order, () => {}, () => ul, roster, [], { station: () => station }, escapeHTML, () => '', () => '', () => {}, name => openedTerms.push(name), () => {},
+  { paint: (img, agent) => paintedQPortraits.push([img, agent]) });
 rooms.etsy.name = '<Workshop "A">';
 render();
 A.ok(ul.innerHTML.startsWith('<li class="crew-row crew-q-row"'), 'Q is the first roster entry ahead of all agent levels');
 A.ok(ul.innerHTML.includes('data-q-terminal data-authority-level="0"'), 'Q is listed as the human Level 0 Captain without an agent ID');
+A.ok(ul.innerHTML.includes('class="crew-dossier crew-interface"') && ul.innerHTML.includes('>INTERFACE</button>'), 'Q has a dossier-style INTERFACE button');
+A.ok(!ul.innerHTML.includes('OPEN Q TERMINAL') && !ul.innerHTML.includes('HUMAN ·'), 'Q row no longer displays the old terminal action or human label');
+A.eq(paintedQPortraits[0], [qPortrait, { id: 'human-q', name: 'Q', skin: 'q_judge', color: '#e8c85b' }], 'Q uses the existing Q sprite portrait without creating an agent');
 A.eq((ul.innerHTML.match(/<li class="crew-row/g) || []).length, roster.length + 1, 'Q is one visible crew-list row in addition to the current agents');
 A.ok(typeof qEvents.click === 'function', 'Q crew entry has a click handler');
 qEvents.click();
@@ -75,6 +122,10 @@ let prevented = false;
 qEvents.keydown({ key: 'Enter', preventDefault: () => { prevented = true; } });
 A.ok(prevented, 'keyboard selection prevents the default action');
 A.eq(openedTerms, ['q', 'q'], 'keyboard activation opens the Q communications terminal');
+let stopped = false;
+interfaceEvents.click({ stopPropagation: () => { stopped = true; } });
+A.ok(stopped, 'the INTERFACE button keeps its action separate from the row click');
+A.eq(openedTerms, ['q', 'q', 'q'], 'the INTERFACE button opens the Q communications terminal');
 A.ok(ul.innerHTML.includes('&lt;Workshop &quot;A&quot;&gt;'), 'room labels and attributes escape HTML');
 A.ok(!ul.innerHTML.includes('<Workshop'), 'room names cannot inject markup');
 A.ok(ul.innerHTML.indexOf('crew-eyebrow') < ul.innerHTML.indexOf('crew-name'), 'eyebrow precedes crew title');

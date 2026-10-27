@@ -54,7 +54,7 @@
     body.innerHTML =
       '<div class="q-terminal">' +
         '<header class="q-header"><div><span class="q-kicker">COMMANDER’S LOCAL INBOX</span><h3>Q · COMMUNICATIONS TERMINAL</h3></div><span class="q-count">' + rows.filter(row => row.status === 'pending').length + ' AWAITING</span></header>' +
-        '<p class="q-intro">Agents can send notes, ask questions, submit exact commands, or request saved Q reference material. Q’s human operating directive and the Prime Directive are included in every agent’s standing instructions; role directives are included for matching agents. Q saves its inbox and settings locally; replies use the agent’s existing COMMS channel.</p>' +
+        '<p class="q-intro">Agents can send notes, ask questions, submit exact commands, or request saved Q reference material. Q’s human operating directive and the Prime Directive are included in every agent’s standing instructions; role directives are included for matching agents. Agents can request the current crew coordination and escalation policy with Q_COORDINATION_REQUEST. Q saves its inbox and settings locally; replies use the agent’s existing COMMS channel.</p>' +
         '<div class="q-inbox-layout"><div class="q-inbox-list" aria-label="Q inbox">' + inbox + '</div>' + selectedMarkup + '</div>' +
         '<section class="q-settings"><h4>PRIME DIRECTIVE · PROJECT-WIDE RULE BASE</h4><p class="q-help">The USS Theseus default is included in every agent’s standing instructions. Edit and save it to customize the shared goals and rules; it cannot be left empty or grant tools or permissions. Choosing SEND PRIME DIRECTIVE sends a copy into that agent’s COMMS.</p>' +
           '<textarea id="q-directive" class="q-textarea" maxlength="8000" placeholder="Write the shared goals and rules agents should follow across this project…">' + esc(Q.directive()) + '</textarea>' +
@@ -68,8 +68,11 @@
           '<textarea id="q-hierarchy" class="q-textarea" maxlength="6000">' + esc(Q.hierarchy()) + '</textarea>' +
           '<button type="button" class="bb sm" data-q-action="save-hierarchy">SAVE HIERARCHY ROSTER</button>' +
         '</section>' +
-        '<section class="q-settings"><h4>BRIDGE COORDINATION &amp; ESCALATION REFERENCE</h4><p class="q-help">Agents can request the read-only escalation routes with the standalone marker Q_COORDINATION_REQUEST. Treasury, security, and communications issues go directly to Q and the assigned specialist. Workload, dependencies, and operational status route to the Chief Ops Officer; escalate to Q if that post is unassigned. This response does not edit or expand the roster; only Q (Level 0) can change it.</p></section>' +
-        '<section class="q-settings"><h4>BRIDGE CREW ROLE DIRECTIVES</h4><p class="q-help">Each saved directive is added to the matching agent’s standing instructions and remains available through Q_ROLE_DIRECTIVE_REQUEST. Empty roles remain unset until you provide their text.</p>' +
+        '<section class="q-settings"><h4>CREW COORDINATION &amp; ESCALATION POLICY</h4><p class="q-help">This Q-owned policy is returned to agents that request it with the standalone marker Q_COORDINATION_REQUEST. Only Q may change it here. Saving updates the reference for future requests; this policy does not grant tools, permissions, or approval.</p>' +
+          '<textarea id="q-coordination-policy" class="q-textarea" maxlength="6000">' + esc(Q.coordinationPolicy()) + '</textarea>' +
+          '<button type="button" class="bb sm" data-q-action="save-coordination-policy">SAVE COORDINATION POLICY</button>' +
+        '</section>' +
+        '<section class="q-settings"><h4>BRIDGE CREW ROLE DIRECTIVES</h4><p class="q-help">Role directives saved here are included in matching agents’ standing instructions and remain available through Q_ROLE_DIRECTIVE_REQUEST. The First Officer has a built-in Q role directive; other roles remain unset here until you provide text.</p>' +
           roleDirectiveMarkup +
         '</section>' +
         '<section class="q-settings"><h4>PROGRAMMED COMMAND RESPONSES</h4><p class="q-help">Responses match the command text exactly (case-sensitive). Q offers a match for you to send.</p>' +
@@ -96,6 +99,11 @@
           const result = Q.setQDirective(body.querySelector('#q-human-directive').value, event);
           if (!result.ok) throw new Error(result.error || 'Could not save Q’s human operating directive.');
           H.notify('Q human operating directive saved for Q and the agents.', 'gold');
+          buildQ(body);
+        } else if (action === 'save-coordination-policy') {
+          const result = Q.setCoordinationPolicy(body.querySelector('#q-coordination-policy').value, event);
+          if (!result.ok) throw new Error(result.error || 'Could not save the crew coordination and escalation policy.');
+          H.notify('Crew coordination and escalation policy saved for Q and agents.', 'gold');
           buildQ(body);
         } else if (action === 'save-hierarchy') {
           const result = Q.setHierarchy(body.querySelector('#q-hierarchy').value, event);

@@ -46,7 +46,8 @@ A.ok(/0\.000/.test(deriveCustomTheme(35, 100, 0)['--ph-glow']), 'glow 0% → the
 /* ---- clamping: out-of-range / malformed inputs fall to the sane defaults (no crash, no NaN colour) ---- */
 A.eq(deriveCustomTheme(999, 999, 999)['--ph'], deriveCustomTheme(359, 100, 150)['--ph'], 'out-of-range hue/sat/glow clamp to their ceilings (hue capped at 359, sat 100, glow 150)');
 A.notThrows(() => deriveCustomTheme(NaN, undefined, 'x'), 'malformed inputs derive a palette rather than throwing');
-A.ok(/^#[0-9a-f]{6}$/.test(deriveCustomTheme(NaN, undefined, 'x')['--ph']), 'malformed inputs still yield a valid hex --ph (default hue 35)');
+A.eq(deriveCustomTheme(NaN, undefined, 'x')['--ph'], deriveCustomTheme(136, 100, 100)['--ph'],
+  'malformed inputs use the neon-green default hue');
 
 /* ---- persistence + the theme-bezel-var TRAP (source-lock) ---- */
 A.ok(/theme:\s*'green',\s*themeHue:\s*136,\s*themeSat:\s*100,\s*themeGlow:\s*100/.test(uiSrc), 'defaults() seeds green phosphor and matching custom sliders');
@@ -68,7 +69,22 @@ const css = read('frontend/css/style.css');
 const rootPalette = /:root\s*\{([\s\S]*?)\}/.exec(css)[1];
 A.ok(/--ph:\s*#3dff70/.test(rootPalette) && /--ph-rgb:\s*61,\s*255,\s*112/.test(rootPalette),
   'first paint uses the green phosphor and its matching RGB token');
-A.ok(/body\.theme-amber\s*\{[^}]*--ph:\s*#ffaa33/.test(css), 'amber remains an explicit optional theme');
+A.ok(!/body\.theme-amber\s*\{/.test(css), 'the retired amber phosphor preset no longer overrides neon green');
+A.ok(/const THEMES = \[\['green', '#3dff70'\]/.test(uiSrc) && !/const THEMES = \[[^\n]*\['amber'/.test(uiSrc),
+  'the appearance picker no longer offers the orange preset');
+A.ok(/if \(r\.settings\.theme === 'amber'\) \{\s*r\.settings\.theme = 'green';\s*r\.settings\.themeHue = 136;\s*r\.settings\.themeSat = 100;/.test(uiSrc),
+  'saved amber preference migrates to the neon-green palette');
+A.ok(/const PHOSPHOR = Object\.freeze\(\[\['green', '#3dff70'\]/.test(read('frontend/app/app.js')),
+  'new station creation offers neon green without the retired amber phosphor');
+const loadSettings = new Function('KEY', 'localStorage', 'defaults', 'notifyDefaults',
+  A.fnBody(uiSrc, 'function load()') + '\nreturn load;')(
+  'settings',
+  { getItem: () => JSON.stringify({ v: 1, settings: { theme: 'amber', themeHue: 35, themeSat: 100 } }) },
+  () => ({ theme: 'green', themeHue: 136, themeSat: 100, notifyPrefs: {} }),
+  () => ({})
+);
+A.eq([loadSettings().settings.theme, loadSettings().settings.themeHue, loadSettings().settings.themeSat], ['green', 136, 100],
+  'loading an older amber save actually applies the green preference and hue');
 for (const file of ['frontend/index.html', 'frontend/agent-station-demo.html']) {
   A.ok(/<body class="theme-green glass-demo">/.test(read(file)), file + ' starts green before settings load');
 }

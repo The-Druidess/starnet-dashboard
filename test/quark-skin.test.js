@@ -59,7 +59,7 @@ async function main() {
   };
   assert.deepEqual(readCatalog(frontend), readCatalog(website));
   assert.deepEqual(readCatalog(frontend), {
-    name: 'Quark', set: 'theseus_quark', scale: 0.25,
+    name: 'Quark', set: 'theseus_quark_review', scale: 0.25,
     sourceStandingHeight: 76, collection: 'star-trek'
   });
   const readTracks = base => Object.fromEntries(Object.entries(JSON.parse(

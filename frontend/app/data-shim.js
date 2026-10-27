@@ -25,7 +25,7 @@ DATA.SKINS = {
   montgomery_scott: {"name":"Montgomery Scott (Scotty)","set":"approved_montgomery_scott","scale":0.25,"sourceStandingHeight":76,"collection":"star-trek"},
   seven_of_nine: {"name":"Seven of Nine","set":"approved_seven_of_nine","scale":0.25,"sourceStandingHeight":76,"collection":"star-trek"},
   chief_science_officer: {"name":"Geordi LaForge","set":"theseus_science_officer","scale":0.25,"sourceStandingHeight":76,"collection":"star-trek"},
-  quark: {"name":"Quark","set":"theseus_quark","scale":0.25,"sourceStandingHeight":76,"collection":"star-trek"},
+  quark: {"name":"Quark","set":"theseus_quark_review","scale":0.25,"sourceStandingHeight":76,"collection":"star-trek"},
   amethyst_cadet: {"name":"Amethyst Cadet","set":"amethyst_cadet","scale":0.25,"sourceStandingHeight":76},
   blank: {"name":"Cadet","set":"approved_android","scale":0.25,"sourceStandingHeight":76},
   astronaut: {"name":"Retro Astronaut","set":"approved_astronaut","scale":0.25,"sourceStandingHeight":76},

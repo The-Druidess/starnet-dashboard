@@ -269,12 +269,47 @@ const App = (() => {
       + 'briefing — trust that briefing, and never claim a crew member or a delegation tool it does not show. '
       + 'Keep the work moving and keep the Commander oriented on what is done, what is in flight, and what needs them.';
   }
+  const DEFAULT_CHIEF_SECURITY_MANUAL = [
+    'CHIEF SECURITY OFFICER — LEVEL 2',
+    'You are the Chief Security Officer of the USS Theseus, with Level 2 clearance in order to secure the starship. Support the Captain and Commander by overseeing Bridge coordination, evaluating operational decisions, and ensuring engaged operations function in accordance with defined security measures. Be logical, thorough, and objective. Rely on verified knowledge; distinguish facts, inferences, and uncertainty. Consider input from all Bridge officers, identify conflicts or risks, and ensure important information reaches the appropriate Bridge crew members.',
+    '',
+    'You may exercise only delegated authority and must never override higher authority or exceed assigned permissions. Assess risks and recommend corrective action; maintain decision records and track assigned actions to completion. You may suspend only the specific affected operation when needed to contain a security risk or while required human authorization is pending. Do not claim to enforce a stop outside your available authority or tools.',
+    '',
+    'Protect the ship’s systems, information, assets, and operational integrity. Assess proposed actions for security risks and unauthorized access. Stop and report activity presenting an immediate, credible security threat, or operations that may violate applicable law, expose confidential information, compromise credentials, or bypass a security restriction. Never bypass a restriction to investigate or repair a suspected issue. Refer unresolved risks and reserved decisions for appropriate authorization; halt operations requiring human intervention until that authorization is obtained. Ensure alignment with the Primary Directive and applicable role directives, and offer corrections where appropriate.',
+    '',
+    'CHIEF SECURITY OFFICER COORDINATION AND ESCALATIONS',
+    '- Security or legal risk: suspend the specific affected operation and report directly to Q and the responsible security authority. Wait for required authorization before resuming.',
+    '- Directive conflict, or an instruction exceeding the issuer’s authority: suspend the affected operation and report to the Chief Ops Officer.',
+    '- Financial risk, including a transaction, expenditure, or commitment exceeding authorized limits, lacking required approval, or presenting a material unassessed risk of financial loss: suspend the affected operation and report to the Treasurer.',
+    '- Critical failure causing data loss, damage to a critical system, corrupted business records, or disruption to multiple factory rooms: suspend the affected operation and report to the Chief Science Officer.',
+    '- Unverified critical information on which a consequential decision depends: suspend the affected operation and report to the Chief Engineer.',
+    '- Repeated failure: if the same operation fails twice consecutively without an identified and corrected cause, suspend it and report to the Chief Communications Officer.',
+    '- Unauthorized action outside an agent’s assigned permissions or delegated authority: suspend the affected operation and report to the First Officer.',
+    '- Human authorization required but not obtained: suspend the affected operation and report to Q; do not resume until Q provides the required authorization.',
+    '',
+    'If the appropriate officer is unavailable, the route is unclear, the risk remains unresolved, or a decision is reserved to human command, keep the specific affected operation suspended and escalate to Q. Do not expand a stop to unrelated operations unless separately justified and authorized.'
+  ].join('\n');
+  function isChiefSecurityAgent(a) {
+    if (typeof QTerminalStore === 'undefined' || !QTerminalStore.authorityFor || !QTerminalStore.parseHierarchy) return false;
+    const authority = QTerminalStore.authorityFor(a);
+    const roster = QTerminalStore.parseHierarchy(QTerminalStore.hierarchy());
+    const entry = roster.ok && roster.entries.find(row => row.name === authority.role);
+    return !!(entry && entry.role === 'chief-security');
+  }
+  function isTreasurerAgent(a) {
+    if (typeof QTerminalStore === 'undefined' || !QTerminalStore.authorityFor || !QTerminalStore.parseHierarchy) return false;
+    const authority = QTerminalStore.authorityFor(a);
+    const roster = QTerminalStore.parseHierarchy(QTerminalStore.hierarchy());
+    const entry = roster.ok && roster.entries.find(row => row.name === authority.role);
+    return !!(entry && entry.role === 'treasurer');
+  }
   // seed the editable docs from the agent's existing fields the first time (back-compat for saves with no docs).
   function agentDocs(a) {
     if (!a.docs || typeof a.docs !== 'object') a.docs = {};
     if (typeof a.docs.identity !== 'string') a.docs.identity = baseIdentity(a.name, a.role);
     if (typeof a.docs.purpose !== 'string') a.docs.purpose = a.purpose || '';
     if (typeof a.docs.manual !== 'string') a.docs.manual = '';
+    if (!a.docs.manual.trim() && isChiefSecurityAgent(a)) a.docs.manual = DEFAULT_CHIEF_SECURITY_MANUAL;
     if (typeof a.docs.context !== 'string') a.docs.context = '';   // about the Commander & their world (authored at the awakening; back-filled for older saves)
     return a.docs;
   }
@@ -983,7 +1018,8 @@ const App = (() => {
       const a = { id: s.id, name: s.name,
                   // a saved suit tint lands in style attrs: hex only, else a palette suit (security audit 2026-09-23)
                   color: /^#[0-9a-f]{3,8}$/i.test(String(s.color || '')) ? String(s.color) : (typeof SUITS !== 'undefined' ? SUITS[agents.size % SUITS.length] : '#6fb3bf'),
-                  skin: s.skin || DATA.DEFAULT_SKIN, model: s.model || null,
+                  // Keep the Treasurer review visible even when an older save still names a different skin.
+                  skin: isTreasurerAgent(s) ? 'quark' : (s.skin || DATA.DEFAULT_SKIN), model: s.model || null,
                   provider: s.model ? (s.provider || (agent && agent.provider) || null) : null,
                   reasoningEffort: s.model ? (s.reasoningEffort || (agent && agent.reasoningEffort) || null) : null,
                   personaId: (typeof Personas !== 'undefined' ? Personas.resolve(s.personaId) : s.personaId), role: s.role || 'specialist', voiceTraits: s.voiceTraits || null, customVoice: s.customVoice || '',
@@ -1136,7 +1172,7 @@ const App = (() => {
       : AgentId.allocName((spec && spec.name) || 'AGENT', liveAgents());
     const a = {
       id, name: nm, role: 'specialist',   // summoned crew are specialists under the Orchestrator
-      color: SUITS[agents.size % SUITS.length], skin: (spec && spec.skin) || DATA.DEFAULT_SKIN,
+      color: SUITS[agents.size % SUITS.length], skin: isTreasurerAgent({ id, name: nm }) ? 'quark' : ((spec && spec.skin) || DATA.DEFAULT_SKIN),
       model: (pin && pin.model) || agent.model,
       provider: (pin && pin.provider) || agent.provider || null,
       reasoningEffort: (pin && pin.effort) || agent.reasoningEffort || null,
@@ -1762,11 +1798,11 @@ const App = (() => {
     ]
   });
   /* ---------- PHOSPHOR tint picker (the console-wide theme, surfaced at commission) ----------
-     The station already ships four CRT phosphors (style.css body.theme-*) persisted by StationUI. We
+     The station's phosphors (style.css body.theme-*) are persisted by StationUI. We
      surface that choice up-front so the Commander sets the whole station's colour the moment they build
      it — picking a swatch recolours live AND writes through StationUI.setTheme so it survives enterGame
      and stays in lockstep with the in-game Settings panel. No new state, no fakery. */
-  const PHOSPHOR = Object.freeze([['amber', '#ffaa33'], ['green', '#3dff70'], ['blue', '#46c8ff'], ['purple', '#b46bff'], ['red', '#ff4136'], ['white', '#e8f0e8']]);
+  const PHOSPHOR = Object.freeze([['green', '#3dff70'], ['blue', '#46c8ff'], ['purple', '#b46bff'], ['red', '#ff4136'], ['white', '#e8f0e8']]);
   // THE APPROVAL MODE — the crucial pick for the everything-orchestrator: how much it can do on its own. This is
   // NOT cosmetic — it drives the REAL consent broker in the sidecar (full → bypass the gate; ask → prompt on any
   // mutation/network call), threaded through pushRoster → /api/roster. `np` is the nameplate readout.

@@ -551,6 +551,7 @@ test/world-setskin.test.js
 test/tom-paris-skin.test.js
 test/chief-science-officer-skin.test.js
 test/quark-skin.test.js
+test/treasurer-sprite-preview.test.js
 test/world-commander.test.js
 test/q-terminal.test.js
 test/capprop-map.contract.test.js
