@@ -1795,21 +1795,22 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
   function crewRender() {
     wireCrewLive();   // ensure the per-agent run-state listener is live
     const ul = $('#crew'); if (!ul) return;
-    if (!present.length && !crewPortals.length) {
-      ul.innerHTML = '<li class="crew-empty"><div class="empty-state"><span class="es-glyph">▯</span><b>NO AGENTS ON STATION</b><span>Commission one from RECRUITMENT to begin.</span></div></li>';
-      $('#crew-sum').innerHTML = '';
-      return;
-    }
     const ordered = crewManifestOrder(present, typeof App !== 'undefined' && App.station ? App.station() : null);
-    ul.innerHTML = ordered.map(({ a, i, roomName, authorityLevel }, order) =>
-      '<li class="crew-row" role="button" tabindex="0" aria-label="' + (present.length > 1 ? 'Show sessions with ' + esc(a.name || a.id) + ', ' + esc(roomName) + '; Shift+F10 for the dossier" aria-keyshortcuts="Shift+F10' : 'Open dossier for ' + esc(a.name || a.id) + ', ' + esc(roomName)) + '" data-i="' + i + '" data-agent-id="' + esc(a.id) + '" data-room-name="' + esc(roomName) + '" data-authority-level="' + (authorityLevel == null ? '' : authorityLevel) + '" style="--ci:' + order + '">' +
+    const qRow = '<li class="crew-row crew-q-row" role="button" tabindex="0" aria-label="Open Q communications terminal; human Captain and Commander, Level 0" aria-keyshortcuts="Enter Space" data-q-terminal data-authority-level="0" style="--ci:0">' +
+      '<span class="crew-portrait" aria-hidden="true"><span class="crew-q-mark">Q</span></span>' +
+      '<span class="dot on"></span><div class="crew-main">' +
+      '<div class="crew-eyebrow" title="HUMAN COMMANDER">CAPTAIN</div>' +
+      '<div class="crew-name">Q<span class="crew-room" title="Assigned hierarchy level">Level 0</span></div>' +
+      '<div class="crew-status">HUMAN · OPEN Q TERMINAL</div></div></li>';
+    ul.innerHTML = qRow + ordered.map(({ a, i, roomName, authorityLevel }, order) =>
+      '<li class="crew-row" role="button" tabindex="0" aria-label="' + (present.length > 1 ? 'Show sessions with ' + esc(a.name || a.id) + ', ' + esc(roomName) + '; Shift+F10 for the dossier" aria-keyshortcuts="Shift+F10' : 'Open dossier for ' + esc(a.name || a.id) + ', ' + esc(roomName)) + '" data-i="' + i + '" data-agent-id="' + esc(a.id) + '" data-room-name="' + esc(roomName) + '" data-authority-level="' + (authorityLevel == null ? '' : authorityLevel) + '" style="--ci:' + (order + 1) + '">' +
       crewPortrait(a) +
       '<span class="dot on"></span>' +
       '<div class="crew-main">' +
       '<div class="crew-eyebrow" title="' + esc(roomName) + '">' + esc(roomName) + '</div>' +
       '<div class="crew-name" style="color:' + esc(a.color) + '">' + esc(a.name) +
       (duplicateAgentName(a) ? '<span class="crew-id">[' + esc(duplicateAgentName(a)) + ']</span>' : '') +
-      '<span class="crew-room" title="Assigned hierarchy level">Level ' + (authorityLevel == null ? 'unknown' : authorityLevel) + '</span></div>' +
+      (authorityLevel == null ? '' : '<span class="crew-room" title="Assigned hierarchy level">Level ' + authorityLevel + '</span>') + '</div>' +
       '<div class="crew-status" id="cs-' + esc(a.id) + '">…</div>' +
       // in-flight work bar: hidden until the row is .working (crewTick toggles it from the real run state).
       // The shimmer (.bar-active) reads as live activity; it's an indeterminate sweep, not a % readout.
@@ -1822,6 +1823,13 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
       crewPortrait(p) + '<span class="dot on"></span><div class="crew-main">' +
       '<div class="crew-name" style="color:' + esc(p.color) + '">' + esc(p.name) + '</div>' +
       '<div class="crew-status">PORTAL - FINANCE</div></div></li>').join('');
+    ul.querySelectorAll('.crew-row[data-q-terminal]').forEach(li => {
+      const openQ = () => { sfx('click'); openTerm('q'); };
+      li.addEventListener('click', openQ);
+      li.addEventListener('keydown', ev => {
+        if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); openQ(); }
+      });
+    });
     // (the head's roster count moved out — #crew-sum below the list already totals the same crew)
     ul.querySelectorAll('.crew-row[data-agent-id]').forEach(li => {
       if (typeof AgentPortraits !== 'undefined') AgentPortraits.paint(li.querySelector('.crew-portrait img'), present[+li.dataset.i]);
@@ -1864,7 +1872,6 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
   // single global hero activity (which used to mark the whole crew WORKING in lockstep with the hero). The
   // talk/task text flavor still comes from the global activity (right for the common single-agent station).
   function crewTick() {
-    if (!present.length && !crewPortals.length) return;
     // self-heal: drop any tracked id no longer on the roster (a left agent, or a stale id left behind when an
     // aborted/dropped run's agent.run.end never reached the bus) so the panel can't get stuck showing it WORKING.
     for (const id of Array.from(runningAgents.keys())) { if (!present.some(a => a.id === id)) { runningAgents.delete(id); runSeenAt.delete(id); } }
@@ -1887,7 +1894,7 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
         const row = e.closest('.crew-row');
         row.classList.toggle('selected', a.id === focusedId);
         row.classList.toggle('filtering', !!railFilter && a.id === railFilter);
-        const hide = !!crewQuery && ![a.name || a.id, a.id, row.dataset.roomName || ''].some(value => String(value).toLowerCase().includes(crewQuery));
+        const hide = !!crewQuery && ![a.name || a.id, a.id, row.dataset ? row.dataset.roomName || '' : ''].some(value => String(value).toLowerCase().includes(crewQuery));
         if (row.hidden !== hide) row.hidden = hide;
         if (!row.hidden) visible++;
       }
@@ -1901,6 +1908,12 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
       if (row.hidden !== hide) row.hidden = hide;
       if (!row.hidden) visible++;
     });
+    const qRow = $('#crew')?.querySelector('[data-q-terminal]');
+    if (qRow) {
+      const hide = !!crewQuery && !['q', 'captain', 'human commander', 'terminal'].some(value => value.includes(crewQuery));
+      if (qRow.hidden !== hide) qRow.hidden = hide;
+      if (!qRow.hidden) visible++;
+    }
     const sum = $('#crew-sum');
     const empty = $('#crew-search-empty');
     if (empty) empty.hidden = !crewQuery || visible > 0;

@@ -7,34 +7,38 @@ this reference.
 
 | Role | Character / assignment | Default level |
 | --- | --- | --- |
-| Human Commander | Q | 0 |
+| Captain | Q (aka me; human) | 0 |
 | Commander | Jean-Luc | 1 |
-| Number Two / First Officer | Data (as Sherlock) | 2 |
-| Tactical Officer | Worf | 2 |
+| First Officer | Data (as Sherlock) | 2 |
+| Chief Security Officer | Worf (Tactical Officer) | 2 |
 | Treasurer | Quark | 2 |
+| Chief Ops Officer | Assigned Bridge agent (name not recorded) | 3 |
+| Chief Comm Officer | Seven | 3 |
+| Chief Med Officer | Beverly Crusher | 3 |
+| Chief Science Officer | Geordi La Forge | 3 |
+| Chief Helm Officer | Tom Paris | 3 |
 | Chief Engineer | Scotty | 3 |
-| Comms Officer | Seven | 3 |
-| Embassador | Deanna Troi | 3 |
-| Helm Officer | Tom Paris | 3 |
-| Med Officer | Beverly Crusher | 3 |
-| Sci Officer | Geordi La Forge | 3 |
+| The Ambassador | Deanna Troi | 3 |
 
-Q is the human Commander and is not an AI agent slot. The default Q hierarchy
-lists all ten assigned AI Bridge crew members, using their assigned roles; the
-character names also resolve to those roles for rank and directive lookup.
-Number Two is the First Officer at Level 2, as is the Treasurer. Level 2 may be
-shared with other roles, including Tactical Officer. The default First Officer
-directive is supplied to that role, and agents may request the read-only Bridge
-coordination and escalation guide from Q with `Q_COORDINATION_REQUEST`.
-The guide routes security issues to the assigned Tactical Officer and workload
-or operational-status coordination to Number Two because no separate Chief
-Operations Officer is listed. Only Q (Level 0) may alter the hierarchy roster.
+The Q hierarchy reference lists all eleven Bridge posts and their levels. The
+Chief Ops Officer is assigned to an existing Bridge agent at Level 3; its
+character name is not recorded here. Saved Chief Ops assignments at Level 4
+are corrected to Level 3 when the hierarchy is loaded. The left crew list
+includes Q as a human Level 0 entry that opens the Q terminal, without creating
+an agent or agent slot. The eleven AI Bridge crew members resolve through
+character and role aliases. Unlisted station agents have no hierarchy level
+and remain below all listed roles. Only Q (Level 0) may alter the hierarchy roster. The default
+First Officer directive is supplied to that role, and agents may request the
+read-only Bridge coordination and escalation guide from Q with
+`Q_COORDINATION_REQUEST`. The guide routes security issues to the Chief
+Security Officer and workload or operational-status coordination to the Chief
+Ops Officer; if that post has no assigned agent, escalate to Q.
 
-The sidecar's default simultaneous-agent limit is ten, so every assigned AI
-Bridge crew member can run at once. This is a concurrency limit, not a cap on
-the number of saved agents or characters. The Commander may set it to `0` for
-unlimited concurrency, and environment or saved settings continue to override
-the default.
+The sidecar's default simultaneous-agent limit is ten, so ten of the eleven
+currently assigned AI Bridge crew members can run at once. This is a
+concurrency limit, not a cap on the number of saved agents or characters. The
+Commander may set it to `0` for unlimited concurrency, and environment or
+saved settings continue to override the default.
 
 ## Treasurer reference and appearance
 

@@ -123,7 +123,7 @@ async function main() {
   const list = {
     innerHTML: '',
     querySelectorAll: selector => selector.includes('data-portal-id') ? [row] : [],
-    querySelector: () => row,
+    querySelector: selector => selector === '[data-q-terminal]' ? null : row,
   };
   const sum = {}, empty = {}, stage = {};
   const rail = vm.createContext({

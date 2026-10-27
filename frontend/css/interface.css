@@ -145,6 +145,7 @@ body {
 #crew .crew-dossier:is(:hover,:focus-visible) { color: var(--ph-bright); border-color: var(--ph); }
 #crew .crew-portrait { width: 35px; height: 43px; }
 #crew .crew-portrait img { width: 27px; height: 33px; object-fit: contain; image-rendering: pixelated; }
+#crew .crew-q-mark { color: var(--ph); font-size: 24px; font-weight: 700; line-height: 1; text-shadow: 0 0 8px rgba(var(--ph-rgb), .45); }
 /* SKIN THUMB (AgentPortraits.thumbHTML) — an agent shown by its body wherever a letter used to stand in. The image is
    already rendered at the box's DEVICE size (integer NN / sharp downscale), so it is laid 1:1: no object-fit, and
    pixelated as a safety net should a zoom step land between device pixels. A well draws its edge as an INSET ring

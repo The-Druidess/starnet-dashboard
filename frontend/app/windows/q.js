@@ -68,7 +68,7 @@
           '<textarea id="q-hierarchy" class="q-textarea" maxlength="6000">' + esc(Q.hierarchy()) + '</textarea>' +
           '<button type="button" class="bb sm" data-q-action="save-hierarchy">SAVE HIERARCHY ROSTER</button>' +
         '</section>' +
-        '<section class="q-settings"><h4>BRIDGE COORDINATION &amp; ESCALATION REFERENCE</h4><p class="q-help">Agents can request the read-only escalation routes with the standalone marker Q_COORDINATION_REQUEST. Treasury, security, and communications issues go directly to Q and the assigned specialist. The current roster uses Tactical Officer for security and has no separate Chief Operations Officer. This response does not edit or expand the roster; only Q (Level 0) can change it.</p></section>' +
+        '<section class="q-settings"><h4>BRIDGE COORDINATION &amp; ESCALATION REFERENCE</h4><p class="q-help">Agents can request the read-only escalation routes with the standalone marker Q_COORDINATION_REQUEST. Treasury, security, and communications issues go directly to Q and the assigned specialist. Workload, dependencies, and operational status route to the Chief Ops Officer; escalate to Q if that post is unassigned. This response does not edit or expand the roster; only Q (Level 0) can change it.</p></section>' +
         '<section class="q-settings"><h4>BRIDGE CREW ROLE DIRECTIVES</h4><p class="q-help">Each saved directive is added to the matching agent’s standing instructions and remains available through Q_ROLE_DIRECTIVE_REQUEST. Empty roles remain unset until you provide their text.</p>' +
           roleDirectiveMarkup +
         '</section>' +
