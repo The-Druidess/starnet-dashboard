@@ -2,9 +2,9 @@
 @import url('../styles.css?v=20260913-brand-nav');
 html:has(body.docs-page){scroll-behavior:auto}
 .docs-page{
-  --bg:#0a0806;--amber:#ffaa33;--amber-b:#ffe4b4;--amber-d:#bb915c;
-  --ink:#f2d6ad;--ink-d:#cfb48e;--line:rgba(255,170,51,.22);--panel:rgba(255,170,51,.035);
-  --ph-rgb:255,170,51;--ph-bright-rgb:255,228,180;
+  --bg:#010503;--amber:#3dff70;--amber-b:#ccffdb;--amber-d:#70bb88;
+  --ink:#b9edca;--ink-d:#95c5a5;--line:rgba(61,255,112,.22);--panel:rgba(61,255,112,.035);
+  --ph-rgb:61,255,112;--ph-bright-rgb:204,255,219;
   /* A reflection of fixed depth stays consistent as cards expand or the page scrolls. */
   --menu-glass:linear-gradient(180deg,rgba(var(--ph-bright-rgb),.075),rgba(var(--ph-rgb),.025) 96px,rgba(var(--ph-rgb),.018) 220px),linear-gradient(rgba(14,11,8,.82),rgba(14,11,8,.82));
   --glass-rim:inset 0 1px 0 rgba(var(--ph-bright-rgb),.08);

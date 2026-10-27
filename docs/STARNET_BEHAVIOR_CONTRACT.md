@@ -5,6 +5,10 @@ The station is home. A user asks an agent for useful work in COMMS, reviews the 
 | Existing concept | Explain it in one sentence | Show at the decision |
 | --- | --- | --- |
 | Agent | The AI worker doing this task. | Name, current activity, configured access and model. |
+| Q Prime Directive | Commander-authored project-wide goals and rules included in every agent's standing instructions when saved. | The text and save action in Q; explain that it does not grant tools or permissions and that explicit COMMS sending remains available. |
+| Q human operating directive | Human-authored statement of how Q intends to lead and engage with the crew, included in all agent prompts as collaboration context. | Its separate Q editor and save action; `Q_HUMAN_DIRECTIVE_REQUEST` returns the saved text. |
+| Q hierarchy roster | The Commander-provided Bridge authority roster, available in each agent's Q reference. | Q's save control and exact roster; `Q_HIERARCHY_REQUEST` returns the saved roster in the agent's reply. |
+| Q role directives | Commander-authored instructions attached to the matching Bridge role and returned by Q on request. | The named role, saved state, and `Q_ROLE_DIRECTIVE_REQUEST` request path. |
 | Equipment prop | Provides an ability such as reading files. | Purpose, current access, equipment scope, equivalent appearances. |
 | Decoration | Changes the station's appearance. | Explicitly say it does not add tools. |
 | Room | Organizes the station and can define equipment scope for an assigned workflow agent. | The scope rules below; never imply every agent needs a complete kit. |
@@ -45,6 +49,14 @@ The station is home. A user asks an agent for useful work in COMMS, reviews the 
 ## Flow and status vocabulary
 
 Normal COMMS work answers in that conversation. A conveyor runs when work reaches its configured intake or trigger; directly messaging a step agent does not inherently launch the whole line. PREVIEW illustrates routing without running an AI job. RUN A SAMPLE JOB uses the real execution path.
+
+Q is the Commander-facing inbox on the Bridge. A saved Prime Directive is included in every agent's composed system prompt as shared project guidance, alongside role-specific instructions. It grants no tools, permissions, or approval and cannot override higher-priority system or safety instructions. The Commander may also explicitly send its text into an agent's COMMS conversation.
+
+Q's human operating directive is stored separately from the project Prime Directive and role directives. When saved, its text is included in each agent's composed system prompt as context for communication and collaboration, not as proof that a decision was made or as permission to exceed authority or higher-priority instructions. Agents can request a copy using `Q_HUMAN_DIRECTIVE_REQUEST`.
+
+The saved Bridge Crew Hierarchy Roster is also included in every agent's composed system prompt with that agent's resolved level. Lower-numbered levels outrank higher-numbered levels; unlisted agents rank below all listed roles. Only a trusted human action in Q's roster control can change it, and Level 0 must be Q alone. An agent can request that Q place the current roster in its reply by ending with `Q_HIERARCHY_REQUEST`; Q replaces the marker with the saved roster. Levels define rank only; no other permissions are implied or granted.
+
+Role directives are keyed to recognized roster roles, included in prompts for matching agents, and can be requested with `Q_ROLE_DIRECTIVE_REQUEST` (own role) or `Q_ROLE_DIRECTIVE_REQUEST: <role name>`. Only trusted Q controls may save role directives.
 
 Execution finished means **review the result**. MARK COMPLETE records the user's task status; it does not publish or send anything. REPEAT opens the existing routine form with task context; it does not create or enable a routine. Routines saved with scheduling off do not run automatically.
 

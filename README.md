@@ -33,6 +33,72 @@ simulation.
 
 ## Features
 
+The dashboard and public website use a classic green phosphor terminal palette.
+Dashboard colors remain adjustable in Settings > Appearance; saved theme choices
+are preserved. Warning/error colors and agent artwork remain distinct from the UI accent.
+
+PixelLab is available in the connector catalog under **Design** for pixel-art
+characters, animations, and tilesets, using its official hosted MCP backend and
+the existing account-token connector flow. It does not require a new room or a
+local image model. Catalog availability is not a live connection: account setup,
+capability grants, consent, and financial admission still apply. With strict
+finance enabled, connection and generation remain blocked until a guaranteed
+maximum-charge adapter and durable reservations are available. An existing
+subscription, credit balance, or estimated cost does not bypass that requirement.
+Do not paste tokens into source files or chat; use the connector credential field
+when financial admission permits setup. No reference artwork is uploaded merely
+by browsing or adding a catalog entry. Personal character-reference projects
+must remain separate from any future original asset catalog intended for sale.
+
+The appearance catalog includes **Tom Paris** (`tom_paris`), **Jean-Luc Picard
+(Dixon Hill)** (`jean_luc_picard`), **Montgomery Scott (Scotty)**
+(`montgomery_scott`), and **Seven of Nine** (`seven_of_nine`), each with eight standing
+directions, eight six-frame walking cycles, four seated poses, and a four-frame
+north-facing typing loop. It uses the normal saved agent skin selection, not a
+temporary preview. The local Bridge assigns Paris to Helm, Picard to COMMANDER,
+Scotty in his TOS red engineering uniform to Chief Engineer, and Seven in her
+silver Voyager outfit to Comms.
+Appearance pickers list the `star-trek` collection first,
+followed by the native skins; adding future approved crew skins to that
+collection preserves this ordering across creation, recruitment, and dossiers.
+**Q (Judge Regalia)** (`q_judge`) includes eight standing reference views and eight
+seated views, retained for future animation work. The local human Commander uses
+this skin; no walking or typing animations have been generated for Q.
+Seated Commander Q exclusively uses the approved dark-wood, curved-arm throne
+with gold posts and a black platform, including eight matched views. Its approved
+chair/body/near-arm layers are baked together to preserve the reviewed fit.
+This is a render-only companion to Q, not a furniture catalog item or appearance
+selection. Changing the Commander skin restores the normal chair; moving,
+rotating, deleting, or restoring the bound chair still works normally.
+
+Build mode's **SURFACE** palette includes **SHIP CARPET** under **DECK**
+(suggested colour **BURGUNDY**) and **SHIP PANELS** under **WALLS**
+(suggested colour **BEIGE**). These original, locally painted materials evoke
+warm classic ship interiors: fine carpet pile, broad beige panels, and a dark
+lower rail. Both remain recolourable, use normal room painting/save/undo, and
+work with industrial or classic textures. No paid generation or third-party
+texture downloads are needed.
+
+The personal workstation frontend is branded **USS Theseus**, with the
+Commander-supplied **DRUIDESS / EST. 2026** terminal banner. This identity is
+shared by the local frontend and mirrored web app, including boot, command
+console, Build mode, HUD, and window chrome. Starnet remains the backend name:
+API routes, storage keys, provider IDs, account/credit services, update names,
+and the public marketing/documentation site are unchanged.
+
+The crew manifest shows each officer's assigned room above their title. Bridge
+crew sort first, then other rooms by name, then officer titles alphabetically
+within each room. Assignment follows the officer's dedicated computer, falling
+back to their workflow bay; unassigned officers sort last. Room labels and order
+refresh after floor edits, and crew search also matches room names.
+
+The station can also retain a seated, render-only **Commander** representing the
+human operator. `station.setCommanderSeat({ propId, skin })` binds an unassigned
+single-tile chair and a catalog skin; passing `null` removes the figure. The
+binding is saved with the floor, follows chair moves and rotation, and hides the
+figure if its chair is deleted. It reserves that seat but creates no AI agent,
+model, workstream, task permissions, or autonomous behavior.
+
 | | |
 | --- | --- |
 | **A crew, not a chatbot** | Create agents with distinct classes, personas, and loadouts. Run several at once — each gets its own workspace, transcript, memory, and bounded permissions. |

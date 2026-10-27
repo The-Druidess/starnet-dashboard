@@ -146,6 +146,7 @@ const World = (() => {
   // Engine-core fns read/write the current body via `self.`; hero-identity refs stay on `agent`.
   let self = agent;
   let crew = [];
+  let commander = null;
   // Stage 2 (orchestration): a lead→worker handoff is WATCHABLE — boxes that fly from the lead body to a worker
   // body when the lead delegates. delegateLead/delegateCall track the open team.dispatch window (tool_call→result)
   // so a worker run that starts inside it animates; both are driven purely by existing agent.* bus events.
@@ -686,6 +687,7 @@ const World = (() => {
       }
     }
     syncCrewFromPlan();            // reconcile the light crew bodies with the plan's bound bays
+    syncCommander();
     if (agent) {
       if (agent.unplaced) placeAgent();
       else {
@@ -1378,6 +1380,7 @@ const World = (() => {
     };
     self = agent;   // B1: track the hero from birth so engine helpers called BEFORE the first tick (awakening / mouse handlers via setGlance/releaseSeat) act on the hero — self is restored to agent every tick anyway
     if (geo) placeAgent();
+    syncCommander();
   }
 
   /* a stable temperament derived from the agent id (no RNG — same agent feels the same across a session).
@@ -2043,7 +2046,7 @@ const World = (() => {
     const c = uncurvePoint(toCanvas(ev));
     return c ? { x: (c.x - panX) / scale, y: (c.y - panY) / scale } : null;
   }
-  // the nearest PLACED body under the cursor — the hero (Overseer) OR any crew/summoned body —
+  // the nearest PLACED body under the cursor — the hero, Q on the throne, or any crew/summoned body —
   // returned as the body itself (so the hover nameplate can tag whichever one), else null.
   function agentHit(wp) {
     let best = null, bestD = 14 * 14;
@@ -2054,6 +2057,7 @@ const World = (() => {
       if (d < bestD) { bestD = d; best = b; }
     };
     consider(agent);
+    consider(commander);
     for (const b of crew) consider(b);
     return best;
   }
@@ -6659,6 +6663,7 @@ const World = (() => {
         // and everything else — props, crates, bodies — is drawn ON them. Decals carry no seat/mount/live
         // state (no `use` row, nothing stands on them), so this branch skips work the decal cannot use.
         if (isFlatProp(p.t)) { decals.push(p); continue; }
+        if (!(stillPass && stillPass.noBodies) && commander && commander.usingProp === p.id && commanderThroneImage(commander)) continue;
         const work = (p.t === 'outbox' && outboxLit) || (p.t === 'bay' && bayLit(p, now)) || workstationLit(p) || leisureProps.has(p.id);
         // G0.2/G0.3 live desk truth: a LIT assigned workstation carries its agent's real activity heat
         // (token/tool-driven, heatFor) + a task-progress fraction ONLY when a real one was published
@@ -6677,6 +6682,7 @@ const World = (() => {
         // the sitter branch pulls the prop's sort key onto the body, which is right for a stool and wrong
         // for a bed, whose frame must keep its own footprint key with the body sorted INSIDE it.
         const sitter = (agent && agent.seated && !agent.lying && agent.usingProp === p.id) ? agent
+          : (commander && commander.usingProp === p.id) ? commander
           : crew.find(b => b.seated && !b.lying && b.usingProp === p.id);
         const sitterUse = sitter ? propUse(p) : null;
         // a SIDE SEAT sorts BEHIND its sitter like a stool, not in front like a sofa: its near arm
@@ -6772,10 +6778,12 @@ const World = (() => {
     const bodyItem = (b, fallbackY) => {
       const bed = lyingBed(b);
       return bed ? { y: (bed.y + (bed.h || 1)) * T + 0.5, draw: () => drawSleeper(now, b, bed) }
+                 : commanderThroneImage(b) ? { y: fallbackY, draw: () => drawCommanderThrone(b) }
                  : { y: fallbackY, draw: () => drawAgent(now, b) };
     };
     const crewInScene = !(stillPass && stillPass.noBodies);   // a crew-free still: the phone draws the crew itself, live
     if (crewInScene && agent && !agent.unplaced) items.push(bodyItem(agent, rposY()));
+    if (crewInScene && commander) items.push(bodyItem(commander, commander.seatPy));
     if (crewInScene) for (const b of crew) items.push(bodyItem(b, (b.seated ? b.seatPy : b.py)));   // the other agents, at their bays (seated → sort by the cushion pos like the hero's rposY, so a couch-lounging crew body tucks just behind the back-facing couch panel, head over the cap)
     // A raised doorway stands in front of a body until its feet clear the wall.
     // Use the baked surfaces in the same depth order as props and agents; leaving
@@ -9711,6 +9719,59 @@ const World = (() => {
   /* ---------- crew bodies (the OTHER agents, standing at their bays) ---------- */
   // a LIGHT body: the full agent field-shape (so SPRITES.drawBody/drawFallback never choke) but STATIC —
   // it never ticks/paths. It only receives work (a say bubble + a wake ripple + a bay work-glow).
+  // A render-only human presence, deliberately outside crew, task lookup and the idle engine.
+  const commanderThroneImages = new Map();
+  function commanderThroneImage(b) {
+    if (!b || b !== commander || b.skin !== 'q_judge' || !b.seated || !b.sitting) return null;
+    const direction = b.dir;
+    if (!['south', 'south-east', 'east', 'north-east', 'north', 'north-west', 'west', 'south-west'].includes(direction)) return null;
+    let image = commanderThroneImages.get(direction);
+    if (!image) {
+      image = new Image();
+      image.onerror = () => console.warn('[commander] Q throne image failed to load:', direction);
+      image.onload = () => {
+        if (image.naturalWidth !== 176 || image.naturalHeight !== 176)
+          console.warn('[commander] invalid Q throne image size:', direction);
+      };
+      image.src = 'assets/sprites/approved_q_throne/seated-' + direction + '.png';
+      commanderThroneImages.set(direction, image);
+    }
+    return image.complete && image.naturalWidth === 176 && image.naturalHeight === 176 ? image : null;
+  }
+  function drawCommanderThrone(b) {
+    const image = commanderThroneImage(b);
+    if (!image) return;
+    // Approved base/sitter/near-arm sandwich, baked without changing either source sprite.
+    // Q was enlarged 1.5x in the composite; undo that at the normal 0.25 world scale.
+    const sc = 0.25 / 1.5;
+    const floor = { south: 137, 'south-east': 137, east: 130, 'north-east': 137,
+      north: 133, 'north-west': 137, west: 130, 'south-west': 137 }[b.dir];
+    ctx.save();
+    ctx.imageSmoothingEnabled = true;
+    ctx.drawImage(image, b.seatPx - 88 * sc, b.seatPy - floor * sc, 176 * sc, 176 * sc);
+    ctx.restore();
+    b._pose = 'approved_q_throne.sit.' + b.dir;
+  }
+  function syncCommander() {
+    if (commander) occupiedSeats.delete(commander.seatKey);
+    commander = null;
+    const config = station && station.doc().meta.commander;
+    if (!config || !geo) return;
+    const p = geo.props.find(p => p.id === config.propId);
+    if (!p || p.t !== 'chair' || p.w !== 1 || p.h !== 1 || p.agentId) return;
+    if (!DATA.SKINS[config.skin]) { console.warn('[commander] unknown skin:', config.skin); return; }
+    const px = (p.x + 0.5) * T, py = (p.y + 1) * T - 1;
+    commander = makeCrewBody('commander', 'COMMANDER', '#64d98b', px, py, config.skin);
+    commander.agentId = null;
+    commander.seated = true;
+    commander.sitting = true;
+    commander.seatPx = px; commander.seatPy = py;
+    commander.seatLift = SEAT_LIFT.chair;
+    commander.seatKey = p.id + ':0';
+    commander.usingProp = p.id;
+    commander.dir = PropAnchor.frontOf(p);
+    occupiedSeats.add(commander.seatKey);
+  }
   function makeCrewBody(aid, name, color, fx, fy, skin) {
     return {
       id: aid, agentId: aid, name: name || aid, color: color || '#5ad0ff', skin: skin || DATA.DEFAULT_SKIN, crewBody: true,
@@ -11318,6 +11379,12 @@ const World = (() => {
       };
       return [snap(agent, true), ...crew.map((b) => snap(b, false))].filter(Boolean);
     },
+    commander: () => commander ? {
+      id: commander.id, name: commander.name, skin: commander.skin,
+      seated: commander.seated, usingProp: commander.usingProp,
+      px: commander.seatPx, py: commander.seatPy, dir: commander.dir,
+      pose: commander._pose || null
+    } : null,
     // does this agent have a WORKBENCH placed (-> shell.exec + verify.run)? An equipped BAY governs; with no bay
     // (simple single-agent floor) any placed workbench grants it. The run client sends this so the hero's run
     // gains shell ADDITIVELY on top of its default office (the room layout is the permission system, for the hero too).

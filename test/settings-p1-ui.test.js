@@ -25,7 +25,7 @@ ok(/setModel:\s*setAgentModelPin/.test(appjs), 'P1-6: setModel is exposed on the
 ok(/setAgentModelPin[\s\S]{0,1500}pushRoster\(\)/.test(appjs), 'P1-6: the pin pushes the roster so the sidecar records it');
 
 // ---- P1-7 station backup export/import/reset ----
-ok(/STATION BACKUP/.test(ui), 'P1-7: SETTINGS has a STATION BACKUP card');
+ok(/SHIP BACKUP/.test(ui), 'P1-7: SETTINGS has a SHIP BACKUP card');
 ok(/function wireBackup\(/.test(ui), 'P1-7: wireBackup is wired');
 ok(/\/api\/config\/export/.test(ui), 'P1-7: export hits /api/config/export');
 ok(/\/api\/config\/import/.test(ui), 'P1-7: import hits /api/config/import');

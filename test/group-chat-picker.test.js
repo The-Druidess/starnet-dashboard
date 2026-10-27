@@ -24,7 +24,7 @@ const walk = e => [e, ...e.children.flatMap(walk)];
 const text = e => (e.textContent || '') + e.children.map(text).join(' ');
 const settle = async () => { for (let n = 0; n < 60; n++) await Promise.resolve(); };
 const deferred = () => { let resolve; const promise = new Promise(r => { resolve = r; }); return { promise, resolve }; };
-const roster = [{ id: 'agent', name: 'Lead' }, { id: 'peer', name: 'Peer' }, { id: 'third', name: 'Third' }];
+const roster = [{ id: 'agent', name: 'Lead', role: 'orchestrator' }, { id: 'peer', name: 'Peer' }, { id: 'third', name: 'Third' }];
 const ok = result => ({ status: 200, ok: true, json: async () => ({ ok: true, result }) });
 const success = () => ok({ roster, groups: [] });
 async function boot({ general = false, crew = roster } = {}) {
@@ -52,6 +52,11 @@ async function boot({ general = false, crew = roster } = {}) {
 }
 const group = (members, extra = {}) => ({ id: 'direct', title: 'Direct', members, leadId: 'agent', revision: 3, paused: false, messages: [], turns: [], artifacts: [], questions: [], ...extra });
 (async () => {
+  const commanderPicker = await boot();
+  await commanderPicker.click('+ Add agents');
+  assert.match(text(commanderPicker.find('gc-picker')), /the Commander/, 'the lead agent is labelled Commander in the group picker');
+  await commanderPicker.click('DONE');
+
   // ---- loading, failure and cancellation (unchanged contract) ----
   const app = await boot();
   const pending = deferred(); app.request(() => pending.promise);

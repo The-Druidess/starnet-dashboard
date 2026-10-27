@@ -171,6 +171,8 @@ const WorldModel = (() => {
     // yellow-green of a lawn. Raising red and dropping blue is what buys the olive.
     meadow:   { base: '#374024', label: 'MEADOW' },
     // value poles — the bright + near-black ends of the range (stark, deliberate)
+    burgundy: { base: '#882f42', label: 'BURGUNDY' },
+    beige:    { base: '#c6ad8b', label: 'BEIGE' },
     bone:     { base: '#e7e3d9', label: 'BONE' },
     /* WHITE — bone's neutral twin, added 2026-08-05 for the SHELL axis (Andrew: "lets add white as a
        colour for the shell"). BONE is a warm cream; this is the achromatic pole, which is what reads
@@ -226,8 +228,9 @@ const WorldModel = (() => {
     lunar: { label: 'LUNAR', pitch: [4, 2], suggest: 'sterile' },
     maggrid: { label: 'MAG GRID', pitch: [2, 2], suggest: 'corridor' },
     habitat: { label: 'HABITAT', pitch: [2, 2], suggest: 'corridor' },
+    carpet: { label: 'SHIP CARPET', pitch: [1, 1], suggest: 'burgundy' },
   };
-  const MAT_ORDER = ['spine', 'alloy', 'runner', 'treadway', 'meshway', 'plate', 'diamond', 'cargo', 'panel', 'tile', 'ceramic', 'resin', 'tread', 'soft', 'grate', 'hex', 'plank', 'turf', 'basalt', 'parquet', 'rubber', 'slotted', 'terrazzo', 'octile', 'flightdeck', 'lunar', 'maggrid', 'habitat'];
+  const MAT_ORDER = ['carpet', 'spine', 'alloy', 'runner', 'treadway', 'meshway', 'plate', 'diamond', 'cargo', 'panel', 'tile', 'ceramic', 'resin', 'tread', 'soft', 'grate', 'hex', 'plank', 'turf', 'basalt', 'parquet', 'rubber', 'slotted', 'terrazzo', 'octile', 'flightdeck', 'lunar', 'maggrid', 'habitat'];
 
   /* the WALL material catalog — the deck's opposite number. Walls carry the same two axes as the
      floor (hue × recipe) and read from the same FLOOR_STYLES hue catalog, because a room should be
@@ -239,6 +242,7 @@ const WorldModel = (() => {
   const WALL_MATERIALS = {
     // base-wall candidates — see the note above wallBulkhead in stationbake.js
     // the base wall since 2026-07-25 — see the note above wallBulkhead in stationbake.js
+    cruiser: { label: 'SHIP PANELS', suggest: 'beige' },
     bulkhead: { label: 'BULKHEAD', suggest: null },
     courses:  { label: 'COURSES',  suggest: null },
     service:  { label: 'SERVICE',  suggest: null },
@@ -257,7 +261,7 @@ const WorldModel = (() => {
     machinery: { label: 'MACHINERY', suggest: null },
     insulation: { label: 'INSULATION', suggest: 'amber' },
   };
-  const WALL_ORDER = ['bulkhead', 'courses', 'service', 'plating', 'ribbed', 'panelled', 'viewport', 'pipework', 'wainscot', 'hedge', 'pressure', 'radiator', 'utility', 'acoustic', 'braced', 'machinery', 'insulation'];
+  const WALL_ORDER = ['cruiser', 'bulkhead', 'courses', 'service', 'plating', 'ribbed', 'panelled', 'viewport', 'pipework', 'wainscot', 'hedge', 'pressure', 'radiator', 'utility', 'acoustic', 'braced', 'machinery', 'insulation'];
 
   /* the HULL material catalog — THE THIRD SURFACE AXIS (2026-08-05, Andrew, circling the outside
      edges of five rooms in a screenshot: "the outer walls are not customizable... for users who
@@ -3437,6 +3441,18 @@ const WorldModel = (() => {
         }
       return any;
     }
+    function setCommanderSeat(config) {
+      if (config !== null) {
+        const p = config && propById(config.propId);
+        if (!p || p.t !== 'chair' || p.w !== 1 || p.h !== 1 || p.agentId) return fail('BAD_COMMANDER_SEAT', 'Commander needs an unassigned single-tile chair');
+        if (typeof config.skin !== 'string' || !/^[a-zA-Z0-9_-]{1,64}$/.test(config.skin)) return fail('BAD_SKIN', 'A skin catalog key is required');
+      }
+      snapshot();
+      if (config === null) delete doc.meta.commander;
+      else doc.meta.commander = { propId: config.propId, skin: config.skin };
+      emit([], { global: true });
+      return { ok: true };
+    }
     function ensureWorkstation(agentId) {
       const aid = String(agentId || '').trim();
       if (!aid || !AID_RE.test(aid)) return fail('BAD_AGENT');
@@ -3547,7 +3563,7 @@ const WorldModel = (() => {
       // agent-bay binding queries
       propsByType, propsByAgent, pipelineEdges, setPipelineEdges, addPipelineEdge, removePipelineEdge, agentRoomId, bayObjects,
       capForProp: t => CAP_PROP_MAP[t] || null,   // a prop type's capability objectType (single source for the UI)
-      undo, redo, canUndo, canRedo, replaceLayout,
+      undo, redo, canUndo, canRedo, replaceLayout, setCommanderSeat,
       // projection + io
       projectGeometry, serialize, onChange,
       // the floor's explicit connections (world tiles), or null when not adopted — see LINKS above

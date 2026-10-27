@@ -244,7 +244,7 @@ const App = (() => {
     // sidecar/capability/office.js + capgate F1). So the identity must NOT promise web/files unconditionally; it
     // tells the agent to use whatever it's actually been granted and to SAY when a tool is missing (that's the
     // signal that teaches the Commander what to place next), never to pretend a reach it doesn't have.
-    let s = 'You are ' + name + ', an AI agent operating from a workstation aboard the STARNET station — a room '
+    let s = 'You are ' + name + ', an AI agent operating from a workstation aboard the USS Theseus — a room '
       + 'your Commander (the user) is building for you. Address the user as "Commander" and keep a spark of personality. '
       + 'Your workstation grants you REAL tools — exactly the ones the Commander has placed in your room (web search/read, '
       + 'file read/write, a terminal, memory, and more as the station grows; compute to think is always yours). When the '
@@ -263,7 +263,7 @@ const App = (() => {
   // block, which alone grants/lists the delegation tools. Extracted so stripLegacySoloClause can migrate old saves
   // onto the exact same text (keeping setAgentName's untouched-default detection working).
   function orchestratorClause() {
-    return ' You are this station\'s OVERSEER — its orchestrating lead and first agent. When there is a crew, you are '
+    return ' You are this station\'s Commander — its coordinating lead and first agent. When there is a crew, you are '
       + 'the one who breaks a big job into pieces and hands them out; when there is not, you do the work yourself. '
       + 'Never assume either from memory: your live crew and your delegation tools are stated fresh in each run\'s '
       + 'briefing — trust that briefing, and never claim a crew member or a delegation tool it does not show. '
@@ -394,6 +394,7 @@ const App = (() => {
       const cd = DossierStore.composeBlock();
       if (cd) p += '\n\n' + cd;
     }
+    if (typeof QTerminalStore !== 'undefined' && QTerminalStore.promptClause) p += QTerminalStore.promptClause(a);
     // R1 MID-TASK FORK: the fork instruction rides ONLY while the style model's confidence is low
     // (Fork.shouldOffer over the live understanding read) — self-retiring: once the station knows how the
     // Commander likes work done, this block vanishes and forks stop appearing. Fail-closed on any hiccup.
@@ -681,6 +682,10 @@ const App = (() => {
   // the same live registry StationUI receives so a summoned specialist opens its own record without changing
   // COMMS focus. Unknown/stale bodies fail closed instead of silently opening the Overseer.
   function openWorldAgent(agentId) {
+    if (agentId === 'commander' && typeof StationUI !== 'undefined' && StationUI.openTerm) {
+      StationUI.openTerm('q');
+      return true;
+    }
     if (typeof TreasurerPortal !== 'undefined' && TreasurerPortal.openFor(agentId)) return true;
     const i = liveAgents().findIndex(a => a && a.id === agentId);
     if (i < 0 || typeof StationUI === 'undefined' || !StationUI.openAgent) return false;
@@ -698,6 +703,15 @@ const App = (() => {
       a.systemPrompt = composeSystemPrompt(a);
       if (agent && agent.id === a.id && typeof Chat !== 'undefined' && Chat.setSystem) Chat.setSystem(a.systemPrompt);   // focused: the live COMMS session follows
     }
+  }
+  function refreshAgentPrompts() {
+    for (const a of agents.values()) {
+      if (!a) continue;
+      a.systemPrompt = composeSystemPrompt(a);
+      if (agent && agent.id === a.id && typeof Chat !== 'undefined' && Chat.setSystem) Chat.setSystem(a.systemPrompt);
+    }
+    pushRoster();
+    return persist();
   }
   /* THE STATION DEFAULT IS THE OVERSEER'S WIRE (issue #24). Focusing an agent writes its model/provider/effort into
      the ONE global wire every COMMS run reads (Harness). A pinned agent brings its own wire; an agent with no pin
@@ -1561,6 +1575,7 @@ const App = (() => {
       // but save before the next browser event. Do not wait for SAVE & EXIT or a chat turn.
       queueMicrotask(() => {
         stationSaveQueued = false; persist();
+        if (typeof StationUI !== 'undefined' && StationUI.refreshCrewRooms) StationUI.refreshCrewRooms();
         // a desk that just landed (a WHO SITS HERE chip, PLACE ITS DESK, the overseer's station op) retires the open
         // COMMS "nowhere to sit" line now, not only when BUILD MODE closes: it is a derived floor claim (chat.js re-reads it)
         if (typeof Chat !== 'undefined' && Chat.retireDeskPrompt) { try { Chat.retireDeskPrompt(); } catch (_) {} }
@@ -1583,7 +1598,8 @@ const App = (() => {
     const worksignal = (typeof WorkSignalStore !== 'undefined') ? WorkSignalStore.serialize() : undefined;   // the capability-usage histogram (adaptive recruitment)
     const roster = liveAgents();
     const dossier = (typeof DossierStore !== 'undefined') ? DossierStore.serialize() : undefined;   // the station-wide Commander model
-    const doc = Save.write(Object.assign({ _saveDirty: true, _saveRevision: typeof CloudSave !== 'undefined' && CloudSave.revision ? CloudSave.revision() : 0, agent: hero, agents: roster.length > 1 ? roster.map(serializeAgentLite) : undefined, usage: Harness.totals(), prov, reasoningEffort, reasoningMigrated: '0125' /* = REASONING_MIGRATION; a literal so persist() also runs when lifted alone */, station: station ? station.serialize() : undefined, stationStats, profile, worksignal, dossier }, Workstreams.serialize()));
+    const qTerminal = (typeof QTerminalStore !== 'undefined' && QTerminalStore.serialize) ? QTerminalStore.serialize() : undefined;
+    const doc = Save.write(Object.assign({ _saveDirty: true, _saveRevision: typeof CloudSave !== 'undefined' && CloudSave.revision ? CloudSave.revision() : 0, agent: hero, agents: roster.length > 1 ? roster.map(serializeAgentLite) : undefined, usage: Harness.totals(), prov, reasoningEffort, reasoningMigrated: '0125' /* = REASONING_MIGRATION; a literal so persist() also runs when lifted alone */, station: station ? station.serialize() : undefined, stationStats, profile, worksignal, dossier, qTerminal }, Workstreams.serialize()));
     if (doc && typeof CloudSave !== 'undefined') CloudSave.push(doc);   // durable write-through to the sidecar (debounced, best-effort)
     if (rosterPushFailed) pushRoster();   // a prior roster POST failed — retry it opportunistically on this persist
     if (!doc) {
@@ -1767,8 +1783,8 @@ const App = (() => {
   }
   function buildPhosphor() {
     const wrap = el('phosphor-swatches'); if (!wrap) return;
-    let cur = 'amber';
-    try { if (typeof StationUI !== 'undefined' && StationUI.getTheme) cur = StationUI.getTheme() || 'amber'; } catch (_) {}
+    let cur = 'green';
+    try { if (typeof StationUI !== 'undefined' && StationUI.getTheme) cur = StationUI.getTheme() || 'green'; } catch (_) {}
     applyTheme(cur);   // reflect a previously-saved tint on the create screen too (StationUI hasn't entered yet)
     wrap.innerHTML = '';
     PHOSPHOR.forEach(([t, c]) => {
@@ -2683,13 +2699,7 @@ const App = (() => {
     const wrap = el('skin-picker'); if (!wrap || typeof DATA === 'undefined' || !DATA.SKINS) return;
     wrap.innerHTML = '';
     if (!DATA.SKINS[pickedSkin]) pickedSkin = DATA.DEFAULT_SKIN;
-    // DEFAULT-FIRST ordering: the default skin leads, followed by its near-identical recolor family (grouped so
-    // they read as variants of ONE skin), then the distinct characters — instead of the default sitting buried
-    // 10th behind nine characters. Data order (data-shim.js) is untouched; this is purely the render order.
-    const def = DATA.DEFAULT_SKIN;
-    const inFamily = id => id === def || id.indexOf(def + '_') === 0;
-    const ids = Object.keys(DATA.SKINS);
-    const ordered = [def, ...ids.filter(id => id !== def && inFamily(id)), ...ids.filter(id => !inFamily(id))].filter(id => DATA.SKINS[id]);
+    const ordered = DATA.skinIds();
     // stage handle (assigned by the mount below): drive THIS stage, not the module-level shortcut, which
     // belongs to whichever picker mounted last once more than one is on screen.
     let stage = null;
@@ -2930,7 +2940,7 @@ const App = (() => {
       if (title) title.textContent = '▮ RESUME ' + nm.toUpperCase();
       if (sub) sub.innerHTML = 'your station is intact — this only re-connects the <b>brain</b>. Identity stays as you left it.';
       if (mode) mode.textContent = 'RESUME';
-      if (wake) wake.textContent = '⏼ RESUME STATION ▸';
+      if (wake) wake.textContent = '⏼ RESUME USS THESEUS ▸';
       // BACK here doesn't go "back" — onConnectBack() re-runs auto-resume (a fresh credential check may now pass
       // straight into the station). Label it for what it does so it doesn't read as a dead retreat button.
       if (back) back.textContent = '↻ RETRY AUTO-RESUME';
@@ -5547,7 +5557,7 @@ const App = (() => {
       if (!recover) return;
       recover.hidden = validCandidates.length === 0;
       recover.disabled = !selected;
-      recover.textContent = validCandidates.length === 1 ? '⟳ RECOVER AUTOMATICALLY' : '⟳ RECOVER SELECTED STATION';
+      recover.textContent = validCandidates.length === 1 ? '⟳ RECOVER AUTOMATICALLY' : '⟳ RECOVER SELECTED SHIP';
     };
     if (box) Array.from(box.querySelectorAll('.lineage-candidate')).forEach(btn => {
       btn.onclick = () => {
@@ -5752,6 +5762,9 @@ const App = (() => {
     // cache to match. Best-effort: an unreachable sidecar just falls back to the local cache.
     if (typeof CloudSave !== 'undefined') CloudSave.installUnloadFlush();
     const saved = (typeof CloudSave !== 'undefined') ? await CloudSave.reconcile(Save.load()) : Save.load();
+    if (saved && saved.qTerminal && typeof QTerminalStore !== 'undefined' && QTerminalStore.hydrate) {
+      if (!QTerminalStore.hydrate(saved.qTerminal)) console.warn('[Q terminal] The durable inbox could not be restored into local storage.');
+    }
     // FORWARD-VERSION GATE (P0.3), step 2 — a durable REMOTE from a newer build. reconcile() refuses to adopt it
     // into the cache and hands back a future-save sentinel instead of a resumable doc. Same hard stop: gate, return,
     // nothing persists.
@@ -5831,6 +5844,7 @@ const App = (() => {
     // WORK LINES: a downstream stage runs as ANOTHER agent, so the chat host needs THAT agent's composed
     // prompt — never the focused one's. Read-only; null for an id that is not on the live roster.
     systemFor: id => { const a = agents.get(id); return a ? (a.systemPrompt || '') : null; },
+    refreshAgentPrompts,
     heroId: () => (agent ? agent.id : 'agent'),
     currentAgent: () => agent,
     agents: () => liveAgents().map(serializeAgentLite),

@@ -1,0 +1,304 @@
+{
+  "groups": [
+    {
+      "group_id": "52cfb4ae-4b30-4c0e-8858-c137e90fb247",
+      "folder": "characters/Seated",
+      "states": [
+        {
+          "character": {
+            "id": "ac7b1ae3-3b74-478f-95bf-404d9637449c",
+            "name": "Seated",
+            "prompt": "text",
+            "size": {
+              "width": 144,
+              "height": 144
+            },
+            "template_id": "mannequin",
+            "directions": 8,
+            "view": "low top-down",
+            "created_at": "2026-10-20T04:43:21.051614+00:00"
+          },
+          "folder": "characters/Seated/Seated",
+          "frames": {
+            "rotations": {
+              "south": "characters/Seated/Seated/rotations/south.png",
+              "south-east": "characters/Seated/Seated/rotations/south-east.png",
+              "east": "characters/Seated/Seated/rotations/east.png",
+              "north-east": "characters/Seated/Seated/rotations/north-east.png",
+              "north": "characters/Seated/Seated/rotations/north.png",
+              "north-west": "characters/Seated/Seated/rotations/north-west.png",
+              "west": "characters/Seated/Seated/rotations/west.png",
+              "south-west": "characters/Seated/Seated/rotations/south-west.png"
+            },
+            "animations": {}
+          }
+        },
+        {
+          "character": {
+            "id": "601895f9-f9fe-41f4-9ed5-d9c13d4e6242",
+            "name": "Idle",
+            "prompt": "text",
+            "size": {
+              "width": 144,
+              "height": 144
+            },
+            "template_id": "mannequin",
+            "directions": 8,
+            "view": "low top-down",
+            "created_at": "2026-10-20T04:47:36.665176+00:00"
+          },
+          "folder": "characters/Seated/Idle",
+          "frames": {
+            "rotations": {
+              "south": "characters/Seated/Idle/rotations/south.png",
+              "south-east": "characters/Seated/Idle/rotations/south-east.png",
+              "east": "characters/Seated/Idle/rotations/east.png",
+              "north-east": "characters/Seated/Idle/rotations/north-east.png",
+              "north": "characters/Seated/Idle/rotations/north.png",
+              "north-west": "characters/Seated/Idle/rotations/north-west.png",
+              "west": "characters/Seated/Idle/rotations/west.png",
+              "south-west": "characters/Seated/Idle/rotations/south-west.png"
+            },
+            "animations": {
+              "ns_fix_candidate": {
+                "south": [
+                  "characters/Seated/Idle/animations/ns_fix_candidate/south/frame_000.png",
+                  "characters/Seated/Idle/animations/ns_fix_candidate/south/frame_001.png",
+                  "characters/Seated/Idle/animations/ns_fix_candidate/south/frame_002.png",
+                  "characters/Seated/Idle/animations/ns_fix_candidate/south/frame_003.png",
+                  "characters/Seated/Idle/animations/ns_fix_candidate/south/frame_004.png",
+                  "characters/Seated/Idle/animations/ns_fix_candidate/south/frame_005.png",
+                  "characters/Seated/Idle/animations/ns_fix_candidate/south/frame_006.png",
+                  "characters/Seated/Idle/animations/ns_fix_candidate/south/frame_007.png"
+                ]
+              },
+              "ns_fix_candidate-c3d2a28d": {
+                "north": [
+                  "characters/Seated/Idle/animations/ns_fix_candidate-c3d2a28d/north/frame_000.png",
+                  "characters/Seated/Idle/animations/ns_fix_candidate-c3d2a28d/north/frame_001.png",
+                  "characters/Seated/Idle/animations/ns_fix_candidate-c3d2a28d/north/frame_002.png",
+                  "characters/Seated/Idle/animations/ns_fix_candidate-c3d2a28d/north/frame_003.png",
+                  "characters/Seated/Idle/animations/ns_fix_candidate-c3d2a28d/north/frame_004.png",
+                  "characters/Seated/Idle/animations/ns_fix_candidate-c3d2a28d/north/frame_005.png",
+                  "characters/Seated/Idle/animations/ns_fix_candidate-c3d2a28d/north/frame_006.png",
+                  "characters/Seated/Idle/animations/ns_fix_candidate-c3d2a28d/north/frame_007.png"
+                ]
+              },
+              "walk_candidates_temporary": {
+                "north-west": [
+                  "characters/Seated/Idle/animations/walk_candidates_temporary/north-west/frame_000.png",
+                  "characters/Seated/Idle/animations/walk_candidates_temporary/north-west/frame_001.png",
+                  "characters/Seated/Idle/animations/walk_candidates_temporary/north-west/frame_002.png",
+                  "characters/Seated/Idle/animations/walk_candidates_temporary/north-west/frame_003.png",
+                  "characters/Seated/Idle/animations/walk_candidates_temporary/north-west/frame_004.png",
+                  "characters/Seated/Idle/animations/walk_candidates_temporary/north-west/frame_005.png",
+                  "characters/Seated/Idle/animations/walk_candidates_temporary/north-west/frame_006.png",
+                  "characters/Seated/Idle/animations/walk_candidates_temporary/north-west/frame_007.png"
+                ],
+                "south-west": [
+                  "characters/Seated/Idle/animations/walk_candidates_temporary/south-west/frame_000.png",
+                  "characters/Seated/Idle/animations/walk_candidates_temporary/south-west/frame_001.png",
+                  "characters/Seated/Idle/animations/walk_candidates_temporary/south-west/frame_002.png",
+                  "characters/Seated/Idle/animations/walk_candidates_temporary/south-west/frame_003.png",
+                  "characters/Seated/Idle/animations/walk_candidates_temporary/south-west/frame_004.png",
+                  "characters/Seated/Idle/animations/walk_candidates_temporary/south-west/frame_005.png",
+                  "characters/Seated/Idle/animations/walk_candidates_temporary/south-west/frame_006.png",
+                  "characters/Seated/Idle/animations/walk_candidates_temporary/south-west/frame_007.png"
+                ],
+                "west": [
+                  "characters/Seated/Idle/animations/walk_candidates_temporary/west/frame_000.png",
+                  "characters/Seated/Idle/animations/walk_candidates_temporary/west/frame_001.png",
+                  "characters/Seated/Idle/animations/walk_candidates_temporary/west/frame_002.png",
+                  "characters/Seated/Idle/animations/walk_candidates_temporary/west/frame_003.png",
+                  "characters/Seated/Idle/animations/walk_candidates_temporary/west/frame_004.png",
+                  "characters/Seated/Idle/animations/walk_candidates_temporary/west/frame_005.png",
+                  "characters/Seated/Idle/animations/walk_candidates_temporary/west/frame_006.png",
+                  "characters/Seated/Idle/animations/walk_candidates_temporary/west/frame_007.png"
+                ],
+                "north-east": [
+                  "characters/Seated/Idle/animations/walk_candidates_temporary/north-east/frame_000.png",
+                  "characters/Seated/Idle/animations/walk_candidates_temporary/north-east/frame_001.png",
+                  "characters/Seated/Idle/animations/walk_candidates_temporary/north-east/frame_002.png",
+                  "characters/Seated/Idle/animations/walk_candidates_temporary/north-east/frame_003.png",
+                  "characters/Seated/Idle/animations/walk_candidates_temporary/north-east/frame_004.png",
+                  "characters/Seated/Idle/animations/walk_candidates_temporary/north-east/frame_005.png",
+                  "characters/Seated/Idle/animations/walk_candidates_temporary/north-east/frame_006.png",
+                  "characters/Seated/Idle/animations/walk_candidates_temporary/north-east/frame_007.png"
+                ],
+                "east": [
+                  "characters/Seated/Idle/animations/walk_candidates_temporary/east/frame_000.png",
+                  "characters/Seated/Idle/animations/walk_candidates_temporary/east/frame_001.png",
+                  "characters/Seated/Idle/animations/walk_candidates_temporary/east/frame_002.png",
+                  "characters/Seated/Idle/animations/walk_candidates_temporary/east/frame_003.png",
+                  "characters/Seated/Idle/animations/walk_candidates_temporary/east/frame_004.png",
+                  "characters/Seated/Idle/animations/walk_candidates_temporary/east/frame_005.png",
+                  "characters/Seated/Idle/animations/walk_candidates_temporary/east/frame_006.png",
+                  "characters/Seated/Idle/animations/walk_candidates_temporary/east/frame_007.png"
+                ],
+                "south-east": [
+                  "characters/Seated/Idle/animations/walk_candidates_temporary/south-east/frame_000.png",
+                  "characters/Seated/Idle/animations/walk_candidates_temporary/south-east/frame_001.png",
+                  "characters/Seated/Idle/animations/walk_candidates_temporary/south-east/frame_002.png",
+                  "characters/Seated/Idle/animations/walk_candidates_temporary/south-east/frame_003.png",
+                  "characters/Seated/Idle/animations/walk_candidates_temporary/south-east/frame_004.png",
+                  "characters/Seated/Idle/animations/walk_candidates_temporary/south-east/frame_005.png",
+                  "characters/Seated/Idle/animations/walk_candidates_temporary/south-east/frame_006.png",
+                  "characters/Seated/Idle/animations/walk_candidates_temporary/south-east/frame_007.png"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "states": [
+    {
+      "character": {
+        "id": "ac7b1ae3-3b74-478f-95bf-404d9637449c",
+        "name": "Seated",
+        "prompt": "text",
+        "size": {
+          "width": 144,
+          "height": 144
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-10-20T04:43:21.051614+00:00"
+      },
+      "folder": "characters/Seated/Seated",
+      "frames": {
+        "rotations": {
+          "south": "characters/Seated/Seated/rotations/south.png",
+          "south-east": "characters/Seated/Seated/rotations/south-east.png",
+          "east": "characters/Seated/Seated/rotations/east.png",
+          "north-east": "characters/Seated/Seated/rotations/north-east.png",
+          "north": "characters/Seated/Seated/rotations/north.png",
+          "north-west": "characters/Seated/Seated/rotations/north-west.png",
+          "west": "characters/Seated/Seated/rotations/west.png",
+          "south-west": "characters/Seated/Seated/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    },
+    {
+      "character": {
+        "id": "601895f9-f9fe-41f4-9ed5-d9c13d4e6242",
+        "name": "Idle",
+        "prompt": "text",
+        "size": {
+          "width": 144,
+          "height": 144
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-10-20T04:47:36.665176+00:00"
+      },
+      "folder": "characters/Seated/Idle",
+      "frames": {
+        "rotations": {
+          "south": "characters/Seated/Idle/rotations/south.png",
+          "south-east": "characters/Seated/Idle/rotations/south-east.png",
+          "east": "characters/Seated/Idle/rotations/east.png",
+          "north-east": "characters/Seated/Idle/rotations/north-east.png",
+          "north": "characters/Seated/Idle/rotations/north.png",
+          "north-west": "characters/Seated/Idle/rotations/north-west.png",
+          "west": "characters/Seated/Idle/rotations/west.png",
+          "south-west": "characters/Seated/Idle/rotations/south-west.png"
+        },
+        "animations": {
+          "ns_fix_candidate": {
+            "south": [
+              "characters/Seated/Idle/animations/ns_fix_candidate/south/frame_000.png",
+              "characters/Seated/Idle/animations/ns_fix_candidate/south/frame_001.png",
+              "characters/Seated/Idle/animations/ns_fix_candidate/south/frame_002.png",
+              "characters/Seated/Idle/animations/ns_fix_candidate/south/frame_003.png",
+              "characters/Seated/Idle/animations/ns_fix_candidate/south/frame_004.png",
+              "characters/Seated/Idle/animations/ns_fix_candidate/south/frame_005.png",
+              "characters/Seated/Idle/animations/ns_fix_candidate/south/frame_006.png",
+              "characters/Seated/Idle/animations/ns_fix_candidate/south/frame_007.png"
+            ]
+          },
+          "ns_fix_candidate-c3d2a28d": {
+            "north": [
+              "characters/Seated/Idle/animations/ns_fix_candidate-c3d2a28d/north/frame_000.png",
+              "characters/Seated/Idle/animations/ns_fix_candidate-c3d2a28d/north/frame_001.png",
+              "characters/Seated/Idle/animations/ns_fix_candidate-c3d2a28d/north/frame_002.png",
+              "characters/Seated/Idle/animations/ns_fix_candidate-c3d2a28d/north/frame_003.png",
+              "characters/Seated/Idle/animations/ns_fix_candidate-c3d2a28d/north/frame_004.png",
+              "characters/Seated/Idle/animations/ns_fix_candidate-c3d2a28d/north/frame_005.png",
+              "characters/Seated/Idle/animations/ns_fix_candidate-c3d2a28d/north/frame_006.png",
+              "characters/Seated/Idle/animations/ns_fix_candidate-c3d2a28d/north/frame_007.png"
+            ]
+          },
+          "walk_candidates_temporary": {
+            "north-west": [
+              "characters/Seated/Idle/animations/walk_candidates_temporary/north-west/frame_000.png",
+              "characters/Seated/Idle/animations/walk_candidates_temporary/north-west/frame_001.png",
+              "characters/Seated/Idle/animations/walk_candidates_temporary/north-west/frame_002.png",
+              "characters/Seated/Idle/animations/walk_candidates_temporary/north-west/frame_003.png",
+              "characters/Seated/Idle/animations/walk_candidates_temporary/north-west/frame_004.png",
+              "characters/Seated/Idle/animations/walk_candidates_temporary/north-west/frame_005.png",
+              "characters/Seated/Idle/animations/walk_candidates_temporary/north-west/frame_006.png",
+              "characters/Seated/Idle/animations/walk_candidates_temporary/north-west/frame_007.png"
+            ],
+            "south-west": [
+              "characters/Seated/Idle/animations/walk_candidates_temporary/south-west/frame_000.png",
+              "characters/Seated/Idle/animations/walk_candidates_temporary/south-west/frame_001.png",
+              "characters/Seated/Idle/animations/walk_candidates_temporary/south-west/frame_002.png",
+              "characters/Seated/Idle/animations/walk_candidates_temporary/south-west/frame_003.png",
+              "characters/Seated/Idle/animations/walk_candidates_temporary/south-west/frame_004.png",
+              "characters/Seated/Idle/animations/walk_candidates_temporary/south-west/frame_005.png",
+              "characters/Seated/Idle/animations/walk_candidates_temporary/south-west/frame_006.png",
+              "characters/Seated/Idle/animations/walk_candidates_temporary/south-west/frame_007.png"
+            ],
+            "west": [
+              "characters/Seated/Idle/animations/walk_candidates_temporary/west/frame_000.png",
+              "characters/Seated/Idle/animations/walk_candidates_temporary/west/frame_001.png",
+              "characters/Seated/Idle/animations/walk_candidates_temporary/west/frame_002.png",
+              "characters/Seated/Idle/animations/walk_candidates_temporary/west/frame_003.png",
+              "characters/Seated/Idle/animations/walk_candidates_temporary/west/frame_004.png",
+              "characters/Seated/Idle/animations/walk_candidates_temporary/west/frame_005.png",
+              "characters/Seated/Idle/animations/walk_candidates_temporary/west/frame_006.png",
+              "characters/Seated/Idle/animations/walk_candidates_temporary/west/frame_007.png"
+            ],
+            "north-east": [
+              "characters/Seated/Idle/animations/walk_candidates_temporary/north-east/frame_000.png",
+              "characters/Seated/Idle/animations/walk_candidates_temporary/north-east/frame_001.png",
+              "characters/Seated/Idle/animations/walk_candidates_temporary/north-east/frame_002.png",
+              "characters/Seated/Idle/animations/walk_candidates_temporary/north-east/frame_003.png",
+              "characters/Seated/Idle/animations/walk_candidates_temporary/north-east/frame_004.png",
+              "characters/Seated/Idle/animations/walk_candidates_temporary/north-east/frame_005.png",
+              "characters/Seated/Idle/animations/walk_candidates_temporary/north-east/frame_006.png",
+              "characters/Seated/Idle/animations/walk_candidates_temporary/north-east/frame_007.png"
+            ],
+            "east": [
+              "characters/Seated/Idle/animations/walk_candidates_temporary/east/frame_000.png",
+              "characters/Seated/Idle/animations/walk_candidates_temporary/east/frame_001.png",
+              "characters/Seated/Idle/animations/walk_candidates_temporary/east/frame_002.png",
+              "characters/Seated/Idle/animations/walk_candidates_temporary/east/frame_003.png",
+              "characters/Seated/Idle/animations/walk_candidates_temporary/east/frame_004.png",
+              "characters/Seated/Idle/animations/walk_candidates_temporary/east/frame_005.png",
+              "characters/Seated/Idle/animations/walk_candidates_temporary/east/frame_006.png",
+              "characters/Seated/Idle/animations/walk_candidates_temporary/east/frame_007.png"
+            ],
+            "south-east": [
+              "characters/Seated/Idle/animations/walk_candidates_temporary/south-east/frame_000.png",
+              "characters/Seated/Idle/animations/walk_candidates_temporary/south-east/frame_001.png",
+              "characters/Seated/Idle/animations/walk_candidates_temporary/south-east/frame_002.png",
+              "characters/Seated/Idle/animations/walk_candidates_temporary/south-east/frame_003.png",
+              "characters/Seated/Idle/animations/walk_candidates_temporary/south-east/frame_004.png",
+              "characters/Seated/Idle/animations/walk_candidates_temporary/south-east/frame_005.png",
+              "characters/Seated/Idle/animations/walk_candidates_temporary/south-east/frame_006.png",
+              "characters/Seated/Idle/animations/walk_candidates_temporary/south-east/frame_007.png"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "export_version": "3.1",
+  "export_date": "2026-10-26T18:53:45.158064"
+}

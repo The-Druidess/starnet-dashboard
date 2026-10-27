@@ -317,7 +317,7 @@ textarea.wf-io:focus { outline: none; border-color: var(--ph); box-shadow: var(-
 /* the tile of the step working now (the floor lamp's WORKING): its own lamp turns the floor's working amber and pulses like the
    bay lamp does, and the tile's edge brightens — never the selection's gold, so "working" and "picked" never look alike */
 .wf-node.working { border-color: rgba(var(--ph-rgb),.7); }
-.wf-node.working .dot { background: #ffb23e; box-shadow: 0 0 0 1px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.3); animation: wf-working 1.2s ease-in-out infinite; }
+.wf-node.working .dot { background: var(--ph); box-shadow: 0 0 0 1px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.3); animation: wf-working 1.2s ease-in-out infinite; }
 @keyframes wf-working { 50% { opacity: .45; } }
 @media (prefers-reduced-motion: reduce) { .wf-node.working .dot { animation: none; } }
 .wf-job-h { font-size: 16px; letter-spacing: .6px; color: var(--ph-dim); }

@@ -118,6 +118,23 @@ const ID_RE = /^[A-Za-z0-9_-]{1,40}$/;
 
 // ---- G. determinism: repeated reads are byte-identical (pure, no ambient time/rng) ----
 {
+  const entry = C.get('pixellab');
+  A.eq(entry.category, 'Design', 'PixelLab is discoverable in Design');
+  A.eq(entry.authType, 'apikey', 'PixelLab uses the existing bearer-token credential flow');
+  A.eq(entry.official, true, 'PixelLab is a first-party MCP server');
+  A.eq(entry.url, 'https://api.pixellab.ai/mcp', 'PixelLab uses the documented remote HTTP endpoint');
+  A.ok(entry.aliases.includes('pixelorama'), 'Pixelorama search finds the PixelLab backend');
+  A.ok(entry.blurb.includes('Strict finance blocks'), 'PixelLab card discloses the financial admission gate');
+  A.ok(entry.blurb.includes('paid credits'), 'PixelLab card discloses credit consumption');
+  const cfg = C.installConfig('pixellab');
+  A.eq(cfg.transport, 'http', 'PixelLab reuses the HTTP connector transport');
+  A.eq(cfg.label, 'PixelLab', 'PixelLab uses the existing labeled connector setup');
+  A.ok(!('token' in cfg), 'PixelLab catalog config never embeds account credentials');
+  A.eq(C.browse([{ id: 'pixellab', url: 'https://other.example/mcp' }]).connectors
+    .find(e => e.id === 'pixellab').installed, false, 'a foreign endpoint cannot impersonate installed PixelLab');
+}
+
+{
   A.eq(JSON.stringify(C.browse(['stripe'])), JSON.stringify(C.browse(['stripe'])), 'browse is deterministic');
   A.eq(JSON.stringify(C.list()), JSON.stringify(C.list()), 'list is deterministic');
 }

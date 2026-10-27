@@ -15,7 +15,7 @@
     var hero = canvas.parentElement, ctx = canvas.getContext('2d');
     var W = 0, H = 0, dpr = 1, stars = [], running = false, visible = true, last = 0, t0 = 0;
     var px = 0, py = 0, tx = 0, ty = 0;
-    var COLORS = ['255,196,107', '255,157,47', '255,226,176', '255,140,40'];
+    var COLORS = ['143,227,172', '61,255,112', '204,255,219', '31,174,78'];
     function spawn(s, far){
       s.x = (Math.random() * 2 - 1) * 1.6; s.y = (Math.random() * 2 - 1) * 1.1;
       s.z = far ? 1 : Math.random() * .95 + .05; s.pz = s.z;

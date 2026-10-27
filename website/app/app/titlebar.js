@@ -103,7 +103,7 @@
     const mark = doc.createElement('span');
     mark.className = 'sn-tb-mark';
     mark.setAttribute('data-tauri-drag-region', '');
-    mark.textContent = '◆';
+    mark.textContent = '◆ USS THESEUS';
 
     const rule = doc.createElement('span');
     rule.className = 'sn-tb-rule';

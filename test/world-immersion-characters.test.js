@@ -129,7 +129,7 @@ const appearance = { light: { color: [96, 168, 240], strength: 0.5, dx: 1, dy: 0
 test('normal desktop roster renders the selected refresh without preview flags, with planted walking feet', async () => {
   const selected = JSON.parse(fs.readFileSync(path.join(frontend, 'assets/skin-study-0914/runtime-motion.json')));
   const { sprites, catalog } = await harness(true);
-  assert.equal(Object.keys(catalog).length, 51);
+  assert.equal(Object.keys(catalog).length, 61);
   for (const skin of selected.skins) {
     assert.equal(catalog[skin.skin].set, skin.renderSet, skin.skin + ' keeps its saved ID');
     await sprites.ensureSkin(skin.skin);
@@ -156,6 +156,23 @@ test('normal desktop roster renders the selected refresh without preview flags, 
   }
   assert.equal(catalog.minionchar, catalog.station_minion, 'retired duplicate remains readable in existing saves');
   assert.equal(sprites.setForBody(body({ skin: 'unknown' })), 'approved_android', 'unknown/default skin uses refresh');
+});
+
+test('custom skin IDs resolve standing height by render set and keep feet flush with the floor', async () => {
+  const { sprites, catalog } = await harness(true);
+  const skin = catalog.chief_science_officer;
+  assert.equal(skin.set, 'theseus_science_officer');
+  await sprites.ensureSkin('chief_science_officer');
+  const b = body({ id: 'chief-science-officer', skin: 'chief_science_officer', state: 'walk' });
+  assert.equal(sprites.setForBody(b), skin.set);
+  close(sprites.bodyScale(b), 0.25, 'custom render set keeps its configured scale');
+  for (const dir of ['south', 'east', 'north', 'west']) {
+    b.dir = dir;
+    const { frame } = draw(sprites, b, 0, {});
+    assert.ok(frame, dir + ' walking frame renders');
+    close(b._renderStandingHeight, 19, dir + ' resolves standing height from the skin ID');
+    assert.ok(Math.abs(b._renderGroundGap - 0.25) <= 0.51, dir + ' boots meet their floor shadow');
+  }
 });
 
 test('standing breath fixes the real measured foot line, keeps native masters and restores sampling state', async () => {

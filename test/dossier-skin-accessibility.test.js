@@ -16,6 +16,7 @@ const render = vm.runInNewContext(
   {
     DATA: {
       DEFAULT_SKIN: 'cadet',
+      skinIds() { return Object.keys(this.SKINS); },
       SKINS: {
         cadet: { name: 'Cadet', set: 'cadet' },
         bear: { name: 'Teddy Bear', set: 'bear' }

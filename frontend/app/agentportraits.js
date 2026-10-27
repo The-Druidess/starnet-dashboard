@@ -3,6 +3,26 @@
 'use strict';
 const AgentPortraits = (() => {
   const cache = new Map();
+  let manifestPromise = null;
+  function portraitPath(set, manifest) {
+    const paths = manifest && manifest.sprites && manifest.sprites[set + '.rot.south'];
+    const path = Array.isArray(paths) && paths.find(value => typeof value === 'string' && value.indexOf(set + '/') === 0);
+    return path ? 'assets/sprites/' + path : null;
+  }
+  function spriteManifest() {
+    if (!manifestPromise) {
+      manifestPromise = fetch('assets/sprites/manifest.json', { cache: 'no-store' })
+        .then(response => {
+          if (!response.ok) throw new Error('Sprite manifest request failed with HTTP ' + response.status + '.');
+          return response.json();
+        })
+        .catch(error => {
+          manifestPromise = null;
+          throw error;
+        });
+    }
+    return manifestPromise;
+  }
   function crop(set) {
     if (cache.has(set)) return cache.get(set);
     const promise = new Promise(resolve => {
@@ -21,8 +41,20 @@ const AgentPortraits = (() => {
         out.getContext('2d').drawImage(cv, left, top, out.width, out.height, 0, 0, out.width, out.height);
         resolve(out.toDataURL());
       };
-      source.onerror = () => { cache.delete(set); resolve(null); };
-      source.src = 'assets/sprites/' + set + '/rot_south.png';
+      source.onerror = () => {
+        cache.delete(set);
+        console.error('[AgentPortraits] Could not load the south-facing sprite for ' + set + '.');
+        resolve(null);
+      };
+      spriteManifest().then(manifest => {
+        const path = portraitPath(set, manifest);
+        if (!path) throw new Error('The sprite manifest has no south-facing frame for ' + set + '.');
+        source.src = path;
+      }).catch(error => {
+        cache.delete(set);
+        console.error('[AgentPortraits] Could not resolve the south-facing sprite for ' + set + '.', error);
+        resolve(null);
+      });
     });
     cache.set(set, promise); return promise;
   }
@@ -197,6 +229,6 @@ const AgentPortraits = (() => {
       if (pending.size) schedule(); else retries = 0;
     }, Math.min(2000, 150 * (retries + 1)));
   }
-  return { paint, renderBody, thumbHTML, fitPlan, _thumbKeys: () => Array.from(thumbs.keys()) };
+  return { paint, renderBody, thumbHTML, fitPlan, portraitPath, _thumbKeys: () => Array.from(thumbs.keys()) };
 })();
 if (typeof module !== 'undefined' && module.exports) module.exports = AgentPortraits;

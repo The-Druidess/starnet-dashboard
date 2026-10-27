@@ -4,7 +4,7 @@
    station's own GLASS recipes (frontend/css/glass-demo.css + style.css tokens) — a plugin built from these classes
    looks like it shipped with StarNet, and repaints with the station when the Commander changes the phosphor.
 
-   · Tokens: the defaults below are the amber reference build. starnet-kit.js overwrites them on :root with the
+   · Tokens: the defaults below are green phosphor. starnet-kit.js overwrites them on :root with the
      station's LIVE computed values the moment the window opens and on every theme change.
    · Everything sits in `@layer starnet`, the lowest layer: any CSS the plugin author writes (unlayered) wins, with
      no !important and no specificity fights. The kit is the default, never a cage.
@@ -28,9 +28,9 @@
 
 @layer starnet {
   :root {
-    --ph: #ffaa33; --ph-bright: #ffd9a3; --ph-dim: #b9791c; --ph-faint: #1e1404; --ink: #190f02;
-    --bg: #030201; --panel: rgba(5, 3, 1, 0.95); --panel2: #0c0704; --text: #eec88f; --gold: #ffd34a;
-    --ph-rgb: 255, 170, 51; --ph-bright-rgb: 255, 228, 180; --gold-rgb: 255, 211, 74;
+    --ph: #3dff70; --ph-bright: #ccffdb; --ph-dim: #1fae4e; --ph-faint: #0c3a1d; --ink: #021407;
+    --bg: #010503; --panel: rgba(2, 16, 8, 0.92); --panel2: #041c0d; --text: #8fe3ac; --gold: #d8f25a;
+    --ph-rgb: 61, 255, 112; --ph-bright-rgb: 204, 255, 219; --gold-rgb: 216, 242, 90;
     --ok: #7bc88a; --ok-rgb: 123, 200, 138; --bad: #ff5c4d; --bad-rgb: 255, 92, 77; --warn: #ffe97a;
     --gd-edge: rgba(var(--ph-rgb), .24);
     --gd-light: rgba(var(--ph-bright-rgb), .13);

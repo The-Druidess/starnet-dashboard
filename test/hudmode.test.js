@@ -105,7 +105,7 @@ const T0 = 1_800_000_000_000;
   // a lost run.end: the snapshot stops listing the run → it is gone
   H.applySnapshot(f, { runs: [], prompts: [], queues: [] }, T0 + 8000);
   v = H.view(f, who, T0 + 8000);
-  A.eq([v.live.length, v.summary.text], [0, 'STATION IDLE'], 'a confirmed run the snapshot drops is not kept alive by a stale event');
+  A.eq([v.live.length, v.summary.text], [0, 'SHIP IDLE'], 'a confirmed run the snapshot drops is not kept alive by a stale event');
   // an event-only run survives a short grace (snapshot older than its run.start), then must be confirmed
   H.onRunStart(f, { agentId: 'agent', runId: 'fresh', trigger: 'directive', model: 'm' }, T0 + 9000);
   H.applySnapshot(f, { runs: [], prompts: [], queues: [] }, T0 + 10_000);

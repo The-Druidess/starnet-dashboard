@@ -112,7 +112,7 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
   // panelBright (−100…100, default 0) is the tube's BRIGHTNESS knob: above 0 it lifts the panel glass's black
   // level toward the phosphor colour (never toward white); below 0 it takes the panels DOWN toward true black
   // (Andrew 10-01: "it doesnt get dark enough"). 0 = the shipped look, untouched.
-  function defaults() { return { theme: 'amber', themeHue: 35, themeSat: 100, themeGlow: 100, panelBright: 0, roomLighting: 'low', textScale: 0, flicker: true, crtGlass: 'full', staticLevel: 100, sound: true, hints: true, backdrop: 'void', sessionRow: 'compact', keepComputerAwake: false, notifyPrefs: notifyDefaults() }; }
+  function defaults() { return { theme: 'green', themeHue: 136, themeSat: 100, themeGlow: 100, panelBright: 0, roomLighting: 'low', textScale: 0, flicker: true, crtGlass: 'full', staticLevel: 100, sound: true, hints: true, backdrop: 'void', sessionRow: 'compact', keepComputerAwake: false, notifyPrefs: notifyDefaults() }; }
   // Raise overall room exposure without changing the distribution of its lights.
   // Existing saves retain their chosen level; missing values start at LOW.
   const ROOM_LIGHTING_STEPS = [
@@ -329,7 +329,7 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
     document.body.classList.remove('theme-amber', 'theme-green', 'theme-blue', 'theme-purple', 'theme-red', 'theme-white', 'theme-custom');
     THEME_VARS.forEach(v => document.body.style.removeProperty(v));
     if (s.theme === 'custom') {
-      document.body.classList.add('theme-custom');   // vars come from the inline derivation below (falls back to :root amber if JS ever misses)
+      document.body.classList.add('theme-custom');   // vars come from the inline derivation below (falls back to :root green if JS ever misses)
       const vars = deriveCustomTheme(s.themeHue, s.themeSat, s.themeGlow);
       for (const k in vars) document.body.style.setProperty(k, vars[k]);
     } else {
@@ -1244,7 +1244,7 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
       screen.appendChild(head); screen.appendChild(body);
       w.appendChild(screen);
       w.appendChild(mkEl('div', 'term-plate',
-        '<span>STARNET DYNAMICS</span><span class="term-knobs"><i class="knob"></i><i class="knob"></i></span>'));
+        '<span>USS THESEUS</span><span class="term-knobs"><i class="knob"></i><i class="knob"></i></span>'));
     } else {
       w.appendChild(head); w.appendChild(body);
       // Phase-2 chrome (generic, plain windows only — feature windows carry their own casing):
@@ -1753,6 +1753,39 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
   function crewPortrait(a) {
     return '<span class="crew-portrait" aria-hidden="true"><img alt="" draggable="false" hidden></span>';
   }
+  function crewManifestOrder(roster, station) {
+    const props = station ? station.props() : [];
+    return roster.map((a, i) => {
+      const desk = props.find(p => p.agentId === a.id && station.capForProp(p.t) === 'computer');
+      const roomId = (desk && station.roomAt(desk.x, desk.y)) || (station && station.agentRoomId(a.id));
+      const room = roomId && station.roomById(roomId);
+      const roomName = room ? String(room.name || room.id) : 'UNASSIGNED';
+      const bridge = !!room && /^(?:the\s+)?bridge$/i.test(roomName.trim());
+      return { a, i, roomName, bridge, assigned: !!room };
+    }).sort((a, b) => Number(b.bridge) - Number(a.bridge)
+      || Number(b.assigned) - Number(a.assigned)
+      || a.roomName.localeCompare(b.roomName, 'en', { sensitivity: 'base', numeric: true })
+      || String(a.a.name || a.a.id).localeCompare(String(b.a.name || b.a.id), 'en', { sensitivity: 'base', numeric: true })
+      || String(a.a.id).localeCompare(String(b.a.id), 'en'));
+  }
+  function refreshCrewRooms() {
+    const ul = $('#crew'); if (!ul) return;
+    const ordered = crewManifestOrder(present, typeof App !== 'undefined' && App.station ? App.station() : null);
+    const rows = Array.from(ul.querySelectorAll('[data-agent-id]'));
+    if (ordered.length === rows.length && ordered.every((entry, i) =>
+      rows[i].dataset.agentId === entry.a.id && rows[i].dataset.roomName === entry.roomName)) return;
+    const scrollTop = ul.scrollTop;
+    const focused = document.activeElement && document.activeElement.closest('#crew [data-agent-id]');
+    const focusedId = focused && focused.dataset.agentId;
+    const dossierFocused = focused && document.activeElement.classList.contains('crew-dossier');
+    crewRender();
+    ul.scrollTop = scrollTop;
+    if (focusedId) {
+      const row = Array.from(ul.querySelectorAll('[data-agent-id]')).find(row => row.dataset.agentId === focusedId);
+      const target = row && (dossierFocused ? row.querySelector('.crew-dossier') : row);
+      if (target) target.focus({ preventScroll: true });
+    }
+  }
   function crewRender() {
     wireCrewLive();   // ensure the per-agent run-state listener is live
     const ul = $('#crew'); if (!ul) return;
@@ -1761,12 +1794,13 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
       $('#crew-sum').innerHTML = '';
       return;
     }
-    const ordered = typeof TreasurerPortal !== 'undefined' ? TreasurerPortal.crewOrder(present) : present.map((a, i) => ({ a, i }));
-    ul.innerHTML = ordered.map(({ a, i }, order) =>
-      '<li class="crew-row" role="button" tabindex="0" aria-label="' + (present.length > 1 ? 'Show sessions with ' + esc(a.name || a.id) + '; Shift+F10 for the dossier" aria-keyshortcuts="Shift+F10' : 'Open dossier for ' + esc(a.name || a.id)) + '" data-i="' + i + '" data-agent-id="' + esc(a.id) + '" style="--ci:' + order + '">' +
+    const ordered = crewManifestOrder(present, typeof App !== 'undefined' && App.station ? App.station() : null);
+    ul.innerHTML = ordered.map(({ a, i, roomName }, order) =>
+      '<li class="crew-row" role="button" tabindex="0" aria-label="' + (present.length > 1 ? 'Show sessions with ' + esc(a.name || a.id) + ', ' + esc(roomName) + '; Shift+F10 for the dossier" aria-keyshortcuts="Shift+F10' : 'Open dossier for ' + esc(a.name || a.id) + ', ' + esc(roomName)) + '" data-i="' + i + '" data-agent-id="' + esc(a.id) + '" data-room-name="' + esc(roomName) + '" style="--ci:' + order + '">' +
       crewPortrait(a) +
       '<span class="dot on"></span>' +
       '<div class="crew-main">' +
+      '<div class="crew-eyebrow" title="' + esc(roomName) + '">' + esc(roomName) + '</div>' +
       '<div class="crew-name" style="color:' + esc(a.color) + '">' + esc(a.name) +
       (duplicateAgentName(a) ? '<span class="crew-id">[' + esc(duplicateAgentName(a)) + ']</span>' : '') +
       '<span class="crew-room">' + (a.stats && a.stats.level ? 'Lv ' + a.stats.level : '') + '</span></div>' +
@@ -1847,7 +1881,7 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
         const row = e.closest('.crew-row');
         row.classList.toggle('selected', a.id === focusedId);
         row.classList.toggle('filtering', !!railFilter && a.id === railFilter);
-        const hide = !!crewQuery && !String(a.name || a.id).toLowerCase().includes(crewQuery) && !String(a.id).toLowerCase().includes(crewQuery);
+        const hide = !!crewQuery && ![a.name || a.id, a.id, row.dataset.roomName || ''].some(value => String(value).toLowerCase().includes(crewQuery));
         if (row.hidden !== hide) row.hidden = hide;
         if (!row.hidden) visible++;
       }
@@ -2096,7 +2130,7 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
     // A retired saved ID can alias an approved catalog entry without becoming an extra tile.
     const cur = (a && a.skin && Object.keys(skins).find(id => skins[id] === skins[a.skin]))
       || (typeof DATA !== 'undefined' ? DATA.DEFAULT_SKIN : '');
-    const thumbs = Object.keys(skins).map(id => {
+    const thumbs = (typeof DATA !== 'undefined' && DATA.SKINS ? DATA.skinIds() : []).map(id => {
       const sk = skins[id];
       return '<button type="button" class="skin-thumb ag-skin-thumb' + (id === cur ? ' sel' : '') + '" data-skin="' + esc(id) + '" title="' + esc(sk.name || id) + '" aria-label="' + esc(sk.name || id) + '" aria-pressed="' + (id === cur ? 'true' : 'false') + '">' +
         '<img src="assets/sprites/' + esc(sk.set) + '/rot_south.png" alt="' + esc(sk.name || id) + '" draggable="false"></button>';
@@ -2132,7 +2166,7 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
       '<div class="gx-station" style="margin-top:18px;">' +
       '<div class="hd"><span class="badge">●</span><span class="ttl">Station prestige</span><span class="agents">&Sigma; ' + nAg + ' AGENT' + (nAg === 1 ? '' : 'S') + '</span></div>' +
       '<div class="body">' +
-        '<div class="lv"><div class="gx-lbl" style="font-size:9px;">STATION</div><div class="n">' + s.level + '</div><div class="gx-lbl" style="font-size:9px;">LEVEL</div></div>' +
+        '<div class="lv"><div class="gx-lbl" style="font-size:9px;">SHIP</div><div class="n">' + s.level + '</div><div class="gx-lbl" style="font-size:9px;">LEVEL</div></div>' +
         '<div style="flex:1;">' +
           '<div class="gx-row" style="margin-bottom:6px;"><span class="gx-val" style="font-size:13px;">' + s.xp.toLocaleString() + ' <span class="gx-dim">/</span> ' + Xp.xpForLevel(s.level + 1).toLocaleString() + ' <span class="gx-dim" style="font-size:11px;">XP</span></span><span class="gx-val" style="color:var(--gold);font-size:13px;">' + s.pct + '%</span></div>' +
           '<div class="gx-trk"><div class="gx-gfill" style="width:' + s.pct + '%;"></div></div>' +
@@ -6544,7 +6578,7 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
         // station and an operator (env) one alike — not on a provider dashboard the user never had.
         const managed = r.managed === true;
         const chargedBy = managed ? 'what StarNet charged' : 'what your provider charged';
-        row.setAttribute('data-tip', 'This run stopped before StarNet recorded what it spent' +
+        row.setAttribute('data-tip', 'This run stopped before Ship log recorded what it spent' +
           (managed ? ' (it ran on your StarNet credits' + (r.model ? ', ' + r.model : '') + ')' : (where ? ' (it started on ' + where + ')' : '')) +
           (managed ? '. Enter what StarNet charged for it — SETTINGS → AI & MODELS › STORE › RECENT ACTIVITY lists those charges as run ' + String(r.runId).slice(0, 8)
             : '. Enter the charge your provider dashboard shows for it') + ': StarNet books it once and your spending limits can be checked again.');
@@ -7385,7 +7419,7 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
       '<label class="set-row"><input type="checkbox" id="ntp-needsApproval"' + (npf('needsApproval') ? ' checked' : '') + '> NEEDS APPROVAL <span class="dim">— an agent is waiting on your yes/no</span></label>' +
       '<label class="set-row"><input type="checkbox" id="ntp-cronDigest"' + (npf('cronDigest') ? ' checked' : '') + '> AUTONOMOUS DIGEST <span class="dim">— what it did while you were away</span></label>' +
       '<label class="set-row"><input type="checkbox" id="ntp-sound"' + (npf('sound') ? ' checked' : '') + '> NOTIFICATION SOUND <span class="dim">— a chime on each ping (also needs TERMINAL AUDIO on)</span></label>' +
-      // CLEAR NOTIFICATIONS lives WITH the notification controls (it was buried in SYSTEM ›  STATION DATA). Armed
+      // CLEAR NOTIFICATIONS lives WITH the notification controls (it was buried in SYSTEM ›  SHIP DATA). Armed
       // 2-click confirm + a "cleared ✓" line so the wipe answers "did that stick?".
       '<div class="set-save"><button class="bb xs" id="ntp-test">TEST NOTIFICATION</button>' +
         '<button class="bb sm danger" id="set-clear">CLEAR NOTIFICATIONS</button></div>' +
@@ -7393,7 +7427,7 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
     const secSystem =
       // "POWER" — this header held only KEEP COMPUTER AWAKE, so "SCHEDULED TASKS" mislabelled it.
       '<h4 class="ms-h">POWER</h4>' +
-      '<label class="set-row"><input type="checkbox" id="set-awake" ' + (awakeChecked ? 'checked' : '') + (awakeDesktop ? '' : ' disabled') + '> KEEP COMPUTER AWAKE <span class="dim">— ' + (awakeDesktop ? 'prevent idle sleep while StarNet is open' : 'desktop app only') + '</span></label>' +
+      '<label class="set-row"><input type="checkbox" id="set-awake" ' + (awakeChecked ? 'checked' : '') + (awakeDesktop ? '' : ' disabled') + '> KEEP COMPUTER AWAKE <span class="dim">— ' + (awakeDesktop ? 'prevent idle sleep while USS Theseus is open' : 'desktop app only') + '</span></label>' +
       // Lane 4D — native startup/tray choices + the honest background-lifecycle explainer. All controls are
       // desktop-only; they stay disabled and the line names the browser reality otherwise. The explainer
       // is filled live from the tray supervisor's REAL armed state (wireLifecycle) so it never over-claims.
@@ -7409,11 +7443,11 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
       '<div id="adv-msg" class="msg"></div>' +
       // DATA / STATION BACKUP — export the whole station config to one JSON file, import it back, reset a section.
       // Secrets NEVER leave the machine (configexport.js redacts to a configured-marker); import surfaces re-enter states.
-      '<h4 class="ms-h">STATION BACKUP <span class="dim">— export / import your setup</span></h4>' +
-      '<p class="set-about">Export your station configuration to a JSON file, or restore a saved configuration. <b>Keys and tokens are excluded</b> and must be entered again after importing.</p>' +
+      '<h4 class="ms-h">SHIP BACKUP <span class="dim">— export / import your setup</span></h4>' +
+      '<p class="set-about">Export your ship configuration to a JSON file, or restore a saved configuration. <b>Keys and tokens are excluded</b> and must be entered again after importing.</p>' +
       '<div class="set-save">' +
-        '<button class="bb sm" id="bk-export">EXPORT STATION</button>' +
-        '<button class="bb sm" id="bk-import">IMPORT STATION…</button>' +
+        '<button class="bb sm" id="bk-export">EXPORT SHIP</button>' +
+        '<button class="bb sm" id="bk-import">IMPORT SHIP…</button>' +
         '<input type="file" id="bk-file" accept="application/json,.json" style="display:none">' +
       '</div>' +
       '<div id="bk-msg" class="msg"></div>' +
@@ -7448,7 +7482,7 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
       '<div id="diag-build" class="dim" style="margin-top:6px;font-size:11px" hidden></div>' +
       // CLEAR NOTIFICATIONS moved to the NOTIFICATIONS section (where it belongs); this is now just the about note.
       '<h4 class="ms-h">ABOUT</h4>' +
-      '<p class="set-about">STARNET — gamified AI-agent harness.<br>Theme, display & audio preferences are saved locally on this machine. Manage planned tasks on the TASK BOARD and saved conversations under SESSIONS in COMMS.</p>';
+      '<p class="set-about">USS Theseus — DRUIDESS command ship.<br>Powered by the Starnet backend. Theme, display & audio preferences are saved locally on this machine. Manage planned tasks on the TASK BOARD and saved conversations under SESSIONS in COMMS.</p>';
 
     // Keep every control mounted and reachable; group existing nodes without replacing their IDs.
     function arrangeSettingsPane(el) {
@@ -7567,7 +7601,7 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
       // STARNET REMOTE: pair a phone and drive the station from anywhere (app/remote-devices.js owns the pane)
       { id: 'remote', label: 'REMOTE', glyph: '▯', desc: 'Pair your phone and control this station from anywhere.', build: el => { if (typeof RemoteDevices !== 'undefined') RemoteDevices.mount(el, arrangeSettingsPane); else el.textContent = 'Remote is not available in this build.'; } },
       // BROWSER: where the station browser lives — built-in / a Chrome window / your Chrome (app/outputbrowser.js owns the pane)
-      { id: 'browser', label: 'BROWSER', glyph: '◎', desc: 'Where the station browser runs: inside StarNet, as its own Chrome window, or in your own Chrome.', build: el => {
+      { id: 'browser', label: 'BROWSER', glyph: '◎', desc: 'Where the ship browser runs: inside USS Theseus, as its own Chrome window, or in your own Chrome.', build: el => {
         if (typeof OutputBrowser !== 'undefined' && OutputBrowser.mountSettings) OutputBrowser.mountSettings(el, arrangeSettingsPane);
         // SAVED SIGN-INS: STEP-IN is no longer a standing dock button, so the sign-ins it keeps get a door here
         const row = mkEl('div', 'set-row');
@@ -9291,7 +9325,7 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
   const CD_SOURCE = { onboarding: 'from your awakening', commander: 'you told the station', interview: 'from the intake interview', curiosity: 'you answered a question', study: 'observed from your work' };
   const CDS = () => (typeof DossierStore !== 'undefined') ? DossierStore : null;
 
-  // STATION RECORD — the durable lifetime pride counters (G3a). Reads the pure PrideStore snapshot and renders a
+  // SHIP RECORD — the durable lifetime pride counters (G3a). Reads the pure PrideStore snapshot and renders a
   // compact honest grid: a counter with no real sample shows "—", never a made-up 0 (the floorstats honesty rule).
   // Returns null when the store isn't present (fresh boot / node) so the caller can append unconditionally.
   function cdStationRecord() {
@@ -9313,7 +9347,7 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
       if (d) founded = '<div class="cd-founded">station founded <b>' + esc(d) + '</b></div>';
     }
     return mkEl('div', 'cd-record',
-      '<div class="cd-record-h">STATION RECORD // LIFETIME</div>'
+      '<div class="cd-record-h">SHIP RECORD // LIFETIME</div>'
       + '<div class="cd-record-grid">' + grid + '</div>'
       + founded);
   }
@@ -9419,11 +9453,11 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
         el.appendChild(mkEl('p', 'cd-privacy', 'Your profile is stored locally. Its briefing is sent to each agent’s configured model when it works; relevant summaries may also be used for suggestions.'));
         el.appendChild(cdBriefing(ds));
       } },
-      { id: 'sources', label: 'SOURCES', glyph: '⌁', desc: 'Manage the notes StarNet can study for useful work.', build: el => {
+      { id: 'sources', label: 'SOURCES', glyph: '⌁', desc: 'Manage the notes your ship crew can study for useful work.', build: el => {
         if (typeof WorkHub !== 'undefined') WorkHub.mountSources(el);
         else el.appendChild(mkEl('p', 'cd-empty', 'Source settings are unavailable. Reopen the dossier to try again.'));
       }, onShow: el => { const detail = el.querySelector('.wh-source-settings'); if (detail) detail.open = true; } },
-      { id: 'record', label: 'STATION RECORD', glyph: '▥', desc: 'Recorded activity across the lifetime of your station.', build: el => {
+      { id: 'record', label: 'SHIP RECORD', glyph: '▥', desc: 'Recorded activity across the lifetime of your station.', build: el => {
         const rec = cdStationRecord();
         if (rec) el.appendChild(rec);
         else el.appendChild(mkEl('p', 'cd-empty', 'No station record is available yet.'));
@@ -9870,7 +9904,7 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
     const next = steps.find(s => s.isNext && s.status !== 'done');
     const accept = (next && !next.inFlight)
       ? '<button class="consent-btn q-arc-accept q-track-accept" data-gid="' + esc(next.arcGoalId) + '" data-mid="' + esc(next.milestoneId) + '">▶ START THIS STEP</button><p class="sub dim">Starts work with your crew using your current model and permissions.</p>'
-        + '<details class="q-life-report"><summary>I DID THIS STEP</summary><label>What did you do?<textarea class="q-step-evidence" maxlength="1000" placeholder="Describe the action you completed outside StarNet"></textarea></label>'
+        + '<details class="q-life-report"><summary>I DID THIS STEP</summary><label>What did you do?<textarea class="q-step-evidence" maxlength="1000" placeholder="Describe the action you completed outside USS Theseus"></textarea></label>'
         + '<button class="consent-btn q-step-report" data-gid="' + esc(next.arcGoalId) + '" data-mid="' + esc(next.milestoneId) + '">RECORD MY ACTION</button></details>'
       : (next && next.inFlight ? '<span class="sub q-track-running">the build for this step is running — finishing it completes the step.</span>' : '');
     const alternatives = steps.filter(s => s.status !== 'done' && !s.isNext);
@@ -10005,7 +10039,7 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
       + lastHtml + disabledNote + '</div>';
   }
 
-  /* STATION SYSTEMS (systems.js) — the dock's map, at the top of QUESTS › Progress. On a growing station it shows
+  /* SHIP SYSTEMS (systems.js) — the dock's map, at the top of QUESTS › Progress. On a growing station it shows
      what is online and how the rest comes online; every tile opens its system (an offline one comes online as it
      opens — reveal, never lock). Tiles copy the constellation's star recipe: glyph + name + ONE short stat, the
      description lives in the hover tip. Counts read Systems.snapshot(), i.e. the dock's real state. */
@@ -10022,7 +10056,7 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
       const svg = b.querySelector('svg');
       return svg ? svg.outerHTML : esc(b.textContent || '◇');
     };
-    return '<div class="q-systems q-constellation" id="q-systems"><div class="gx-sec"><span class="gx-title">STATION SYSTEMS</span><span class="gx-tag">'
+    return '<div class="q-systems q-constellation" id="q-systems"><div class="gx-sec"><span class="gx-title">SHIP SYSTEMS</span><span class="gx-tag">'
       + s.online + ' OF ' + s.total + ' ONLINE</span></div>'
       + (staged ? '<div class="arc-bar q-bar"><div class="q-bar-fill" style="width:' + pct + '%"></div></div>' : '')
       + '<div class="q-star-map q-sys-map">' + s.list.map(x =>
@@ -10127,7 +10161,7 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
     const recent = (Array.isArray(j.outcomes) ? j.outcomes : []).slice(-3).reverse();
     const progression = j.progression;
     const achievements = progression && Array.isArray(progression.achievements) ? progression.achievements.slice(-5).reverse() : [];
-    const proofLabel = (kind, authority) => authority === 'commander-confirmed' ? 'You confirmed' : kind === 'metric' ? 'You recorded' : 'StarNet recorded';
+    const proofLabel = (kind, authority) => authority === 'commander-confirmed' ? 'You confirmed' : kind === 'metric' ? 'You recorded' : 'Ship log recorded';
     const growthHtml = progression ? '<div class="q-commander-growth"><div class="q-journey-title">COMMANDER LEVEL ' + progression.level + '</div>'
       + '<div class="sub">' + progression.points + ' achievement points · ' + progression.pointsToNextLevel + ' to the next level</div>'
       + '<div class="sub dim">Confirmed goal activity and recorded metric checkpoints earn points across your goals. Confirming a completed goal earns 100 points. Setbacks never erase your history.</div>'
@@ -10191,7 +10225,7 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
           + '<button class="consent-btn q-goal-reflect">SAVE REFLECTION</button></details></details>';
       }).join('') + '</div>' : '';
     return '<details class="q-life-goal q-life-manage"' + (goals.length ? '' : ' open') + '><summary>Start a goal</summary>'
-      + '<p class="sub">A rough idea is enough. Shape it with StarNet or write your own plan.</p>'
+      + '<p class="sub">A rough idea is enough. Shape it with the USS Theseus crew or write your own plan.</p>'
       + '<label>I want to…<input class="q-new-goal" maxlength="280" placeholder="Learn to play a song, change careers, build a business…"></label>'
       + '<button class="consent-btn q-goal-suggest">HELP SHAPE MY PLAN</button><p class="sub dim">Uses your current AI model to suggest an editable plan. Saving and starting work are separate actions.</p>'
       + '<div class="q-plan-feedback" role="status" aria-live="polite"></div><div class="q-plan-proposal"></div>'
@@ -10375,7 +10409,7 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
       const rewardHtml = q.reward ? '<div class="sub q-reward"><span class="q-field-label">REWARD</span>&#9670; ' + esc(q.reward) + '</div>' : '';
       const actionRow = (goBtn || queueBtn) ? '<div class="q-actions">' + goBtn + queueBtn + '</div>' : '';
       const lifeActions = q.kind === 'ledger' && q.status !== 'done' ? '<div class="q-life-quest" data-qid="' + esc(q.id) + '">'
-        + '<div class="sub q-owner">' + esc(q.executionMode === 'commander' ? 'YOUR ACTION' : q.executionMode === 'together' ? 'YOU + STARNET' : 'STARNET CAN HELP') + '</div>'
+        + '<div class="sub q-owner">' + esc(q.executionMode === 'commander' ? 'YOUR ACTION' : q.executionMode === 'together' ? 'YOU + SHIP CREW' : 'SHIP CREW CAN HELP') + '</div>'
         + (q.whyNow ? '<div class="sub">Why now: ' + esc(q.whyNow) + '</div>' : '')
         + (isPaused(q) ? '<div class="sub">' + esc(q.disposition.type === 'later' ? 'Saved for tomorrow' : q.disposition.type === 'too_big' ? 'Needs a smaller step' : 'Blocked') + (q.disposition.reason ? ': ' + esc(q.disposition.reason) : '') + '</div><button class="consent-btn q-quest-disposition" data-action="resume">RESUME</button>'
           : '<details><summary>CHANGE THIS RECOMMENDATION</summary><label>What needs to change?<input id="q-reason-' + esc(q.id) + '" class="q-disposition-reason" value="' + esc(questDrafts.get(q.id)?.reason || '') + '" maxlength="240" placeholder="For example: waiting for a reply, or only 15 minutes available"></label>'
@@ -10609,7 +10643,7 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
     if (suggest) suggest.addEventListener('click', async () => {
       if (body._journeyPlanning) return;
       const form = body.querySelector('.q-life-manage'), title = form.querySelector('.q-new-goal').value.trim();
-      if (title.length < 4) { body._journeyPlanMessage = 'Tell StarNet a little about what you want to do first.'; planFeedback.textContent = body._journeyPlanMessage; form.querySelector('.q-new-goal').focus(); return; }
+      if (title.length < 4) { body._journeyPlanMessage = 'Tell the USS Theseus crew a little about what you want to do first.'; planFeedback.textContent = body._journeyPlanMessage; form.querySelector('.q-new-goal').focus(); return; }
       const options = { motivation: form.querySelector('.q-new-motivation').value, constraints: form.querySelector('.q-new-constraints').value,
         successCondition: form.querySelector('.q-new-success').value, steps: form.querySelector('.q-new-steps').value };
       body._journeyPlanning = true; body._journeyPlan = null; rerender('quests', false);
@@ -11297,7 +11331,7 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
   // GROWTH Tier 3: repaint the Settings AUTONOMY panel's EARNED badge if it is open (no-op otherwise — the paint fn
   // queries its own (possibly detached) host nodes, so a closed panel costs nothing). Called after a trust accept.
   const repaintAutonomy = () => { try { if (repaintAutonomyDial) repaintAutonomyDial(); } catch (_) {} };
-  return { init, enter, setRoster, setCrewPortals, leave, clearRunning, runningCount: () => runningAgents.size, isAgentRunning: (id) => agentLive(id), notify, warnIfStationLacksKey, settleNotifs, waitingNotifKeys, seenSession, flashSave, openAgent, refreshCrew: () => crewTick(), openArcade, toggleTerm, openTerm, showTerm, showAgent, notifsMarkRead, notifsClear, openDesk, closeTerm, rerender, refreshBoard: refreshBoardLive, pokeQuests, setTheme, getTheme, setLook, lookNow, lookOptions, repaintAutonomy, refreshSystems, toggleFamily, familyOf, registerWindow, h, motionRestState };
+  return { init, enter, setRoster, setCrewPortals, leave, clearRunning, runningCount: () => runningAgents.size, isAgentRunning: (id) => agentLive(id), notify, warnIfStationLacksKey, settleNotifs, waitingNotifKeys, seenSession, flashSave, openAgent, refreshCrew: () => crewTick(), refreshCrewRooms, openArcade, toggleTerm, openTerm, showTerm, showAgent, notifsMarkRead, notifsClear, openDesk, closeTerm, rerender, refreshBoard: refreshBoardLive, pokeQuests, setTheme, getTheme, setLook, lookNow, lookOptions, repaintAutonomy, refreshSystems, toggleFamily, familyOf, registerWindow, h, motionRestState };
 })();
 
 if (typeof module !== 'undefined' && module.exports) module.exports = { visibleTerminalRect, clampTerminalSize };

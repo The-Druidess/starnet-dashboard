@@ -357,7 +357,7 @@ const Build = (() => {
     window.removeEventListener('blur', onBlur);
     if (typeof SFX !== 'undefined') SFX.close();
     const saved = opts.persist ? opts.persist() : false;
-    if (saved && typeof StationUI !== 'undefined' && StationUI.notify) StationUI.notify('Station layout saved locally', 'good', undefined, { transient: true });
+    if (saved && typeof StationUI !== 'undefined' && StationUI.notify) StationUI.notify('Ship layout saved locally', 'good', undefined, { transient: true });
     if (opts.world && opts.world.refit) opts.world.refit();     // recenter the live world on the new build
     if (opts.world && opts.world.start) opts.world.start();     // resume the live sim with the new build
     if (opts.onClose) opts.onClose();
@@ -5728,7 +5728,7 @@ const Build = (() => {
     const tier = tierFor(tiles);
     if (!first && tier !== lastTier) { sfx('milestone'); announceTier(tier); }
     lastTier = tier;
-    sub.innerHTML = '<span class="refit-tier">' + esc(tier) + '</span>' + esc(' · ' + bits.join(' · '));
+    sub.innerHTML = '<span class="refit-tier">USS THESEUS</span>' + esc(' · ' + bits.join(' · '));
   }
   // deck tiles → the station's size word. Thresholds are round numbers, not tuned: they exist to
   // give a growing floor a few named landmarks, and every one is reachable from minute one.

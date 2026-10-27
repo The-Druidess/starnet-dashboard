@@ -548,6 +548,11 @@ test/worldlight.test.js
 test/worldlight-receiver.test.mjs
 test/state-truth-overlap.test.js
 test/world-setskin.test.js
+test/tom-paris-skin.test.js
+test/chief-science-officer-skin.test.js
+test/quark-skin.test.js
+test/world-commander.test.js
+test/q-terminal.test.js
 test/capprop-map.contract.test.js
 test/dock-terms-open.test.js
 test/settings-p1-ui.test.js
@@ -1103,3 +1108,5 @@ test/prose-links-desktop.test.js
 test/comms-receipts-count.test.js
 test/rail-agent-empty-archived.test.js
 test/run-stop-handles.test.js
+test/theseus-branding.test.js
+test/crew-room-order.test.js

@@ -229,6 +229,7 @@ const IndustrialTextures = (() => {
 
   function floor(ctx, X, Y, size, tx, ty, id = 'plate', base, opts) {
     if (!enabled()) return false;
+    if (id === 'carpet') return false;
     if (opts && opts.detail === 0) return false;
     const im = floorMaterials.includes(id) ? materialImage('floor-' + id, base, 1.25) : material(floorArtName(floorIds.includes(id) ? id : 'plate'), base);
     if (!im) return false;
@@ -285,6 +286,7 @@ const IndustrialTextures = (() => {
   }
   function wall(ctx, X, Y, width, height, tx, id = 'bulkhead', base, opts) {
     if (!enabled()) return false;
+    if (id === 'cruiser') return false;
     if (id === 'viewport') return false; // glass and its authored frame have a separate painter
     if (opts && opts.detail === 0) return false;
     const im = wallImage(id, base);
@@ -301,6 +303,7 @@ const IndustrialTextures = (() => {
   }
   function wallStrip(height, id = 'bulkhead', base, opts) {
     if (!enabled()) return null;
+    if (id === 'cruiser') return null; // Native ship panels must also wrap side faces.
     if (id === 'viewport') return null;
     if (opts && opts.detail === 0) return null;
     const key = [height, id, base || '', opts && opts.detail,projectionReview?lighting.wallGain:1].join(':');

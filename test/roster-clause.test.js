@@ -25,11 +25,11 @@ const X = new Function(src + '\nreturn { baseIdentity, orchestratorClause, LEGAC
 
 // ---- A. the fresh orchestrator identity is TIMELESS: no crew-size claim to go stale ----
 const fresh = X.baseIdentity('ULTRA', 'orchestrator');
-A.ok(fresh.indexOf('OVERSEER') !== -1, 'orchestrator identity still names the OVERSEER role');
+A.ok(fresh.indexOf("station's Commander") !== -1, 'orchestrator identity names the Commander role');
 A.ok(fresh.indexOf('right now its only agent') === -1, 'no frozen "only agent" claim in a fresh identity');
 A.ok(fresh.indexOf('you gain a team.dispatch tool') === -1, 'no frozen tool-arrival promise in a fresh identity');
 A.ok(fresh.indexOf(X.orchestratorClause()) !== -1, 'baseIdentity composes the shared orchestratorClause (single source for the migration)');
-A.ok(X.baseIdentity('ULTRA', 'specialist').indexOf('OVERSEER') === -1, 'specialists never get the overseer clause');
+A.ok(X.baseIdentity('ULTRA', 'specialist').indexOf("station's Commander") === -1, 'specialists never get the Commander clause');
 
 // ---- B. migration: legacy baked block -> byte-equal to a fresh default ----
 const core = X.baseIdentity('ULTRA', 'specialist');               // the role-free identity paragraph

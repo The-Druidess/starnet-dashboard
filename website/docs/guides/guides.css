@@ -14,7 +14,7 @@
 }
 .fm-hero .fh-kicker{ font-size:15px; letter-spacing:3px; color:var(--amber-d); margin-bottom:2px; }
 .fm-hero h1{ margin:0 0 16px; }
-.fm-hero .fh-sub{ margin:0 0 14px; font-size:18px; color:rgba(236,224,207,.5); letter-spacing:.5px; }
+.fm-hero .fh-sub{ margin:0 0 14px; font-size:18px; color:rgba(var(--ink-rgb),.5); letter-spacing:.5px; }
 .fm-hero svg{ display:block; width:100%; height:auto; }
 
 /* ================= QUEST BOARD (hub) ================= */
@@ -26,7 +26,7 @@
   border:1px solid var(--line); background:var(--panel);
   transition:border-color .15s, box-shadow .15s, transform .15s;
 }
-a.quest:hover{ border-color:var(--amber); box-shadow:0 0 26px rgba(255,140,30,.16); transform:translateY(-2px); }
+a.quest:hover{ border-color:var(--amber); box-shadow:0 0 26px rgba(var(--brand-rgb),.16); transform:translateY(-2px); }
 .quest{ display:flex; flex-direction:column; }
 .quest .q-thumb{
   border-bottom:1px solid var(--line); background:rgba(0,0,0,.42);
@@ -36,7 +36,7 @@ a.quest:hover{ border-color:var(--amber); box-shadow:0 0 26px rgba(255,140,30,.1
 .quest .q-thumb svg{ max-height:130px; width:auto; max-width:100%; }
 .quest .q-body{ padding:13px 16px 15px; flex:1; }
 .quest .q-title{ font-size:22px; letter-spacing:1.5px; color:var(--amber-b); display:block; margin-bottom:5px; }
-a.quest:hover .q-title{ text-shadow:0 0 12px rgba(255,157,47,.45); }
+a.quest:hover .q-title{ text-shadow:0 0 12px rgba(var(--brand-rgb),.45); }
 .quest .q-blurb{ font-size:16.5px; line-height:1.5; color:var(--ink-d); margin:0 0 11px; }
 
 .q-tags{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
@@ -47,7 +47,7 @@ a.quest:hover .q-title{ text-shadow:0 0 12px rgba(255,157,47,.45); }
 }
 .tag.hot{ border-color:var(--amber-d); color:var(--amber-b); }
 .pips{ letter-spacing:2px; font-size:15px; color:var(--amber); }
-.pips i{ font-style:normal; color:rgba(236,224,207,.22); }
+.pips i{ font-style:normal; color:rgba(var(--ink-rgb),.22); }
 
 .quest.locked{ opacity:.5; }
 .quest.locked .q-title{ color:var(--ink-d); }
@@ -82,7 +82,7 @@ a.quest:hover .q-title{ text-shadow:0 0 12px rgba(255,157,47,.45); }
   position:absolute; left:0; top:0;
   width:40px; height:40px; box-sizing:border-box;
   display:flex; align-items:center; justify-content:center;
-  background:var(--amber); color:#120a02; font-size:19px; letter-spacing:1px;
+  background:var(--amber); color:#021407; font-size:19px; letter-spacing:1px;
 }
 .buildsteps .b-title{ display:block; font-size:20px; letter-spacing:1.2px; color:var(--amber-b); margin:0 0 7px; }
 .buildsteps p{ margin:0 0 8px; font-size:16.5px; line-height:1.55; }
@@ -98,8 +98,8 @@ a.quest:hover .q-title{ text-shadow:0 0 12px rgba(255,157,47,.45); }
 .key{
   display:inline-block; min-width:22px; text-align:center;
   font-family:'VT323',monospace; font-size:17px; line-height:1.3;
-  color:#120a02; background:var(--amber);
-  border:1px solid var(--amber); border-bottom:3px solid #a35b12;
+  color:#021407; background:var(--amber);
+  border:1px solid var(--amber); border-bottom:3px solid #247e3c;
   padding:0 6px; margin:0 3px;
 }
 
@@ -108,11 +108,11 @@ a.quest:hover .q-title{ text-shadow:0 0 12px rgba(255,157,47,.45); }
 @media (max-width:760px){ .compare{ grid-template-columns:1fr; } }
 .cmp{ border:1px solid var(--line); background:rgba(0,0,0,.32); padding:14px 14px 12px; }
 .cmp.good{ border-left:3px solid var(--amber); }
-.cmp.bad{ border-left:3px solid rgba(236,224,207,.25); }
+.cmp.bad{ border-left:3px solid rgba(var(--ink-rgb),.25); }
 .cmp svg{ display:block; width:100%; height:auto; margin-bottom:9px; }
 .cmp .c-verdict{ font-size:19px; letter-spacing:2px; margin-bottom:3px; }
 .cmp.good .c-verdict{ color:var(--amber-b); }
-.cmp.bad .c-verdict{ color:rgba(236,224,207,.42); }
+.cmp.bad .c-verdict{ color:rgba(var(--ink-rgb),.42); }
 .cmp p{ margin:0; font-size:16px; line-height:1.5; }
 
 /* ================= PATTERN / RECIPE CARDS ================= */
@@ -163,7 +163,7 @@ a.quest:hover .q-title{ text-shadow:0 0 12px rgba(255,157,47,.45); }
 /* ================= SECTION HEADER ================= */
 .docs-main h2{ display:flex; align-items:center; gap:12px; }
 .docs-main h2 .h-num{
-  font-size:15px; letter-spacing:2px; color:#120a02; background:var(--amber-d); padding:1px 7px;
+  font-size:15px; letter-spacing:2px; color:#021407; background:var(--amber-d); padding:1px 7px;
 }
 
 /* ================= collapsible Q&A ================= */
@@ -172,29 +172,29 @@ a.quest:hover .q-title{ text-shadow:0 0 12px rgba(255,157,47,.45); }
 .qa > summary::-webkit-details-marker{ display:none; }
 .qa > summary::before{ content:"+ "; color:var(--amber-d); }
 .qa[open] > summary::before{ content:"\2013 "; }
-.qa > summary:hover{ background:rgba(255,157,47,.06); }
+.qa > summary:hover{ background:rgba(var(--brand-rgb),.06); }
 .qa .qa-body{ padding:0 16px 12px; border-top:1px solid var(--line); }
 .qa .qa-body p{ margin:10px 0 0; font-size:16px; line-height:1.55; }
 
 /* ================= SCHEMATIC PARTS ================= */
-.d-machine{ fill:rgba(255,157,47,.07); stroke:var(--amber-d); stroke-width:1.5; }
-.d-machine.d-lit{ fill:rgba(255,157,47,.2); stroke:var(--amber); }
+.d-machine{ fill:rgba(var(--brand-rgb),.07); stroke:var(--amber-d); stroke-width:1.5; }
+.d-machine.d-lit{ fill:rgba(var(--brand-rgb),.2); stroke:var(--amber); }
 .d-belt{ fill:rgba(0,0,0,.55); }
 .d-inner{ fill:rgba(0,0,0,.55); }
-.d-plate{ fill:rgba(255,157,47,.3); }
-.d-chute{ fill:rgba(0,0,0,.8); stroke:rgba(255,157,47,.3); stroke-width:1; }
+.d-plate{ fill:rgba(var(--brand-rgb),.3); }
+.d-chute{ fill:rgba(0,0,0,.8); stroke:rgba(var(--brand-rgb),.3); stroke-width:1; }
 .d-rail line{ stroke:var(--amber-d); stroke-width:1.5; }
 .d-chev polyline, .d-chev line{ fill:none; stroke:var(--amber); stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round; }
 .d-led{ fill:var(--amber); }
-.d-crate{ fill:#8a5a25; stroke:#d99a3e; stroke-width:1.2; }
-.d-crate-top{ fill:#d99a3e; }
+.d-crate{ fill:#246a39; stroke:#44bd69; stroke-width:1.2; }
+.d-crate-top{ fill:#44bd69; }
 .d-shadow{ fill:rgba(0,0,0,.6); }
 .d-label text{ fill:var(--amber-b); font-family:'VT323',monospace; font-size:15px; letter-spacing:1.5px; }
-.d-label.d-bad text{ fill:rgba(236,224,207,.4); }
+.d-label.d-bad text{ fill:rgba(var(--ink-rgb),.4); }
 .d-sub text{ fill:var(--ink-d); font-family:'VT323',monospace; font-size:14px; letter-spacing:.5px; }
 .d-note text{ fill:var(--amber-d); font-family:'VT323',monospace; font-size:13.5px; letter-spacing:.5px; }
-.d-ghost{ fill:none; stroke:rgba(236,224,207,.22); stroke-width:1.5; stroke-dasharray:4 4; }
-.d-ghost-text text{ fill:rgba(236,224,207,.32); font-family:'VT323',monospace; font-size:14px; letter-spacing:1.5px; }
+.d-ghost{ fill:none; stroke:rgba(var(--ink-rgb),.22); stroke-width:1.5; stroke-dasharray:4 4; }
+.d-ghost-text text{ fill:rgba(var(--ink-rgb),.32); font-family:'VT323',monospace; font-size:14px; letter-spacing:1.5px; }
 
 /* --- MOTION: treads march, crates ride, the drive LED blinks --- */
 @keyframes fm-march   { from { transform:translateX(0); } to { transform:translateX(30px); } }
@@ -225,15 +225,15 @@ a.quest:hover .q-title{ text-shadow:0 0 12px rgba(255,157,47,.45); }
 .alt-a { animation:fm-alt 6s linear infinite; }
 .alt-b { animation:fm-alt 6s linear infinite; animation-delay:-3s; }
 /* dial pills (night shift guide) */
-.d-pill{ fill:rgba(0,0,0,.5); stroke:rgba(255,157,47,.3); stroke-width:1; }
-.d-pill.on{ fill:rgba(255,157,47,.22); stroke:var(--amber); }
-.d-pill-t text{ fill:rgba(236,224,207,.5); font-family:'VT323',monospace; font-size:13.5px; letter-spacing:1.5px; text-anchor:middle; }
+.d-pill{ fill:rgba(0,0,0,.5); stroke:rgba(var(--brand-rgb),.3); stroke-width:1; }
+.d-pill.on{ fill:rgba(var(--brand-rgb),.22); stroke:var(--amber); }
+.d-pill-t text{ fill:rgba(var(--ink-rgb),.5); font-family:'VT323',monospace; font-size:13.5px; letter-spacing:1.5px; text-anchor:middle; }
 .d-pill-t.on text{ fill:var(--amber-b); }
-.d-bar{ fill:rgba(0,0,0,.55); stroke:rgba(255,157,47,.3); stroke-width:1; }
+.d-bar{ fill:rgba(0,0,0,.55); stroke:rgba(var(--brand-rgb),.3); stroke-width:1; }
 .d-fill{ fill:var(--amber); }
 .d-node{ fill:rgba(0,0,0,.6); stroke:var(--amber-d); stroke-width:1.5; }
-.d-node.done{ fill:rgba(255,157,47,.35); stroke:var(--amber); }
-.d-node.here{ fill:rgba(255,157,47,.15); stroke:var(--amber); stroke-width:2.5; }
+.d-node.done{ fill:rgba(var(--brand-rgb),.35); stroke:var(--amber); }
+.d-node.here{ fill:rgba(var(--brand-rgb),.15); stroke:var(--amber); stroke-width:2.5; }
 .d-path{ fill:none; stroke:var(--amber-d); stroke-width:2; stroke-dasharray:5 5; }
 .d-path.done{ stroke:var(--amber); stroke-dasharray:none; }
 @keyframes fm-glow { 0%,100% { opacity:.35; } 50% { opacity:1; } }
@@ -242,11 +242,11 @@ a.quest:hover .q-title{ text-shadow:0 0 12px rgba(255,157,47,.45); }
 @keyframes fm-pop { 0%,70% { transform:translateY(0); opacity:0; } 75% { opacity:1; } 100% { transform:translateY(-26px); opacity:0; } }
 .pop{ animation:fm-pop 3s ease-out infinite; }
 .pop text{ fill:var(--amber-b); font-family:'VT323',monospace; font-size:16px; letter-spacing:1px; text-anchor:middle; }
-.d-moon{ fill:rgba(255,157,47,.18); stroke:var(--amber-d); stroke-width:1.5; }
-.d-tick{ stroke:rgba(255,157,47,.25); stroke-width:1; }
+.d-moon{ fill:rgba(var(--brand-rgb),.18); stroke:var(--amber-d); stroke-width:1.5; }
+.d-tick{ stroke:rgba(var(--brand-rgb),.25); stroke-width:1; }
 .d-beat{ fill:var(--amber); }
-.d-beat.skip{ fill:none; stroke:rgba(236,224,207,.35); stroke-width:1.5; }
-.d-clock text{ fill:rgba(236,224,207,.4); font-family:'VT323',monospace; font-size:12.5px; letter-spacing:1px; text-anchor:middle; }
+.d-beat.skip{ fill:none; stroke:rgba(var(--ink-rgb),.35); stroke-width:1.5; }
+.d-clock text{ fill:rgba(var(--ink-rgb),.4); font-family:'VT323',monospace; font-size:12.5px; letter-spacing:1px; text-anchor:middle; }
 @media (prefers-reduced-motion: reduce){ .march-w, .march-n, .ride-s, .alt-a, .alt-b, .glow, .pop{ animation:none !important; } .ride-s{ transform:translateY(var(--ride-mid,150px)); } .pop{ opacity:0; } }
 .blink   { animation:fm-blink 1.1s steps(1,end) infinite; }
 .ride    { animation:fm-ride 4.4s linear infinite; }
@@ -300,17 +300,17 @@ a.quest:hover .q-title{ text-shadow:0 0 12px rgba(255,157,47,.45); }
 .st .st-n{
   display:inline-flex; align-items:center; justify-content:center;
   width:26px; height:26px; margin-bottom:8px;
-  background:var(--amber); color:#120a02; font-size:16px;
+  background:var(--amber); color:#021407; font-size:16px;
 }
 .st p{ margin:0; font-size:16px; line-height:1.5; color:var(--ink-d); }
 .st b{ color:var(--amber-b); }
 
 /* the phone-and-minion hero (channels guide) */
 .d-phonebody{ fill:rgba(0,0,0,.5); stroke:var(--amber); stroke-width:2; }
-.d-phonescreen{ fill:#0d0a06; stroke:rgba(255,157,47,.3); stroke-width:1; }
-.bub-you{ fill:rgba(255,157,47,.55); }
-.bub-min{ fill:rgba(255,157,47,.14); stroke:rgba(255,157,47,.35); stroke-width:1; }
-.d-minion{ fill:rgba(255,157,47,.12); stroke:var(--amber); stroke-width:1.6; }
+.d-phonescreen{ fill:#030a05; stroke:rgba(var(--brand-rgb),.3); stroke-width:1; }
+.bub-you{ fill:rgba(var(--brand-rgb),.55); }
+.bub-min{ fill:rgba(var(--brand-rgb),.14); stroke:rgba(var(--brand-rgb),.35); stroke-width:1; }
+.d-minion{ fill:rgba(var(--brand-rgb),.12); stroke:var(--amber); stroke-width:1.6; }
 .d-eye{ fill:var(--amber-b); }
 .d-signal{ fill:none; stroke:var(--amber-d); stroke-width:2; stroke-dasharray:6 6; animation:fm-sig 1.2s linear infinite; }
 .d-sigarrow{ fill:var(--amber-d); }
@@ -321,10 +321,10 @@ a.quest:hover .q-title{ text-shadow:0 0 12px rgba(255,157,47,.45); }
    Pixel art: never smooth it. */
 .gearstrip{ display:flex; flex-wrap:wrap; gap:18px 26px; justify-content:center; align-items:flex-end; padding:8px 0 4px; }
 .gearstrip .gs{ text-align:center; }
-.gearstrip img{ image-rendering:pixelated; height:104px; width:auto; display:block; margin:0 auto 6px; filter:drop-shadow(0 0 14px rgba(255,157,47,.14)); }
+.gearstrip img{ image-rendering:pixelated; height:104px; width:auto; display:block; margin:0 auto 6px; filter:drop-shadow(0 0 14px rgba(var(--brand-rgb),.14)); }
 .gearstrip .gs-n{ display:block; font-size:15px; letter-spacing:1.5px; color:var(--amber-b); }
 .gearstrip .gs-p{ display:block; font-size:13.5px; letter-spacing:1.5px; color:var(--amber-d); }
-.fm-hero .fh-cap{ margin:10px 0 2px; text-align:center; font-size:14px; letter-spacing:1px; color:rgba(236,224,207,.4); }
+.fm-hero .fh-cap{ margin:10px 0 2px; text-align:center; font-size:14px; letter-spacing:1px; color:rgba(var(--ink-rgb),.4); }
 
 .gearcards{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:18px 0; }
 @media (max-width:900px){ .gearcards{ grid-template-columns:repeat(2,1fr); } }

@@ -46,6 +46,9 @@ for (const url of ['/api/tts', '/api/realtime/session', '/api/plugins/run', '/ap
   '/api/local-voice/warm', '/api/desktop/input', '/api/browser/view/click', '/api/hooks/allow']) {
   assert.match(guard.routeRefusal('POST', url), /Strict finance/);
 }
+assert.match(guard.routeRefusal('POST', '/api/connectors'), /Strict finance/,
+  'adding PixelLab must not bypass financial admission during connector initialization');
+denied(() => guard.assertTool({ name: 'mcp.pixellab.create_character', args: {} }, { provenance: 'connector' }));
 for (const url of ['/api/run', '/api/cancel', '/api/station/ack', '/api/save', '/api/budget/caps', '/api/halt']) {
   assert.equal(guard.routeRefusal('POST', url), null);
 }
@@ -90,7 +93,9 @@ assert.throws(() => calendarTotals([{ ts: now + 1, usd: 1 }], now), /Future/);
 async function main() {
   let calls = 0;
   const fetchImpl = async (url, init) => { calls++; assert.equal(init.redirect, 'manual'); return { status: 200 }; };
-  for (const address of ['https://api.anthropic.com/v1/messages', 'http://127.0.0.1:8189/mcp', 'http://127.0.0.1:11434/api/pull']) {
+  for (const address of ['https://api.anthropic.com/v1/messages', 'https://api.pixellab.ai/mcp',
+    'https://api.pixellab.ai/v2/create-character-with-8-directions',
+    'http://127.0.0.1:8189/mcp', 'http://127.0.0.1:11434/api/pull']) {
     await assert.rejects(guard.fetch(fetchImpl, address, { method: 'POST', body: '{"model":"qwen3.5:4b"}' }), error => error.code === CODE);
   }
   await assert.rejects(guard.fetch(fetchImpl, 'http://127.0.0.1:11434/api/chat', { method: 'POST', body: '{"model":"remote:cloud"}' }));

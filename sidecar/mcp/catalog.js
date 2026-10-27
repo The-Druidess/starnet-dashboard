@@ -260,6 +260,10 @@
       url: 'https://mcp.monday.com/mcp', official: true, homepage: 'https://monday.com',
       blurb: 'Create and update monday.com boards and items. Needs monday.com sign-in (OAuth).' },
     // Design
+    { id: 'pixellab', name: 'PixelLab', category: 'Design', authType: 'apikey', transport: 'http',
+      url: 'https://api.pixellab.ai/mcp', official: true, homepage: 'https://www.pixellab.ai',
+      aliases: ['pixel art', 'pixelorama', 'sprite generation', 'character animations', 'tilesets'],
+      blurb: 'Generate pixel-art characters, directional sprites, animations, and tilesets. Uses your PixelLab account token and may consume paid credits. Strict finance blocks connection and generation until a guaranteed maximum charge is verified; a subscription or balance estimate alone is not authorization.' },
     { id: 'canva', name: 'Canva', category: 'Design', authType: 'oauth', transport: 'http',
       url: 'https://mcp.canva.com/mcp', official: true, homepage: 'https://canva.com',
       blurb: 'Generate and manage Canva designs. Needs Canva sign-in (OAuth).' },

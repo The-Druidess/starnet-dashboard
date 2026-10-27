@@ -14,6 +14,7 @@ const path = require('path');
 const rd = f => fs.readFileSync(path.join(__dirname, '..', 'frontend', f), 'utf8');
 const AP = require('../frontend/app/agentportraits.js');
 const LW = require('../frontend/app/linewatch.js');
+const manifest = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'frontend', 'assets', 'sprites', 'manifest.json'), 'utf8'));
 
 // ---- the fit law ----
 let p = AP.fitPlan(30, 43, 64, 80);            // t = 1.49 → ×1 fills 67% → sharp: NN ×2 then smooth down
@@ -36,6 +37,13 @@ for (const [sw, sh, W, H] of [[28, 39, 32, 38], [43, 46, 60, 76], [31, 44, 90, 1
   A.ok(q.mode === 'nn' || q.dw < sw * q.pre || q.dh < sh * q.pre, 'every smoothed step is a DOWNSCALE ' + [sw, sh, W, H]);
 }
 A.eq(AP.fitPlan(0, 0, 10, 10), null, 'no art, no plan');
+A.eq(AP.portraitPath('engineer', manifest), 'assets/sprites/engineer/characters/Seated/Idle/rotations/south.png', 'Engineer portrait resolves its nested south-facing sprite from the manifest');
+A.eq(AP.portraitPath('ambassador', manifest), 'assets/sprites/ambassador/characters/Idle/Idle/rotations/south.png', 'Ambassador portrait resolves its nested south-facing sprite from the manifest');
+A.eq(AP.portraitPath('missing-set', manifest), null, 'an unlisted sprite set has no portrait path');
+for (const set of ['engineer', 'ambassador']) {
+  const rel = AP.portraitPath(set, manifest).replace(/^assets\/sprites\//, '');
+  A.ok(fs.existsSync(path.join(__dirname, '..', 'frontend', 'assets', 'sprites', rel)), set + ' portrait frame exists at its manifest path');
+}
 
 // ---- one pipeline, shared ----
 const su = rd('app/stationui.js'), ap = rd('app/agentportraits.js');
@@ -44,6 +52,7 @@ A.ok(!/drawPortrait\._buf/.test(su), 'the dossier no longer keeps its own copy o
 A.ok(/SPRITES\.bodyScale/.test(ap) && /SPRITES\.drawBody\(/.test(ap), 'renderBody cancels the floor scale and draws the real body');
 A.ok(/SPRITES\.ensureSkin\(a\.skin\)/.test(ap) && /agt-sil/.test(ap), 'a late skin loads through ensureSkin behind a silhouette');
 A.ok(/thumbs\.has\(key\)/.test(ap) && /crops\.has\(bk\)/.test(ap), 'thumbs and native crops are cached (repaints never re-run the pipeline)');
+A.ok(/spriteManifest\(\)\.then\(manifest =>/.test(ap) && /source\.src = path/.test(ap), 'crew portraits load each skin through its manifest-resolved south frame');
 
 // ---- no letter avatar in the Workflow panel ----
 const panel = rd('app/workflowpanel.js'), code = panel.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/\/\/.*/g, ' ');

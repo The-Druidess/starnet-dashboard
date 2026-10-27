@@ -18,13 +18,13 @@
 'use strict';
 
 const WorldSurface = (() => {
-  const VERSION = 6;
+  const VERSION = 7;
   const CELL = 12;
   const MATERIALS = Object.freeze([
     'spine', 'alloy', 'plate', 'panel', 'tile', 'tread', 'soft', 'grate', 'hex',
-    'plank', 'turf', 'diamond', 'resin', 'ceramic', 'cargo', 'runner', 'treadway', 'meshway', 'basalt', 'parquet', 'rubber', 'slotted', 'terrazzo', 'octile', 'flightdeck', 'lunar', 'maggrid', 'habitat'
+    'plank', 'turf', 'diamond', 'resin', 'ceramic', 'cargo', 'runner', 'treadway', 'meshway', 'basalt', 'parquet', 'rubber', 'slotted', 'terrazzo', 'octile', 'flightdeck', 'lunar', 'maggrid', 'habitat', 'carpet'
   ]);
-  const WALLS = Object.freeze(['bulkhead', 'courses', 'service', 'plating', 'ribbed', 'panelled', 'pipework', 'pressure', 'radiator', 'utility', 'acoustic', 'braced', 'machinery', 'insulation']);
+  const WALLS = Object.freeze(['bulkhead', 'courses', 'service', 'plating', 'ribbed', 'panelled', 'pipework', 'pressure', 'radiator', 'utility', 'acoustic', 'braced', 'machinery', 'insulation', 'cruiser']);
   const materialSet = new Set(MATERIALS), wallSet = new Set(WALLS);
   const palettes = new Map();
   const remastered = () => typeof IndustrialTextures !== 'undefined' && IndustrialTextures &&
@@ -130,6 +130,16 @@ const WorldSurface = (() => {
     const tx = Math.floor(worldTx || 0), ty = Math.floor(worldTy || 0), wx = tx * CELL, wy = ty * CELL;
     p(0, 0, CELL, CELL, pal.base);
     if (!d) return true;
+
+    if (mat === 'carpet') {
+      // Seamless pile, not a grid of hard-edged metal tiles.
+      for (let y = 0; y < CELL; y++) for (let x = 0; x < CELL; x++) {
+        const n = hash(wx + x, wy + y, 419);
+        if (n % 7 === 0) p(x, y, 1, 1, pal.soft);
+        else if (n % 11 === 0) p(x, y, 1, 1, pal.fine);
+      }
+      return true;
+    }
 
     if (['flightdeck', 'lunar', 'maggrid', 'habitat'].includes(mat)) {
       const slab = mat === 'lunar', width = slab ? 48 : 24, height = 24;
@@ -397,6 +407,18 @@ const WorldSurface = (() => {
     };
     p(0, 0, CELL, h, pal.shade);
     if (!d) return true;
+    if (material === 'cruiser') {
+      const lx = mod(wx, 24), rail = Math.round(h * 0.72);
+      p(0, 0, CELL, h, pal.base);
+      p(0, 0, CELL, 1, pal.edge);
+      p(-lx, 1, 1, rail - 1, pal.shade);
+      p(1 - lx, 1, 1, rail - 1, pal.fine);
+      p(0, rail, CELL, 1, pal.warm);
+      p(0, rail + 1, CELL, 2, pal.deep);
+      p(0, rail + 3, CELL, h - rail - 3, pal.recess);
+      p(0, h - 2, CELL, 2, pal.deep);
+      return true;
+    }
     if (['pressure', 'radiator', 'utility', 'acoustic'].includes(material)) {
       const lx = mod(wx, material === 'acoustic' ? 8 : 12);
       p(0, 0, CELL, h, pal.base);

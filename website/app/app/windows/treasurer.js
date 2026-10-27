@@ -47,25 +47,6 @@ const TreasurerPortal = (() => {
     if (!liveStatus) return 'CHECKING';
     return liveStatus.enforcement?.state || 'UNKNOWN';
   }
-  function crewOrder(roster) {
-    const ordered = roster.map((a, i) => ({ a, i }));
-    const index = ordered.findIndex(entry => isPortal(entry.a.id));
-    const station = typeof App !== 'undefined' && App.station ? App.station() : null;
-    if (index < 0 || !station?.props || !station.roomAt || !station.capForProp) return ordered;
-    const props = station.props();
-    // agentRoomId is a bay-capability seam; this officer needs no workflow bay.
-    const roomOf = id => {
-      const desk = props.find(p => p.agentId === id && station.capForProp(p.t) === 'computer');
-      return desk ? station.roomAt(desk.x, desk.y) : station.agentRoomId?.(id);
-    };
-    const room = roomOf(avatarId);
-    if (!room) return ordered;
-    const [treasurer] = ordered.splice(index, 1);
-    let after = -1;
-    ordered.forEach((entry, i) => { if (roomOf(entry.a.id) === room) after = i; });
-    ordered.splice(after < 0 ? index : after + 1, 0, treasurer);
-    return ordered;
-  }
   async function activateAdviser() {
     if (adviser()) return adviser();
     await refreshStatus();
@@ -267,6 +248,6 @@ const TreasurerPortal = (() => {
   }
 
   if (typeof StationUI !== 'undefined') StationUI.registerWindow('treasurer', 'TREASURER - FINANCE PORTAL', build, {});
-  return { avatarId, isPortal, init, openFor, summary, officerStatus, dossierHTML, wireDossier, refreshStatus, activateAdviser, crewOrder };
+  return { avatarId, isPortal, init, openFor, summary, officerStatus, dossierHTML, wireDossier, refreshStatus, activateAdviser };
 })();
 if (typeof module !== 'undefined' && module.exports) module.exports = TreasurerPortal;

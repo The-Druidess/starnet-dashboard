@@ -123,20 +123,25 @@ async function main() {
   ok(api.enabled()&&api.isRemaster(),'complete asset set enables the remaster');
   equal(pending.dataset.textureRevision,'bridge-remaster','loaded pack exposes its actual revision');
   const floorPaths=new Set(),wallPaths=new Set();
+  equal(api.floor(empty.getContext('2d'),0,0,12,0,0,'carpet'),false,'ship carpet retains native woven recipe with art pack loaded');
+  equal(api.wall(empty.getContext('2d'),0,0,12,39,0,'cruiser'),false,'ship panels retain native recipe with art pack loaded');
+  equal(api.wallStrip(39,'cruiser'),null,'ship panel side strips retain native recipe');
   for(const id of Surface.MATERIALS) {
+    if(id==='carpet') continue;
     const d=draw(api,'floor',0,0,12,0,0,id);
     const paths=[...d.image.paths]; equal(paths.length,1,id+' floor samples one authored source');
     const asset = ['flightdeck','lunar','maggrid','habitat'].includes(id) ? '/floor-'+id+'.png' : '/remaster/floors/'+id+(['basalt','rubber','soft'].includes(id)?'-v2':'')+'.png';
     ok(paths[0].endsWith(asset),id+' selection loads its own floor art'); floorPaths.add(paths[0]);
   }
   for(const id of Surface.WALLS) {
+    if(id==='cruiser') continue;
     const d=draw(api,'wall',0,0,12,39,0,id);
     const paths=[...d.image.paths]; equal(paths.length,1,id+' wall samples one authored source');
     const asset = ['pressure','radiator','utility','acoustic'].includes(id) ? '/wall-'+id+'.png' : '/remaster/walls/'+id+(['bulkhead','courses','panelled','pipework','ribbed','service'].includes(id)?'-v3':'')+'.png';
     ok(paths[0].endsWith(asset),id+' selection loads its own wall art'); wallPaths.add(paths[0]);
   }
-  equal(floorPaths.size,Surface.MATERIALS.length,'no floor selection silently shares a fallback image');
-  equal(wallPaths.size,Surface.WALLS.length,'no wall selection silently shares a fallback image');
+  equal(floorPaths.size,Surface.MATERIALS.length-1,'no image-authored floor selection silently shares a fallback image');
+  equal(wallPaths.size,Surface.WALLS.length-1,'no image-authored wall selection silently shares a fallback image');
   const failure=load({fail:'/remaster/floors/hex.png'}); await failure.finish();
   equal(failure.api.enabled(),false,'one failed asset prevents a mixed old/new station');
   equal(failure.dataset.textureRevision,'native','failed pack reports native fallback');

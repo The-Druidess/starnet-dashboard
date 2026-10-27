@@ -49,8 +49,11 @@ const SPRITES = (() => {
      floor at the SAME size, and stays sharp when the camera zooms in.
      ultron keeps more of his source size so he towers over the crew. */
   const SCALE = { ultron: 0.60 };   // skins read their scale from DATA.SKINS; ULTRON is special
+  function skinForSet(setName) {
+    return DATA.SKINS[setName] || Object.values(DATA.SKINS).find(s => s.set === setName);
+  }
   function drawScaleFor(setName) {
-    const skin = DATA.SKINS[setName] || Object.values(DATA.SKINS).find(s => s.set === setName);
+    const skin = skinForSet(setName);
     return (skin && skin.scale) || SCALE[setName] || 2 / 3;
   }
   /* The set drawBody will resolve for this body, and the scale it will draw at. Exported (bodyScale)
@@ -133,7 +136,7 @@ const SPRITES = (() => {
     const cacheKey = set + ':' + sc;
     if (cycleCache[cacheKey] != null) return cycleCache[cacheKey];
     // Approved masters contain 68 rows of transparent packing. They are not leg length.
-    const visibleHeight = isReviewSet(set) ? 76 : (DATA.SKINS[set]?.sourceStandingHeight || frameH);
+    const visibleHeight = isReviewSet(set) ? 76 : (skinForSet(set)?.sourceStandingHeight || frameH);
     const fallback = visibleHeight * sc * CYCLE_PER_HEIGHT;
     const side = frames[set + '.walk.east'] || frames[set + '.walk.west'];
     const idleFr = frames[set + '.rot.east'] || frames[set + '.rot.west'];
@@ -661,7 +664,7 @@ const SPRITES = (() => {
     const x = snap(b.px - dw / 2);
     // Keep the approved boots against the floor contact. The legacy three-world-pixel
     // lift separated an 18px body from its shadow by one sixth of its visible height.
-    const sourceHeight = isReviewSet(set) ? 76 : DATA.SKINS[set]?.sourceStandingHeight;
+    const sourceHeight = isReviewSet(set) ? 76 : skinForSet(set)?.sourceStandingHeight;
     const GROUND_BITE = sourceHeight ? -0.25 : -3;
     b._renderStandingHeight = sourceHeight ? sourceHeight * sc : null;
     // SEAT LIFT: a body seated on a raised single-tile seat (stool/chair) draws its pixels this many px

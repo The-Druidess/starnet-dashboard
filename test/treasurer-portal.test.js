@@ -132,7 +132,7 @@ async function main() {
     agentLive: () => false, lineTestOnly: () => false,
     $: selector => ({ '#crew': list, '#crew-sum': sum, '#crew-search-empty': empty, '#stage-summary': stage })[selector],
   });
-  for (const name of ['duplicateAgentName', 'crewPortrait', 'crewRender', 'setCrewPortals', 'crewTick']) {
+  for (const name of ['duplicateAgentName', 'crewPortrait', 'crewManifestOrder', 'crewRender', 'setCrewPortals', 'crewTick']) {
     const fn = stationSource.match(new RegExp('  function ' + name + '\\([^\\n]*\\) \\{[\\s\\S]*?\\n  \\}'));
     assert(fn, name);
     vm.runInContext(fn[0], rail);
@@ -234,19 +234,6 @@ async function main() {
   assert.match(adviserSpec.manual, /cannot authorize payments/);
   assert.match(adviserSpec.manual, /Claude CLI remain blocked/);
   assert.equal(ui.officerStatus(a.id), 'GUARDING');
-  const manifest = [{ id: 'agent' }, { id: 'chief' }, { id: 'engineer' }, { id: 'writer' }, a];
-  const rooms = { agent: 'home', chief: 'bridge', engineer: 'bridge', writer: 'etsy', [a.id]: 'bridge' };
-  context.App.station = () => ({
-    props: () => Object.keys(rooms).map(id => ({ agentId: id, t: 'desk', x: id, y: 0 })),
-    capForProp: () => 'computer', roomAt: x => rooms[x],
-    agentRoomId: () => null,
-  });
-  const ordered = ui.crewOrder(manifest);
-  assert.deepEqual(Array.from(ordered, entry => entry.a.id), ['agent', 'chief', 'engineer', a.id, 'writer'], 'Treasurer joins the Bridge crew above workstation crews');
-  assert.deepEqual(Array.from(ordered, entry => entry.i), [0, 1, 2, 4, 3], 'dossier/portrait indices still reference the actual roster');
-  assert.equal(manifest[4], a, 'presentation ordering never mutates the runnable roster');
-  delete rooms[a.id];
-  assert.deepEqual(Array.from(ui.crewOrder(manifest), entry => entry.i), [0, 1, 2, 3, 4], 'an unassigned officer is not falsely grouped into the Bridge');
   await ui.activateAdviser();
   assert.equal(created, 1, 'activation is idempotent');
   changed();

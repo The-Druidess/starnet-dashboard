@@ -29,6 +29,9 @@ async function pack(missing = '', classic = false) {
 (async () => {
   const { textures: t, draws, ctx } = await pack();
   assert.equal(t.enabled(), true);
+  assert.equal(t.floor(ctx, 0, 0, 12, 0, 0, 'carpet', '#882f42'), false, 'native carpet never substituted with metal art');
+  assert.equal(t.wall(ctx, 0, 0, 12, 30, 0, 'cruiser', '#c6ad8b'), false, 'native ship panels never substituted with bulkhead art');
+  assert.equal(t.wallStrip(30, 'cruiser', '#c6ad8b'), null, 'side and curved faces use the native ship panel recipe');
   for (const name of ['remaster/shell', ...['monocoque', 'timber', 'clapboard', 'shingle', 'brick', 'stone', 'stucco', 'curtain', 'hedge', 'thermal', 'heatsink', 'truss', 'louver', 'ceramic'].map(id => 'shell-' + id)]) {
     const asset = 'assets/industrial/' + name + '-v2.png';
     assert.ok(draws.some(draw => draw.im.url === asset), asset + ' is loaded');

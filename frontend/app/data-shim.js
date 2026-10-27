@@ -19,6 +19,14 @@ function registerAgent(id, color) {
    here + a matching sprite set in assets/sprites/manifest.json. `scale` is the
    per-set downscale applied at tint time (crew sprites render on a 92px canvas). */
 DATA.SKINS = {
+  tom_paris: {"name":"Tom Paris","set":"approved_tom_paris","scale":0.25,"sourceStandingHeight":76,"collection":"star-trek"},
+  jean_luc_picard: {"name":"Jean-Luc Picard (Dixon Hill)","set":"approved_jean_luc_picard","scale":0.25,"sourceStandingHeight":76,"collection":"star-trek"},
+  q_judge: {"name":"Q (Judge Regalia)","set":"approved_q_judge","scale":0.25,"sourceStandingHeight":76,"collection":"star-trek"},
+  montgomery_scott: {"name":"Montgomery Scott (Scotty)","set":"approved_montgomery_scott","scale":0.25,"sourceStandingHeight":76,"collection":"star-trek"},
+  seven_of_nine: {"name":"Seven of Nine","set":"approved_seven_of_nine","scale":0.25,"sourceStandingHeight":76,"collection":"star-trek"},
+  chief_science_officer: {"name":"Geordi LaForge","set":"theseus_science_officer","scale":0.25,"sourceStandingHeight":76,"collection":"star-trek"},
+  quark: {"name":"Quark","set":"theseus_quark","scale":0.25,"sourceStandingHeight":76,"collection":"star-trek"},
+  amethyst_cadet: {"name":"Amethyst Cadet","set":"amethyst_cadet","scale":0.25,"sourceStandingHeight":76},
   blank: {"name":"Cadet","set":"approved_android","scale":0.25,"sourceStandingHeight":76},
   astronaut: {"name":"Retro Astronaut","set":"approved_astronaut","scale":0.25,"sourceStandingHeight":76},
   robot: {"name":"Robot","set":"approved_robot","scale":0.25,"sourceStandingHeight":76},
@@ -70,7 +78,21 @@ DATA.SKINS = {
   catinthehat: {"name":"Cat in the Hat","set":"approved_catinthehat","scale":0.25,"sourceStandingHeight":76},
   reptilian: {"name":"Reptilian","set":"approved_reptilian","scale":0.25,"sourceStandingHeight":76},
   elonmusk: {"name":"Elon Musk","set":"approved_elonmusk","scale":0.25,"sourceStandingHeight":76},
+  engineer: {"name":"Engineer","set":"engineer","scale":0.25,"sourceStandingHeight":76},
+  ambassador: {"name":"Ambassador","set":"ambassador","scale":0.25,"sourceStandingHeight":76},
 };
 // Keep the retired duplicate readable in old saves without offering it in the picker.
 Object.defineProperty(DATA.SKINS, 'minionchar', { value: DATA.SKINS.station_minion });
 DATA.DEFAULT_SKIN = 'blank';
+
+DATA.skinIds = function() {
+  const ids = Object.keys(DATA.SKINS);
+  const trek = id => DATA.SKINS[id].collection === 'star-trek';
+  const family = id => id === DATA.DEFAULT_SKIN || id.indexOf(DATA.DEFAULT_SKIN + '_') === 0;
+  return [
+    ...ids.filter(trek),
+    ...ids.filter(id => !trek(id) && id === DATA.DEFAULT_SKIN),
+    ...ids.filter(id => !trek(id) && id !== DATA.DEFAULT_SKIN && family(id)),
+    ...ids.filter(id => !trek(id) && !family(id))
+  ];
+};

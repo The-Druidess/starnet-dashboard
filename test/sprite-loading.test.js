@@ -1,11 +1,16 @@
 'use strict';
 const fs = require('fs');
 const path = require('path');
+const vm = require('vm');
 const A = require('./_assert.js');
 const Plan = require('../frontend/js/sprite-load-plan.js');
 
 const manifest = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'frontend', 'assets', 'sprites', 'manifest.json'), 'utf8'));
 const grouped = Plan.groupTracks(manifest.sprites);
+const catalogContext = vm.createContext({});
+vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'frontend', 'app', 'data-shim.js'), 'utf8') +
+  '\nglobalThis.skinCatalog = DATA.SKINS;', catalogContext);
+const catalog = JSON.parse(JSON.stringify(catalogContext.skinCatalog));
 const all = Object.entries(manifest.sprites);
 const planned = Object.values(grouped).flat();
 const initial = Plan.initialTracks(grouped, ['blank', 'ultron', 'blank']);
@@ -17,6 +22,19 @@ const appHtml = fs.readFileSync(path.join(__dirname, '..', 'frontend', 'index.ht
 
 A.eq(planned.length, all.length, 'every valid manifest track belongs to exactly one set');
 A.ok(grouped.blank && grouped.ultron, 'default skin and station leader have loadable sets');
+A.eq(catalog.engineer.set, 'engineer', 'Engineer skin resolves to its sprite set');
+A.eq(catalog.ambassador.set, 'ambassador', 'Ambassador skin resolves to its sprite set');
+for (const set of ['engineer', 'ambassador']) {
+  A.ok(grouped[set], `${set} tracks are included in the loader plan`);
+  for (const action of ['rot', 'walk', 'sit']) {
+    for (const direction of ['south', 'south-east', 'east', 'north-east', 'north', 'north-west', 'west', 'south-west']) {
+      A.ok(manifest.sprites[`${set}.${action}.${direction}`], `${set} has ${action} art for ${direction}`);
+    }
+  }
+}
+A.eq(manifest.sprites['engineer.walk.south'].length, 8, 'Engineer walking sequence keeps all eight frames');
+A.eq(manifest.sprites['ambassador.walk.south'].length, 6, 'Ambassador walking sequence keeps all six frames');
+A.eq(manifest.sprites['ambassador.sit.south'].length, 8, 'Ambassador seated idle frames and south pose are registered');
 A.eq(initial.length, grouped.blank.length + grouped.ultron.length, 'startup plan de-duplicates requested sets');
 A.ok(initialFrames > 0 && initialFrames < totalFrames * 0.12, 'startup fetches less than twelve percent of sprite frames');
 A.ok(totalFrames > 3000, 'budget assertion covers the expanded production manifest rather than a fixture');

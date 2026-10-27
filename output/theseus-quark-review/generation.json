@@ -1,0 +1,100 @@
+{
+  "character": "Quark",
+  "role": "Treasurer",
+  "status": "Directional art approved; runtime package installed; temporary Treasurer preview awaiting approval.",
+  "provider": "PixelLab",
+  "characterId": "6127edea-51c5-43ff-8d71-c870742b4af7",
+  "mode": "Pro",
+  "size": [80, 80],
+  "camera": "low top-down",
+  "directions": ["south", "south-east", "east", "north-east", "north", "north-west", "west", "south-west"],
+  "animations": 9,
+  "runtime": {
+    "skin": "quark",
+    "set": "theseus_quark",
+    "script": "../../scripts/generate-quark-sprites.py",
+    "frames": 64,
+    "tracks": 21,
+    "motionReference": "../../frontend/assets/sprites/approved_tom_paris",
+    "walking": "Eight six-frame cycles retargeted from StarNet Tom Paris articulated silhouettes, including bent knees, raised feet and swinging arms. Approved standing turns and head pixels preserved.",
+    "seated": "Four directional poses retargeted from existing seated silhouettes, including forward-bent thighs and knees rather than compressed standing legs.",
+    "typing": "Four north-facing frames retargeted from existing typing silhouettes, retaining elbow and forearm movement.",
+    "appearanceTransfer": "Neck-register each donor pose; fit torso and leg proportions; sample approved Quark patchwork; retain olive trousers and brown boots. Use continuous pixel coverage to avoid holes in diagonal poses.",
+    "review": "animation-preview.gif",
+    "additionalGenerationCost": 0,
+    "assignment": "Temporary World.setSkin preview only; saved Treasurer appearance unchanged."
+  },
+  "autoAdd": false,
+  "quotedIncludedGenerations": 10,
+  "includedGenerationsAvailableBeforeSubmission": 1983,
+  "bootColorRequirement": "brown, never green",
+  "outfitDetail": {
+    "script": "../../scripts/detail-quark-outfit.py",
+    "runAfter": "combine-quark-south-face.py and any base refinement or regeneration",
+    "southVest": "Transfer approved southeast center panel directly (x39 y41 width7 height13 to x36 y41), preserving its blue, burgundy and rust pattern instead of invented purple stripes.",
+    "northAndSouth": "Wider loose trouser legs with restrained inner-edge and cuff folds, based on SE/SW fabric volume. Remove harsh vertical leg stripes and bright boot bars; retain subdued brown boot edge and sole shading.",
+    "preserved": "Approved south face and neck and six other directions unchanged. North/south trouser silhouettes widened intentionally. Boots remain brown.",
+    "status": "Approved; included in the runtime package."
+  },
+  "combinedSouth": {
+    "candidate": "south-combined-candidate.png",
+    "comparison": "south-combined-comparison.png",
+    "script": "../../scripts/combine-quark-south-face.py",
+    "newCandidateFeatures": ["ears", "eyebrows", "chin"],
+    "previousFeatures": ["forehead", "eyes", "nose", "mouth"],
+    "processing": "Match new skin shades to existing palette, align previous forehead and central facial features, remove disconnected head debris. Preserve broad candidate jaw proportions while filling edge gaps and removing excess pixels; shaded chin underside and six-pixel-wide neck connecting to collar. Body and seven other views unchanged.",
+    "status": "South face approved; used in all-turn review sheets and runtime package. No additional generation."
+  },
+  "southRegeneration": {
+    "characterId": "b71e2242-7ba3-4cf2-b324-a1b6a297b374",
+    "mode": "Pro, 80px, low top-down, auto-add off",
+    "quotedIncludedGenerations": 10,
+    "references": ["south-east.png", "south-west.png", "Commander-supplied front photo", "verified original APK Quark"],
+    "result": "Completed but still blocky; separate comparison candidate only, not approved or installed.",
+    "source": "south-regeneration-source.png",
+    "headOnlyCandidate": "south-generated-head-candidate.png",
+    "comparison": "south-generation-comparison.png",
+    "preserved": "Existing eight directional drafts untouched. Candidate keeps the current south body from row 35 downward."
+  },
+  "southRegeneration2": {
+    "characterId": "8ae00c55-d038-43a2-bfa7-1418e2cc7d1f",
+    "mode": "Pro, 80px, low top-down, auto-add off",
+    "quotedIncludedGenerations": 10,
+    "references": ["approved southeast full sprite and native head crop", "approved southwest full sprite and native head crop"],
+    "source": "south-regeneration-2-source.png",
+    "candidate": "south-generated-head-2-candidate.png",
+    "comparison": "south-generation-2-comparison.png",
+    "processing": "Isolate head by source skin/eye palette, excluding generated clothing. Crop x19 y7 width42 height34, fit to 34x30 with nearest-neighbor, place x23 y4 on unchanged south body.",
+    "script": "../../scripts/preview-quark-south-candidate.py",
+    "status": "Separate candidate awaiting review; existing eight directions unchanged."
+  },
+  "prompt": "Full-body Ferengi treasurer, Quark reference: bald peach-tan lobed ridged head, very large round ears, heavy brow, sly face. Burgundy-edged patchwork cropped jacket in muted mustard, rust, sage and plum rectangles, multicolor striped shirt, small gold clasp. Olive green trousers. Dark BROWN leather boots, brown soles, never green boots. Empty bare hands at sides, neutral standing pose. Crisp readable pixel art matching a low top-down bridge crew sprite; no weapons, no armor, no hat, no uniform.",
+  "references": [
+    {
+      "source": "../apk-bridge-reference-drafts/quark-original.png",
+      "use": "Verified original APK full-body Quark: compact readable pixel-art silhouette, large ears, bald ridged head, patchwork jacket, brown boots."
+    },
+    {
+      "source": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQIQZ4NRtGk_zTxl5N_GQsZprF_m4Tt2NOT2zf12slo9GtsNIidv7CsdyDI&s=10",
+      "use": "Front photo: facial features, patchwork jacket, striped shirt and trousers. Override green boots with brown."
+    },
+    {
+      "source": "https://www.sideshow.com/cdn-cgi/image/quality=90,f=auto/https://www.sideshow.com/storage/product-images/911997/quark_star-trek_silo.png",
+      "use": "Three-quarter photo: head lobes, ear anatomy, jacket shape and colors. Override green boots with brown."
+    },
+    {
+      "source": "../../frontend/assets/sprites/approved_tom_paris/rot_south.png",
+      "use": "Pixel style, proportions, outline and camera only; do not copy appearance."
+    }
+  ],
+  "files": "Eight directional PNGs plus gray-backed nearest-neighbor review sheets.",
+  "localRefinements": {
+    "script": "../../scripts/refine-quark-draft.py",
+    "south": "Rebuilt with ear-fold, eye and mouth pixel clusters taken directly from the approved southeast view. Reshaped the formerly blocky silhouette into a rounded split crown, curved ear edges and tapered jaw with single-pixel steps and existing skin-tone edge shading. Clothing retained.",
+    "southProportions": "Ears widened one pixel per side and extended lower, with source ear folds moved outward and down. Chin extended two rows beneath the mouth and rounded into the collar to avoid a pinched jaw.",
+    "west": "Replace rogue white forehead pixel at x=29, y=9 with existing skin tone.",
+    "north-east": "Exact full-image horizontal mirror of northwest, as requested.",
+    "north": "Slight two-pixel central scalp split and symmetrical paired rear-head ridges in the existing ridge shade.",
+    "preserved": "South head silhouette refined, clothing retained; northeast fully mirrored from northwest; north crown split slightly adjusted. Brown boots retained in all views."
+  }
+}

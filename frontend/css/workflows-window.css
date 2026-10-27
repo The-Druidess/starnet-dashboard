@@ -135,7 +135,7 @@ textarea.wfw-field { min-height: 76px; }
 .wfw-fixh { font-size: 17px; color: var(--ph-bright); }
 
 /* the job box, the job riding, the jobs before */
-.wfw-live { margin: 0; padding: 8px 12px; font-size: 18px; color: var(--ph-bright); border-left: 3px solid #ffb23e; border-radius: 0 8px 8px 0; background: linear-gradient(90deg, rgba(255,178,62,.09), rgba(255,178,62,.02)); }
+.wfw-live { margin: 0; padding: 8px 12px; font-size: 18px; color: var(--ph-bright); border-left: 3px solid var(--ph); border-radius: 0 8px 8px 0; background: linear-gradient(90deg, rgba(var(--ph-rgb),.09), rgba(var(--ph-rgb),.02)); }
 .wfw-you { display: grid; gap: 3px; }
 .wfw-quote { font-size: 17px; line-height: 1.4; color: var(--ph-bright); white-space: pre-wrap; overflow-wrap: anywhere; max-height: 7.2em; overflow: auto; }
 .wfw-jobs { display: grid; gap: 4px; }
@@ -145,7 +145,7 @@ textarea.wfw-field { min-height: 76px; }
 .wfw-jtext { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ph-bright); }
 .wfw-jmeta { font-size: 14px; color: var(--ph-dim); white-space: nowrap; }
 .wfw-st { font-size: 14px; letter-spacing: 1px; color: var(--ph-dim); white-space: nowrap; }
-.wfw-st.ok { color: var(--ok); } .wfw-st.warn { color: var(--gold); } .wfw-st.run { color: #ffb23e; }
+.wfw-st.ok { color: var(--ok); } .wfw-st.warn { color: var(--gold); } .wfw-st.run { color: var(--ph); }
 
 /* the result page: what came out first, then what you can do about it, then the detail */
 .wfw-result { gap: 10px; }

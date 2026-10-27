@@ -2,6 +2,20 @@
 
 const A = require('./_assert.js');
 const Surface = require('../frontend/app/worldsurface.js');
+const WM = require('../frontend/app/worldmodel.js');
+const st = WM.create();
+const room = { id: Object.keys(st.doc().rooms)[0] };
+A.ok(room.id, 'ship material fixture uses seeded room');
+A.ok(st.setDeck(room.id, { mat: 'carpet', style: 'burgundy' }).ok, 'ship carpet selectable through normal deck API');
+A.ok(st.setWalls(room.id, { mat: 'cruiser', style: 'beige' }).ok, 'ship panels selectable through normal wall API');
+const savedShip = st.serialize();
+const reloadedShip = WM.create(savedShip).doc().rooms[room.id];
+A.eq([reloadedShip.floorMat, reloadedShip.floorStyle, reloadedShip.wallMat, reloadedShip.wallStyle],
+  ['carpet', 'burgundy', 'cruiser', 'beige'], 'ship surfaces survive save/reload');
+st.undo();
+A.ok(st.doc().rooms[room.id].wallMat !== 'cruiser', 'ship wall paint uses normal undo');
+A.ok(WM.MAT_ORDER.includes('carpet') && WM.WALL_ORDER.includes('cruiser'), 'Build palette lists both ship surfaces');
+A.eq([WM.FLOOR_MATERIALS.carpet.suggest, WM.WALL_MATERIALS.cruiser.suggest], ['burgundy', 'beige'], 'Build selection suggests reviewed colours');
 
 // A small integer rasterizer, sufficient for these pixel-only painters. Comparing
 // final pixels (rather than call strings) exercises clipping and chunk boundaries.

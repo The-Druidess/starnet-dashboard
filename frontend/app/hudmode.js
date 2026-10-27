@@ -231,7 +231,7 @@
     else if (feed.snapOk == null && !working) summary = { text: '…', tone: 'dim' };
     else if (waiting) summary = { text: waiting + ' NEED' + (waiting === 1 ? 'S' : '') + ' YOU', tone: 'ask' };
     else if (working) summary = { text: working + ' WORKING', tone: 'live' };
-    else summary = { text: 'STATION IDLE', tone: 'dim' };
+    else summary = { text: 'SHIP IDLE', tone: 'dim' };
     return {
       summary,
       live: live.slice(0, LIVE_MAX),
@@ -679,7 +679,7 @@
     open.setAttribute('aria-label', 'Open activity'); open.title = 'Click to open activity · drag to move';
     const box = el('section', 'hud-widget');
     box.id = 'hud-widget';
-    box.setAttribute('aria-label', 'StarNet HUD: your agents at work');
+    box.setAttribute('aria-label', 'USS Theseus HUD: your agents at work');
     box.setAttribute('data-tauri-drag-region', '');
     const rows = el('div', 'hud-wrows'); rows.setAttribute('data-tauri-drag-region', '');
     const more = el('button', 'hud-wmore'); more.type = 'button'; more.hidden = true;
@@ -806,8 +806,8 @@
     const small = el('button', 'btn', 'AGENT CAM'); small.type = 'button'; small.id = 'hud-small';
     small.title = 'Shrink the HUD to the agent cam';
     const pin = el('button', 'btn', 'PIN'); pin.type = 'button'; pin.id = 'hud-pin'; pin.hidden = true;
-    const exitBtn = el('button', 'btn', 'STATION'); exitBtn.type = 'button'; exitBtn.id = 'hud-exit';
-    exitBtn.title = 'Back to the full station';
+    const exitBtn = el('button', 'btn', 'SHIP'); exitBtn.type = 'button'; exitBtn.id = 'hud-exit';
+    exitBtn.title = 'Back to the USS Theseus';
     ctl.append(view, small, pin, exitBtn);
     const right = h3.querySelector('.h3-right') || h3;
     right.appendChild(ctl);

@@ -1600,6 +1600,7 @@ const StationBake = (() => {
     }
   }
 
+  MAT_PITCH.carpet = [1, 1];
   function paintDeckRecipe(b, mat, base, x, y, X, Y, z, n, fd) {
     if (mat === 'alloy') return deckAlloy(b, base, x, y, X, Y, z, n, fd);
     if (mat === 'runner') return deckRunner(b, base, x, y, X, Y, z, n, fd);
@@ -1620,7 +1621,7 @@ const StationBake = (() => {
   // Finish belongs to the material, not to the room. Keep it inside the tile and
   // anchored to world coordinates so refit swatches and chunked decks agree.
   function paintDeck(b, mat, base, x, y, X, Y, z, n, fd) {
-    if (nextSurfaces() || (typeof WorldSurface !== 'undefined' && ['basalt', 'parquet', 'rubber', 'slotted', 'terrazzo', 'octile', 'flightdeck', 'lunar', 'maggrid', 'habitat'].includes(mat))) {
+    if (nextSurfaces() || (typeof WorldSurface !== 'undefined' && ['carpet', 'basalt', 'parquet', 'rubber', 'slotted', 'terrazzo', 'octile', 'flightdeck', 'lunar', 'maggrid', 'habitat'].includes(mat))) {
       const origin = G && G.origin || { tx: 0, ty: 0 };
       WorldSurface.paintFloorTile(b, mat, base, X, Y, T, x + origin.tx, y + origin.ty, { detail: fd });
       return;
@@ -2486,7 +2487,7 @@ const StationBake = (() => {
     viewport: wallViewport, pipework: wallPipework, wainscot: wallWainscot, hedge: wallHedge,
     bulkhead: wallBulkhead, courses: wallCourses, service: wallService,
     pressure: spaceWall('pressure'), radiator: spaceWall('radiator'), utility: spaceWall('utility'), acoustic: spaceWall('acoustic'),
-    braced: spaceWall('braced'), machinery: spaceWall('machinery'), insulation: spaceWall('insulation')
+    braced: spaceWall('braced'), machinery: spaceWall('machinery'), insulation: spaceWall('insulation'), cruiser: spaceWall('cruiser')
   };
 
   /* ---------------- THE SIDE FACE — the same inner face, seen foreshortened ----------------

@@ -4447,7 +4447,7 @@ const Chat = (() => {
     implBtn.title = (plan && plan.action === 'apply') ? ('applies this patch to a new branch in ' + plan.root)
       : patchSaveOnly ? 'saves the .patch file only — it will NOT be applied to your project'
       : buildable ? ('has ' + who + ' BUILD what this describes — nothing is copied to a folder')
-      : ('saves the files to ' + ((plan && plan.dest) || 'your StarNet deliverables folder'));
+      : ('saves the files to ' + ((plan && plan.dest) || 'your ship deliverables folder'));
     // why a build can be refused, in the Commander's words — never a raw reason code.
     const implFailCopy = (reason) => {
       const r = String(reason || '');
@@ -4504,8 +4504,8 @@ const Chat = (() => {
       const saved = res.applied
         ? ('✓ implemented — applied to branch ' + (res.branch || '?') + (res.root ? (' in ' + res.root) : ''))
         : res.savedOnly
-          ? ('⚠ patch file saved to ' + (res.destPath || 'your StarNet deliverables folder') + ' — NOT applied to your project')
-          : ('✓ implemented — files saved to ' + (res.destPath || 'your StarNet deliverables folder'));
+          ? ('⚠ patch file saved to ' + (res.destPath || 'your ship deliverables folder') + ' — NOT applied to your project')
+          : ('✓ implemented — files saved to ' + (res.destPath || 'your ship deliverables folder'));
       decideNote(saved); sendNote(); settle(saved, false, res.applied ? '' : (res.destPath || ''));
     };
     acts.appendChild(implBtn);
@@ -7136,6 +7136,10 @@ const Chat = (() => {
         if (!seg) return;
         if (typeof Fork !== 'undefined' && Fork.stripMarkers) { raw = Fork.stripMarkers(raw); flushProse(); }
         else if (typeof TaskIntent !== 'undefined' && TaskIntent.strip) { raw = TaskIntent.strip(raw); flushProse(); }
+        if (typeof QTerminalStore !== 'undefined' && QTerminalStore.stripMarkers) {
+          const clean = QTerminalStore.stripMarkers(raw);
+          if (clean !== raw) { raw = clean; flushProse(); }
+        }
       },
       done() { closeSeg(); },
       // m = the plain-language headline to LEAD with; rawDetail (optional) = the original technical text, kept
@@ -7979,7 +7983,7 @@ const Chat = (() => {
       }
       return localLine('Loop: every ' + cur.label + ', ' + cur.fired + '/' + LOOP_MAX_ITERS + ' runs done'
         + (cur.skipped ? ', ' + cur.skipped + ' tick' + (cur.skipped === 1 ? '' : 's') + ' skipped (a run, a question or another stream had the floor)' : '')
-        + ' — "' + String(cur.prompt).slice(0, 60) + '". It stops if you close StarNet; /routine makes it permanent.');
+        + ' — "' + String(cur.prompt).slice(0, 60) + '". It stops if you close USS Theseus; /routine makes it permanent.');
     }
 
     const sp = raw.search(/\s/);
@@ -9347,6 +9351,21 @@ const Chat = (() => {
         // settle the outcome so the board's DONE chip is anchored to a real finished run.
         if (thisRunId && typeof Workstreams !== 'undefined' && Workstreams.noteRunEnd) Workstreams.noteRunEnd(ws.id, thisRunId, true);
         let replyText = reply || acc;
+        if (typeof QTerminalStore !== 'undefined' && QTerminalStore.capture) {
+          const unfilteredReply = replyText;
+          const q = QTerminalStore.capture(replyText, ws.agentId || 'agent', ws.id, thisRunId || '');
+          replyText = q.text;
+          if (replyText !== unfilteredReply && isActiveWs(ws) && activeLiveRow && activeLiveRow.cleanTaskIntent) activeLiveRow.cleanTaskIntent();
+          for (const item of q.received) {
+            const detail = item.kind === 'directive' ? ' requested your primary directive'
+              : item.kind === 'question' ? ' asked you a question'
+              : item.kind === 'command' ? ' sent Q a command'
+              : ' sent you a message';
+            if (typeof StationUI !== 'undefined' && StationUI.notify) {
+              StationUI.notify(whoOf(ws) + detail + ' in Q.', 'gold', undefined, { go: { term: 'q', section: 'inbox' } });
+            }
+          }
+        }
         const taskQuestion = (isTask && typeof TaskIntent !== 'undefined' && TaskIntent.parse) ? TaskIntent.parse(replyText) : null;
         if (taskQuestion) {
           if (thisRunId) {

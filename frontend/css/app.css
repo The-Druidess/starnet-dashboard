@@ -300,13 +300,21 @@ input[type=file]::file-selector-button:hover { border-color: var(--ph); backgrou
 }
 .sp-logo {
   width: min(58vw, 640px); height: auto; image-rendering: auto; user-select: none;
-  filter: drop-shadow(0 0 18px var(--ph-glow)) drop-shadow(0 0 60px var(--ph-glow2));
+  filter: var(--brand-art-filter, brightness(1)) drop-shadow(0 0 18px var(--ph-glow)) drop-shadow(0 0 60px var(--ph-glow2));
   animation: sp-breathe 4.2s ease-in-out infinite;
 }
-@keyframes sp-breathe {
-  0%, 100% { filter: drop-shadow(0 0 18px var(--ph-glow)) drop-shadow(0 0 60px var(--ph-glow2)); }
-  50%      { filter: drop-shadow(0 0 26px var(--ph-glow)) drop-shadow(0 0 84px var(--ph-glow2)); }
+.sp-logo.theseus-banner {
+  width: min(88vw, 1100px); aspect-ratio: 1006 / 168;
+  background: var(--ph);
+  -webkit-mask: url(../assets/brand/uss-theseus.svg?v=2) center / contain no-repeat;
+          mask: url(../assets/brand/uss-theseus.svg?v=2) center / contain no-repeat;
+  filter: none; animation: none;
 }
+@keyframes sp-breathe {
+  0%, 100% { filter: var(--brand-art-filter, brightness(1)) drop-shadow(0 0 18px var(--ph-glow)) drop-shadow(0 0 60px var(--ph-glow2)); }
+  50%      { filter: var(--brand-art-filter, brightness(1)) drop-shadow(0 0 26px var(--ph-glow)) drop-shadow(0 0 84px var(--ph-glow2)); }
+}
+body.theme-green { --brand-art-filter: hue-rotate(100deg); }
 .sp-tag { color: var(--ph-dim); letter-spacing: 7px; font-size: 15px; text-transform: uppercase; text-shadow: 0 0 8px var(--ph-glow2); }
 .sp-press {
   margin-top: 9vh; pointer-events: auto; cursor: pointer;
