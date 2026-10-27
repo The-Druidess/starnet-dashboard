@@ -2,13 +2,19 @@
 const assert = require('assert');
 
 const saved = new Map();
+saved.set('starnet.q-terminal.v1', JSON.stringify({ directive: '' }));
 global.localStorage = {
   getItem: key => saved.has(key) ? saved.get(key) : null,
   setItem: (key, value) => saved.set(key, value)
 };
 const Q = require('../frontend/app/qterminal.js');
 
-assert.doesNotMatch(Q.promptClause(), /PRIME DIRECTIVE — PROJECT-WIDE OPERATING RULES:/, 'an empty directive is not inserted into prompts');
+const defaultDirective = Q.directive();
+assert.match(defaultDirective, /The USS Theseus/);
+assert.match(defaultDirective, /\$1,000,000,000/);
+assert.match(defaultDirective, /Human authorization is required/);
+assert.ok(defaultDirective.length <= 8000, 'the default fits the saved directive limit');
+assert.match(Q.promptClause(), /PRIME DIRECTIVE — PROJECT-WIDE OPERATING RULES:[\s\S]*The USS Theseus/);
 const defaultHierarchy = [
   'Q — Level 0',
   'The Commander — Level 1',
@@ -56,6 +62,8 @@ global.App = { persist: () => true, refreshAgentPrompts: () => { promptRefreshes
 assert.strictEqual(Q.setDirective('Protect the crew and keep the station operational.').ok, true);
 assert.strictEqual(Q.directive(), 'Protect the crew and keep the station operational.');
 assert.strictEqual(promptRefreshes, 1, 'saving the Prime Directive refreshes current agent prompts');
+assert.deepStrictEqual(Q.setDirective('   '), { ok: false, error: 'The Prime Directive cannot be empty.' });
+assert.strictEqual(Q.directive(), 'Protect the crew and keep the station operational.', 'an empty update does not remove the saved directive');
 assert.strictEqual(Q.setQDirective('A human operating commitment.').ok, false, 'programmatic calls cannot authorize Q directive changes');
 assert.strictEqual(Q.qDirective(), '', 'rejected Q directive updates leave the store unchanged');
 assert.strictEqual(Q.setHierarchy(defaultHierarchy).ok, false, 'programmatic calls cannot authorize hierarchy changes');

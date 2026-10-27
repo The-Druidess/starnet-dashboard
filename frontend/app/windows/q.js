@@ -56,7 +56,7 @@
         '<header class="q-header"><div><span class="q-kicker">COMMANDER’S LOCAL INBOX</span><h3>Q · COMMUNICATIONS TERMINAL</h3></div><span class="q-count">' + rows.filter(row => row.status === 'pending').length + ' AWAITING</span></header>' +
         '<p class="q-intro">Agents can send notes, ask questions, submit exact commands, or request saved Q reference material. Q’s human operating directive and the Prime Directive are included in every agent’s standing instructions; role directives are included for matching agents. Q saves its inbox and settings locally; replies use the agent’s existing COMMS channel.</p>' +
         '<div class="q-inbox-layout"><div class="q-inbox-list" aria-label="Q inbox">' + inbox + '</div>' + selectedMarkup + '</div>' +
-        '<section class="q-settings"><h4>PRIME DIRECTIVE · PROJECT-WIDE RULE BASE</h4><p class="q-help">Saved text is included in every agent’s standing instructions. It does not grant tools or permissions. Choosing SEND PRIME DIRECTIVE sends a copy into that agent’s COMMS.</p>' +
+        '<section class="q-settings"><h4>PRIME DIRECTIVE · PROJECT-WIDE RULE BASE</h4><p class="q-help">The USS Theseus default is included in every agent’s standing instructions. Edit and save it to customize the shared goals and rules; it cannot be left empty or grant tools or permissions. Choosing SEND PRIME DIRECTIVE sends a copy into that agent’s COMMS.</p>' +
           '<textarea id="q-directive" class="q-textarea" maxlength="8000" placeholder="Write the shared goals and rules agents should follow across this project…">' + esc(Q.directive()) + '</textarea>' +
           '<button type="button" class="bb sm" data-q-action="save-directive">SAVE PRIME DIRECTIVE</button>' +
         '</section>' +
@@ -88,7 +88,7 @@
       try {
         if (action === 'save-directive') {
           const result = Q.setDirective(body.querySelector('#q-directive').value);
-          if (!result.ok) throw new Error('Could not save the directive locally.');
+          if (!result.ok) throw new Error(result.error || 'Could not save the directive locally.');
           H.notify('Q Prime Directive saved on this device.', 'gold');
           buildQ(body);
         } else if (action === 'save-q-directive') {

@@ -6,7 +6,7 @@ The station is home. A user asks an agent for useful work in COMMS, reviews the 
 | --- | --- | --- |
 | Agent | The AI worker doing this task. | Name, current activity, configured access and model. |
 | USS Theseus crew capacity | The default concurrent-agent limit covers all ten assigned AI Bridge crew members; it does not cap saved agents. | Runtime Limits in Settings; `0` explicitly means unlimited. |
-| Q Prime Directive | Commander-authored project-wide goals and rules included in every agent's standing instructions when saved. | The text and save action in Q; explain that it does not grant tools or permissions and that explicit COMMS sending remains available. |
+| Q Prime Directive | The USS Theseus default project-wide goals and rules are included in every agent's standing instructions; Q can customize and save them. | The text and save action in Q; explain that it does not grant tools or permissions and that explicit COMMS sending remains available. |
 | Q human operating directive | Human-authored statement of how Q intends to lead and engage with the crew, included in all agent prompts as collaboration context. | Its separate Q editor and save action; `Q_HUMAN_DIRECTIVE_REQUEST` returns the saved text. |
 | Q hierarchy roster | The Commander-provided Bridge authority roster, available in each agent's Q reference. | Q's save control and exact roster; `Q_HIERARCHY_REQUEST` returns the saved roster in the agent's reply. |
 | Q role directives | Commander-authored instructions attached to the matching Bridge role and returned by Q on request. | The named role, saved state, and `Q_ROLE_DIRECTIVE_REQUEST` request path. |
@@ -51,7 +51,7 @@ The station is home. A user asks an agent for useful work in COMMS, reviews the 
 
 Normal COMMS work answers in that conversation. A conveyor runs when work reaches its configured intake or trigger; directly messaging a step agent does not inherently launch the whole line. PREVIEW illustrates routing without running an AI job. RUN A SAMPLE JOB uses the real execution path.
 
-Q is the Commander-facing inbox on the Bridge. A saved Prime Directive is included in every agent's composed system prompt as shared project guidance, alongside role-specific instructions. It grants no tools, permissions, or approval and cannot override higher-priority system or safety instructions. The Commander may also explicitly send its text into an agent's COMMS conversation.
+Q is the Commander-facing inbox on the Bridge. The built-in USS Theseus Prime Directive is included in every agent's composed system prompt as shared project guidance, alongside role-specific instructions; Q can customize it, but it cannot be left empty. It grants no tools, permissions, or approval and cannot override higher-priority system or safety instructions. The Commander may also explicitly send its text into an agent's COMMS conversation.
 
 Q's human operating directive is stored separately from the project Prime Directive and role directives. When saved, its text is included in each agent's composed system prompt as context for communication and collaboration, not as proof that a decision was made or as permission to exceed authority or higher-priority instructions. Agents can request a copy using `Q_HUMAN_DIRECTIVE_REQUEST`.
 
