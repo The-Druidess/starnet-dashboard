@@ -10,6 +10,7 @@ The station is home. A user asks an agent for useful work in COMMS, reviews the 
 | Q human operating directive | Human-authored statement of how Q intends to lead and engage with the crew, included in all agent prompts as collaboration context. | Its separate Q editor and save action; `Q_HUMAN_DIRECTIVE_REQUEST` returns the saved text. |
 | Q hierarchy roster | The Commander-provided Bridge authority roster, available in each agent's Q reference. | Q's save control and exact roster; `Q_HIERARCHY_REQUEST` returns the saved roster in the agent's reply. |
 | Q role directives | Commander-authored instructions attached to the matching Bridge role and returned by Q on request. | The named role, saved state, and `Q_ROLE_DIRECTIVE_REQUEST` request path. |
+| Q Bridge coordination guide | Read-only reporting and escalation guidance returned automatically to any agent that requests it. | `Q_COORDINATION_REQUEST`; it grants no authority, tools, or roster-edit capability. |
 | Equipment prop | Provides an ability such as reading files. | Purpose, current access, equipment scope, equivalent appearances. |
 | Decoration | Changes the station's appearance. | Explicitly say it does not add tools. |
 | Room | Organizes the station and can define equipment scope for an assigned workflow agent. | The scope rules below; never imply every agent needs a complete kit. |
@@ -58,6 +59,8 @@ Q's human operating directive is stored separately from the project Prime Direct
 The saved Bridge Crew Hierarchy Roster is also included in every agent's composed system prompt with that agent's resolved level. Lower-numbered levels outrank higher-numbered levels; unlisted agents rank below all listed roles. Only a trusted human action in Q's roster control can change it, and Level 0 must be Q alone. An agent can request that Q place the current roster in its reply by ending with `Q_HIERARCHY_REQUEST`; Q replaces the marker with the saved roster. Levels define rank only; no other permissions are implied or granted.
 
 Role directives are keyed to recognized roster roles, included in prompts for matching agents, and can be requested with `Q_ROLE_DIRECTIVE_REQUEST` (own role) or `Q_ROLE_DIRECTIVE_REQUEST: <role name>`. Only trusted Q controls may save role directives.
+
+The default First Officer (Number Two, Level 2) directive is included in that role's standing instructions. Agents may request the read-only Bridge coordination and escalation guide with the standalone line `Q_COORDINATION_REQUEST`; Q returns the current reference automatically. The guide preserves direct escalation to Q for Commander, treasury, security, and communications issues, with specialist routing where assigned. The current roster identifies Tactical Officer as the security specialist and has no separate Chief Operations Officer; the guide routes workload and operational-status coordination to Number Two without changing the roster. Only Q (Level 0) may alter the hierarchy, and an automated reference response never changes it.
 
 Execution finished means **review the result**. MARK COMPLETE records the user's task status; it does not publish or send anything. REPEAT opens the existing routine form with task context; it does not create or enable a routine. Routines saved with scheduling off do not run automatically.
 

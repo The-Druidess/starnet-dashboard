@@ -22,6 +22,13 @@ this reference.
 Q is the human Commander and is not an AI agent slot. The default Q hierarchy
 lists all ten assigned AI Bridge crew members, using their assigned roles; the
 character names also resolve to those roles for rank and directive lookup.
+Number Two is the First Officer at Level 2. Level 2 may be shared with other
+roles; this directive does not change the hierarchy. The default First Officer
+directive is supplied to that role, and agents may request the read-only Bridge
+coordination and escalation guide from Q with `Q_COORDINATION_REQUEST`.
+The guide routes security issues to the assigned Tactical Officer and workload
+or operational-status coordination to Number Two because no separate Chief
+Operations Officer is listed. Only Q (Level 0) may alter the hierarchy roster.
 
 The sidecar's default simultaneous-agent limit is ten, so every assigned AI
 Bridge crew member can run at once. This is a concurrency limit, not a cap on

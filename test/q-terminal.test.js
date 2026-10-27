@@ -50,6 +50,8 @@ for (const [name, role, level] of assignments) {
 assert.strictEqual(Q.authorityFor({ id: 'bridge-commander', name: 'Jean-Luc Picard' }).listed, true, 'Jean-Luc resolves to the Commander role');
 assert.strictEqual(Q.parseHierarchy(defaultHierarchy).entries.length - 1, 10, 'default roster includes every assigned AI crew member, excluding human Q');
 assert.strictEqual(Q.authorityFor({ id: 'chief', name: 'FIRST OFFICER' }).level, 2, 'Number Two remains compatible with the First Officer role');
+assert.match(Q.roleDirective('Number Two'), /FIRST OFFICER \(NUMBER TWO\) — LEVEL 2/);
+assert.match(Q.roleDirective('First Officer'), /halt that operation and wait for human intervention/);
 assert.strictEqual(Q.authorityFor({ id: 'bridge-tactical', name: 'TACTICAL OFFICER' }).level, 2);
 assert.strictEqual(Q.authorityFor({ id: 'new-agent', name: 'New Agent' }).level, 4);
 assert.strictEqual(Q.authorityFor({ id: 'new-agent', name: 'New Agent' }).listed, false);
@@ -74,6 +76,7 @@ assert.strictEqual(promptRefreshes, 1, 'rejected hierarchy changes do not refres
 assert.strictEqual(Q.setRoleDirective('commander', 'A commander directive.').ok, false, 'programmatic calls cannot authorize role directives');
 assert.strictEqual(Q.roleDirective('commander'), '', 'rejected role directive updates leave the store unchanged');
 assert.match(Q.promptClause({ id: 'agent', name: 'COMMANDER' }), /YOUR ROSTER ASSIGNMENT: The Commander — Level 1 \(listed\)/);
+assert.match(Q.promptClause({ id: 'chief', name: 'FIRST OFFICER' }), /YOUR ROLE-SPECIFIC DIRECTIVE — NUMBER TWO:[\s\S]*FIRST OFFICER \(NUMBER TWO\) — LEVEL 2/);
 assert.match(Q.promptClause({ id: 'new-agent', name: 'New Agent' }), /YOUR ROSTER ASSIGNMENT: New Agent — Level 4 \(unlisted; subordinate to all listed roles\)/);
 assert.match(Q.promptClause(), /Only Q \(Level 0, the human Commander\) may alter the hierarchy/);
 delete global.App;
@@ -91,20 +94,39 @@ const input = [
   'Q_COMMAND: STATUS REPORT',
   'Q_DIRECTIVE_REQUEST',
   'Q_HUMAN_DIRECTIVE_REQUEST',
-  'Q_HIERARCHY_REQUEST'
+  'Q_HIERARCHY_REQUEST',
+  'Q_COORDINATION_REQUEST'
 ].join('\n');
 const captured = Q.capture(input, 'engineer', 'workstream-1', 'run-1');
-assert.strictEqual(captured.text, 'I finished the report.\nQ has no saved human operating directive.\nQ · BRIDGE CREW HIERARCHY ROSTER:\n' + defaultHierarchy);
+assert.strictEqual(captured.text, 'I finished the report.\nQ has no saved human operating directive.\nQ · BRIDGE CREW HIERARCHY ROSTER:\n' + defaultHierarchy + '\nQ · BRIDGE CREW COORDINATION AND ESCALATION GUIDE:\n' + [
+  'BRIDGE AUTHORITY AND COORDINATION',
+  'Q is the human Commander at Level 0 and is the only authority that may alter the Bridge Crew Hierarchy Roster. Agents may request and read the roster but must not edit it, replace it, assign themselves roles, or treat rank as permission. Number Two (First Officer) is Level 2 and coordinates Bridge work within authority delegated by Q; escalate unresolved conflicts, unclear authority, and reserved decisions to Q.',
+  '',
+  'REPORTING ROUTES',
+  '- Commander-related issues: Q directly.',
+  '- Treasury, security, and communications issues: Q directly, plus the responsible assigned Bridge specialist for departmental handling. Halt affected operations that cannot be repaired within authorized scope and await human intervention.',
+  '- Extensive agent troubleshooting: Chief Medical Officer for diagnosis and repair coordination. Only an authorized agent with necessary access may perform repairs.',
+  '- Communications repairs or training: Chief Communications Officer.',
+  '- Technical infrastructure, integrations, and system support: Chief Engineer.',
+  '- Workload, resources, dependencies, throughput, and operational status: First Officer (Number Two) for coordination; unresolved issues or unclear authority go to Q.',
+  '- Finances, budgets, expenditures, revenue, and financial obligations: Treasurer and Q directly.',
+  '- Security rules, access restrictions, authorization boundaries, or threats to ship systems, information, assets, and operational integrity: Q directly and the assigned security specialist. Never bypass a restriction to investigate or repair.',
+  '',
+  'The current roster names Tactical Officer as the security specialist and has no separate Chief Operations Officer. Do not modify the roster to satisfy a routing request. If no responsible officer is listed, refer the issue to Q. Record routine issues for tracking; report major errors and failures to Q. Agents must pause disputed or human-reserved operations until Q resolves or authorizes resumption. This guide conveys reporting guidance only; it grants no access, tools, approval, or authority.'
+].join('\n'));
 assert.deepStrictEqual(captured.received.map(row => row.kind), ['message', 'question', 'command', 'command', 'directive']);
 assert.strictEqual(captured.received[2].matchedResponse, 'All systems nominal.');
 assert.strictEqual(captured.received[3].matchedResponse, '');
+assert.strictEqual(Q.hierarchy(), defaultHierarchy, 'the read-only coordination response cannot change the roster');
 assert.strictEqual(Q.capture(input, 'engineer', 'workstream-1', 'run-1').received.length, 0, 'same run markers are idempotent');
 assert.strictEqual(Q.stripMarkers('visible\nQ_MESSAGE: hidden\nQ_HIERARCHY_REQUEST\nmore visible'), 'visible\nmore visible');
 assert.strictEqual(Q.stripMarkers('visible\nQ_ROLE_DIRECTIVE_REQUEST: Commander\nmore visible'), 'visible\nmore visible');
 assert.strictEqual(Q.stripMarkers('visible\nQ_HUMAN_DIRECTIVE_REQUEST\nmore visible'), 'visible\nmore visible');
+assert.strictEqual(Q.stripMarkers('visible\nQ_COORDINATION_REQUEST\nmore visible'), 'visible\nmore visible');
 assert.match(Q.promptClause(), /Q_DIRECTIVE_REQUEST/);
 assert.match(Q.promptClause(), /Q_HUMAN_DIRECTIVE_REQUEST/);
 assert.match(Q.promptClause(), /Q_HIERARCHY_REQUEST/);
+assert.match(Q.promptClause(), /Q_COORDINATION_REQUEST/);
 
 const question = Q.messages().find(row => row.kind === 'question');
 assert.ok(question);
@@ -162,7 +184,7 @@ assert.strictEqual(qDirectiveReply.text, 'Q · HUMAN OPERATING DIRECTIVE:\nQ wil
 const roleReply = reloaded.capture('Q_ROLE_DIRECTIVE_REQUEST', 'agent', 'workstream-1', 'run-2');
 assert.strictEqual(roleReply.text, 'Q · DIRECTIVE FOR THE COMMANDER:\n' + commanderDirective);
 const otherRoleReply = reloaded.capture('Q_ROLE_DIRECTIVE_REQUEST: First Officer', 'agent', 'workstream-1', 'run-3');
-assert.strictEqual(otherRoleReply.text, 'Q has no saved role directive for First Officer.');
+assert.strictEqual(otherRoleReply.text, 'Q · DIRECTIVE FOR FIRST OFFICER:\n' + reloaded.roleDirective('First Officer'));
 assert.strictEqual(reloaded.hydrate({ directive: 'Restored directive.', hierarchy: defaultHierarchy, roleDirectives: { 'OVERLORD': 'Old title should not be recognized.' } }), true);
 assert.strictEqual(reloaded.roleDirective('commander'), '', 'role directives do not retain the retired Overlord title as an alias');
 delete global.App;
