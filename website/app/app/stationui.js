@@ -1809,7 +1809,7 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
       '<div class="crew-eyebrow" title="' + esc(roomName) + '">' + esc(roomName) + '</div>' +
       '<div class="crew-name" style="color:' + esc(a.color) + '">' + esc(a.name) +
       (duplicateAgentName(a) ? '<span class="crew-id">[' + esc(duplicateAgentName(a)) + ']</span>' : '') +
-      '<span class="crew-room">' + (a.stats && a.stats.level ? 'Lv ' + a.stats.level : '') + '</span></div>' +
+      '<span class="crew-room" title="Assigned hierarchy level">Level ' + (authorityLevel == null ? 'unknown' : authorityLevel) + '</span></div>' +
       '<div class="crew-status" id="cs-' + esc(a.id) + '">…</div>' +
       // in-flight work bar: hidden until the row is .working (crewTick toggles it from the real run state).
       // The shimmer (.bar-active) reads as live activity; it's an indeterminate sweep, not a % readout.

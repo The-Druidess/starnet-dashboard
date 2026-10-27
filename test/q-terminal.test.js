@@ -32,6 +32,21 @@ assert.strictEqual(Q.hierarchy(), defaultHierarchy);
 assert.deepStrictEqual(Q.authorityFor({ id: 'agent', name: 'COMMANDER' }), {
   level: 1, listed: true, role: 'The Commander', hierarchy: defaultHierarchy
 });
+const bridgeLevels = [
+  ['Jean-Luc Picard', 1],
+  ['Data (as Sherlock)', 2],
+  ['Worf', 2],
+  ['Quark', 2],
+  ['Scotty', 3],
+  ['Seven of Nine', 3],
+  ['Deanna Troi', 3],
+  ['Tom Paris', 3],
+  ['Beverly Crusher', 3],
+  ['Geordi LaForge', 3]
+];
+for (const [name, level] of bridgeLevels) {
+  assert.strictEqual(Q.authorityFor({ id: name.toLowerCase().replace(/\W+/g, '-'), name }).level, level, name + ' has its assigned Bridge hierarchy level');
+}
 const assignments = [
   ['Scotty', 'Chief Engineer', 3],
   ['Seven of Nine', 'Comms Officer', 3],

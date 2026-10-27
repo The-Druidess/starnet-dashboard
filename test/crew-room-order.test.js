@@ -63,6 +63,7 @@ A.ok(ul.innerHTML.includes('&lt;Workshop &quot;A&quot;&gt;'), 'room labels and a
 A.ok(!ul.innerHTML.includes('<Workshop'), 'room names cannot inject markup');
 A.ok(ul.innerHTML.indexOf('crew-eyebrow') < ul.innerHTML.indexOf('crew-name'), 'eyebrow precedes crew title');
 A.ok(ul.innerHTML.includes('data-authority-level="2"'), 'crew row retains the assigned authority level');
+A.ok(ul.innerHTML.includes('class="crew-room" title="Assigned hierarchy level">Level 2</span>'), 'crew row visibly labels the authority rank, not game XP');
 const appSource = fs.readFileSync(path.join(__dirname, '../frontend/app/app.js'), 'utf8');
 A.ok(A.fnBody(appSource, 'function watchStationSave(').includes('StationUI.refreshCrewRooms()'), 'model changes refresh room labels/order');
 const refreshBody = A.fnBody(source, 'function refreshCrewRooms(');

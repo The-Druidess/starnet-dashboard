@@ -5,25 +5,25 @@ with the Commander assignment on 2026-10-17. Preserve names,
 spellings, and character descriptions as supplied unless the Commander updates
 this reference.
 
-| Role | Character / assignment |
-| --- | --- |
-| Me | Commander = Q |
-| Commander | Jean-Luc |
-| Chief Engineer | Scotty |
-| Comms Officer | Seven |
-| Embassador | Deanna Troi |
-| Helm Officer | Tom Paris |
-| Med Officer | Beverly Crusher |
-| Number Two | Data (as Sherlock) |
-| Sci Officer | Geordi La Forge |
-| Tactical Officer | Worf |
-| Treasurer | Quark |
+| Role | Character / assignment | Default level |
+| --- | --- | --- |
+| Human Commander | Q | 0 |
+| Commander | Jean-Luc | 1 |
+| Number Two / First Officer | Data (as Sherlock) | 2 |
+| Tactical Officer | Worf | 2 |
+| Treasurer | Quark | 2 |
+| Chief Engineer | Scotty | 3 |
+| Comms Officer | Seven | 3 |
+| Embassador | Deanna Troi | 3 |
+| Helm Officer | Tom Paris | 3 |
+| Med Officer | Beverly Crusher | 3 |
+| Sci Officer | Geordi La Forge | 3 |
 
 Q is the human Commander and is not an AI agent slot. The default Q hierarchy
 lists all ten assigned AI Bridge crew members, using their assigned roles; the
 character names also resolve to those roles for rank and directive lookup.
-Number Two is the First Officer at Level 2. Level 2 may be shared with other
-roles; this directive does not change the hierarchy. The default First Officer
+Number Two is the First Officer at Level 2, as is the Treasurer. Level 2 may be
+shared with other roles, including Tactical Officer. The default First Officer
 directive is supplied to that role, and agents may request the read-only Bridge
 coordination and escalation guide from Q with `Q_COORDINATION_REQUEST`.
 The guide routes security issues to the assigned Tactical Officer and workload
