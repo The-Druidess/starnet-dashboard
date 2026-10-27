@@ -1756,13 +1756,18 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
   function crewManifestOrder(roster, station) {
     const props = station ? station.props() : [];
     return roster.map((a, i) => {
+      const authority = typeof QTerminalStore !== 'undefined' && QTerminalStore.authorityFor
+        ? QTerminalStore.authorityFor(a)
+        : null;
       const desk = props.find(p => p.agentId === a.id && station.capForProp(p.t) === 'computer');
       const roomId = (desk && station.roomAt(desk.x, desk.y)) || (station && station.agentRoomId(a.id));
       const room = roomId && station.roomById(roomId);
       const roomName = room ? String(room.name || room.id) : 'UNASSIGNED';
       const bridge = !!room && /^(?:the\s+)?bridge$/i.test(roomName.trim());
-      return { a, i, roomName, bridge, assigned: !!room };
-    }).sort((a, b) => Number(b.bridge) - Number(a.bridge)
+      const authorityLevel = authority && Number.isFinite(authority.level) ? authority.level : null;
+      return { a, i, roomName, bridge, assigned: !!room, authorityLevel };
+    }).sort((a, b) => (a.authorityLevel == null ? Infinity : a.authorityLevel) - (b.authorityLevel == null ? Infinity : b.authorityLevel)
+      || Number(b.bridge) - Number(a.bridge)
       || Number(b.assigned) - Number(a.assigned)
       || a.roomName.localeCompare(b.roomName, 'en', { sensitivity: 'base', numeric: true })
       || String(a.a.name || a.a.id).localeCompare(String(b.a.name || b.a.id), 'en', { sensitivity: 'base', numeric: true })
@@ -1773,7 +1778,8 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
     const ordered = crewManifestOrder(present, typeof App !== 'undefined' && App.station ? App.station() : null);
     const rows = Array.from(ul.querySelectorAll('[data-agent-id]'));
     if (ordered.length === rows.length && ordered.every((entry, i) =>
-      rows[i].dataset.agentId === entry.a.id && rows[i].dataset.roomName === entry.roomName)) return;
+      rows[i].dataset.agentId === entry.a.id && rows[i].dataset.roomName === entry.roomName
+      && rows[i].dataset.authorityLevel === (entry.authorityLevel == null ? '' : String(entry.authorityLevel)))) return;
     const scrollTop = ul.scrollTop;
     const focused = document.activeElement && document.activeElement.closest('#crew [data-agent-id]');
     const focusedId = focused && focused.dataset.agentId;
@@ -1795,8 +1801,8 @@ const StationUI = typeof document === 'undefined' ? {} : (() => {
       return;
     }
     const ordered = crewManifestOrder(present, typeof App !== 'undefined' && App.station ? App.station() : null);
-    ul.innerHTML = ordered.map(({ a, i, roomName }, order) =>
-      '<li class="crew-row" role="button" tabindex="0" aria-label="' + (present.length > 1 ? 'Show sessions with ' + esc(a.name || a.id) + ', ' + esc(roomName) + '; Shift+F10 for the dossier" aria-keyshortcuts="Shift+F10' : 'Open dossier for ' + esc(a.name || a.id) + ', ' + esc(roomName)) + '" data-i="' + i + '" data-agent-id="' + esc(a.id) + '" data-room-name="' + esc(roomName) + '" style="--ci:' + order + '">' +
+    ul.innerHTML = ordered.map(({ a, i, roomName, authorityLevel }, order) =>
+      '<li class="crew-row" role="button" tabindex="0" aria-label="' + (present.length > 1 ? 'Show sessions with ' + esc(a.name || a.id) + ', ' + esc(roomName) + '; Shift+F10 for the dossier" aria-keyshortcuts="Shift+F10' : 'Open dossier for ' + esc(a.name || a.id) + ', ' + esc(roomName)) + '" data-i="' + i + '" data-agent-id="' + esc(a.id) + '" data-room-name="' + esc(roomName) + '" data-authority-level="' + (authorityLevel == null ? '' : authorityLevel) + '" style="--ci:' + order + '">' +
       crewPortrait(a) +
       '<span class="dot on"></span>' +
       '<div class="crew-main">' +

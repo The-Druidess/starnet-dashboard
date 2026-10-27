@@ -203,6 +203,7 @@
     state.hierarchy = hierarchyText;
     const ok = persist();
     if (ok && typeof App !== 'undefined' && App.refreshAgentPrompts) App.refreshAgentPrompts();
+    if (ok && typeof StationUI !== 'undefined' && StationUI.refreshCrewRooms) StationUI.refreshCrewRooms();
     return { ok };
   }
   function setRoleDirective(role, text, event) {
