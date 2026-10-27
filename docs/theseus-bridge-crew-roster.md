@@ -19,6 +19,16 @@ this reference.
 | Tactical Officer | Worf |
 | Treasurer | Quark |
 
+Q is the human Commander and is not an AI agent slot. The default Q hierarchy
+lists all ten assigned AI Bridge crew members, using their assigned roles; the
+character names also resolve to those roles for rank and directive lookup.
+
+The sidecar's default simultaneous-agent limit is ten, so every assigned AI
+Bridge crew member can run at once. This is a concurrency limit, not a cap on
+the number of saved agents or characters. The Commander may set it to `0` for
+unlimited concurrency, and environment or saved settings continue to override
+the default.
+
 ## Treasurer reference and appearance
 
 Quark is the Treasurer. Use the

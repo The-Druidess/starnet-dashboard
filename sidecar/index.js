@@ -816,8 +816,8 @@ const BUDGET_CAPS = {
 // budgetcaps.DEFAULT_MANAGED_PER_RUN_USD explains the number; SKYNET_BUDGET_MANAGED_PER_RUN retunes it and 0
 // restores the old "the whole wallet is the ceiling" behaviour. A saved/env per-run cap > 0 always wins.
 const MANAGED_PER_RUN_DEFAULT = num(ENV('BUDGET_MANAGED_PER_RUN'), budgetCaps.DEFAULT_MANAGED_PER_RUN_USD);
-// Optional multi-agent fan-out ceiling. 0 = unlimited (the product default). See concurrency.js.
-const MAX_CONCURRENT_AGENTS = resolveKnob('MAX_CONCURRENT_AGENTS', 'maxConcurrentAgents', 0);   // P1-9: env > saved > default
+// The Theseus Bridge has ten assigned AI crew members; 0 remains the explicit unlimited option.
+const MAX_CONCURRENT_AGENTS = resolveKnob('MAX_CONCURRENT_AGENTS', 'maxConcurrentAgents', 10);   // P1-9: env > saved > default
 // Optional per-worker USD ceiling for delegated sub-runs. 0 = ungoverned.
 const ORCH_PER_WORKER = num(ENV('BUDGET_PER_WORKER'), 0);
 // Optional per-worker tool-turn ceiling. 0 inherits the unlimited station policy.
@@ -13631,7 +13631,7 @@ async function handleConfigReset(req, res) {
    Saved values apply at NEXT BOOT (they feed the boot-frozen constants) — the UI discloses this. ---- */
 const RUNTIME_KNOB_DEFS = [
   { key: 'maxIters', env: 'MAX_ITERS', def: 0, min: 0, max: 200 },
-  { key: 'maxConcurrentAgents', env: 'MAX_CONCURRENT_AGENTS', def: 0, min: 0, max: 32 },
+  { key: 'maxConcurrentAgents', env: 'MAX_CONCURRENT_AGENTS', def: 10, min: 0, max: 32 },
   { key: 'consentTimeoutMs', env: 'CONSENT_TIMEOUT_MS', def: 120000, min: 5000, max: 600000 },
   { key: 'cronTickMs', env: 'CRON_TICK_MS', def: 60000, min: 5000, max: 600000 }
 ];

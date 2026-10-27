@@ -5,6 +5,7 @@ The station is home. A user asks an agent for useful work in COMMS, reviews the 
 | Existing concept | Explain it in one sentence | Show at the decision |
 | --- | --- | --- |
 | Agent | The AI worker doing this task. | Name, current activity, configured access and model. |
+| USS Theseus crew capacity | The default concurrent-agent limit covers all ten assigned AI Bridge crew members; it does not cap saved agents. | Runtime Limits in Settings; `0` explicitly means unlimited. |
 | Q Prime Directive | Commander-authored project-wide goals and rules included in every agent's standing instructions when saved. | The text and save action in Q; explain that it does not grant tools or permissions and that explicit COMMS sending remains available. |
 | Q human operating directive | Human-authored statement of how Q intends to lead and engage with the crew, included in all agent prompts as collaboration context. | Its separate Q editor and save action; `Q_HUMAN_DIRECTIVE_REQUEST` returns the saved text. |
 | Q hierarchy roster | The Commander-provided Bridge authority roster, available in each agent's Q reference. | Q's save control and exact roster; `Q_HIERARCHY_REQUEST` returns the saved roster in the agent's reply. |

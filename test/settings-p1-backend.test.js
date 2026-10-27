@@ -37,7 +37,8 @@ ok(/handleConfigReset[\s\S]{0,2200}unknown or non-resettable section/.test(src),
 // ---- P1-9 advanced runtime knobs: env > saved > default ----
 ok(/function resolveKnob\(/.test(src), 'P1-9: resolveKnob implements the precedence');
 ok(/resolveKnob\('MAX_ITERS', 'maxIters', 0\)/.test(src), 'P1-9: maxIters defaults to unlimited and resolves via resolveKnob');
-ok(/resolveKnob\('MAX_CONCURRENT_AGENTS', 'maxConcurrentAgents', 0\)/.test(src), 'P1-9: maxConcurrentAgents defaults to unlimited and resolves via resolveKnob');
+ok(/resolveKnob\('MAX_CONCURRENT_AGENTS', 'maxConcurrentAgents', 10\)/.test(src), 'P1-9: maxConcurrentAgents defaults to the full USS Theseus Bridge crew and resolves via resolveKnob');
+ok(/key: 'maxConcurrentAgents', env: 'MAX_CONCURRENT_AGENTS', def: 10, min: 0, max: 32/.test(src), 'P1-9: runtime knob advertises the same 10-agent default');
 // 2026-09-17: the four caps read their defaults from ONE shipped table (budgetcaps.SHIPPED_DEFAULTS) so the
 // runaway-loop day rail and the still-off per-run ceiling cannot drift apart. Per-run stays off — asserted on
 // the table itself, not on a literal the source no longer carries.

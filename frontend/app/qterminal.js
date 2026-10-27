@@ -4,7 +4,7 @@
   const KEY = 'starnet.q-terminal.v1';
   const MAX_MESSAGES = 200;
   const MAX_COMMANDS = 50;
-  const DEFAULT_HIERARCHY = [
+  const LEGACY_DEFAULT_HIERARCHY = [
     'Q — Level 0',
     'The Commander — Level 1',
     'The First Officer — Level 2',
@@ -16,6 +16,19 @@
     'Chief Helm Officer — Level 3',
     'Chief Engineer — Level 3',
     'The Ambassador — Level 3',
+    'The Treasurer — Level 2'
+  ].join('\n');
+  const DEFAULT_HIERARCHY = [
+    'Q — Level 0',
+    'The Commander — Level 1',
+    'Number Two — Level 2',
+    'Chief Engineer — Level 3',
+    'Comms Officer — Level 3',
+    'Embassador — Level 3',
+    'Helm Officer — Level 3',
+    'Med Officer — Level 3',
+    'Sci Officer — Level 3',
+    'Tactical Officer — Level 2',
     'The Treasurer — Level 2'
   ].join('\n');
 
@@ -44,7 +57,9 @@
   }
   function normalize(value) {
     const data = value && typeof value === 'object' ? value : {};
-    const hierarchy = cleanText(data.hierarchy, 6000) || DEFAULT_HIERARCHY;
+    const savedHierarchy = cleanText(data.hierarchy, 6000);
+    const hierarchy = savedHierarchy === LEGACY_DEFAULT_HIERARCHY ? DEFAULT_HIERARCHY
+      : savedHierarchy || DEFAULT_HIERARCHY;
     const roleDirectives = {};
     if (data.roleDirectives && typeof data.roleDirectives === 'object') {
       for (const [key, value] of Object.entries(data.roleDirectives).slice(0, 30)) {
@@ -171,25 +186,51 @@
     return { ok: true, entries };
   }
   function canonicalRole(value) {
-    const name = String(value || '').trim().toLocaleUpperCase().replace(/^THE\s+/, '').replace(/\s+/g, ' ');
+    const name = String(value || '').trim().replace(/\s+\([^)]*\)$/, '')
+      .toLocaleUpperCase().replace(/^THE\s+/, '').replace(/\s+/g, ' ');
     const aliases = {
       Q: 'commander-q',
       COMMANDER: 'commander',
+      'JEAN-LUC': 'commander',
+      'JEAN-LUC PICARD': 'commander',
+      PICARD: 'commander',
       'FIRST OFFICER': 'first-officer',
-      'CHIEF OPS OFFICER': 'chief-ops',
+      'NUMBER TWO': 'first-officer',
       'CHIEF SECURITY OFFICER': 'chief-security',
       'TACTICAL OFFICER': 'chief-security',
+      WORF: 'chief-security',
       'CHIEF COMM OFFICER': 'chief-comm',
       'COMMS OFFICER': 'chief-comm',
+      SEVEN: 'chief-comm',
+      'SEVEN OF NINE': 'chief-comm',
       'CHIEF MED OFFICER': 'chief-med',
       'MEDICAL OFFICER': 'chief-med',
+      'MED OFFICER': 'chief-med',
+      BEVERLY: 'chief-med',
+      'BEVERLY CRUSHER': 'chief-med',
+      CRUSHER: 'chief-med',
       'CHIEF SCIENCE OFFICER': 'chief-science',
       'SCIENCE OFFICER': 'chief-science',
+      'SCI OFFICER': 'chief-science',
+      GEORDI: 'chief-science',
+      'GEORDI LAFORGE': 'chief-science',
+      LAFORGE: 'chief-science',
       'CHIEF HELM OFFICER': 'chief-helm',
       'HELM OFFICER': 'chief-helm',
+      'TOM PARIS': 'chief-helm',
+      PARIS: 'chief-helm',
       'CHIEF ENGINEER': 'chief-engineer',
+      SCOTTY: 'chief-engineer',
+      'MONTGOMERY SCOTT': 'chief-engineer',
       AMBASSADOR: 'ambassador',
-      TREASURER: 'treasurer'
+      EMBASSADOR: 'ambassador',
+      DEANNA: 'ambassador',
+      'DEANNA TROI': 'ambassador',
+      TROI: 'ambassador',
+      TREASURER: 'treasurer',
+      QUARK: 'treasurer',
+      DATA: 'first-officer',
+      SHERLOCK: 'first-officer'
     };
     return aliases[name] || '';
   }

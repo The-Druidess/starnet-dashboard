@@ -12,22 +12,38 @@ assert.doesNotMatch(Q.promptClause(), /PRIME DIRECTIVE — PROJECT-WIDE OPERATIN
 const defaultHierarchy = [
   'Q — Level 0',
   'The Commander — Level 1',
-  'The First Officer — Level 2',
-  'Chief Ops Officer — Level 3',
-  'Chief Security Officer — Level 2',
-  'Chief Comm Officer — Level 3',
-  'Chief Med Officer — Level 3',
-  'Chief Science Officer — Level 3',
-  'Chief Helm Officer — Level 3',
+  'Number Two — Level 2',
   'Chief Engineer — Level 3',
-  'The Ambassador — Level 3',
+  'Comms Officer — Level 3',
+  'Embassador — Level 3',
+  'Helm Officer — Level 3',
+  'Med Officer — Level 3',
+  'Sci Officer — Level 3',
+  'Tactical Officer — Level 2',
   'The Treasurer — Level 2'
 ].join('\n');
 assert.strictEqual(Q.hierarchy(), defaultHierarchy);
 assert.deepStrictEqual(Q.authorityFor({ id: 'agent', name: 'COMMANDER' }), {
   level: 1, listed: true, role: 'The Commander', hierarchy: defaultHierarchy
 });
-assert.strictEqual(Q.authorityFor({ id: 'chief', name: 'FIRST OFFICER' }).level, 2);
+const assignments = [
+  ['Scotty', 'Chief Engineer', 3],
+  ['Seven of Nine', 'Comms Officer', 3],
+  ['Deanna Troi', 'Embassador', 3],
+  ['Tom Paris', 'Helm Officer', 3],
+  ['Beverly Crusher', 'Med Officer', 3],
+  ['Data (as Sherlock)', 'Number Two', 2],
+  ['Geordi LaForge', 'Sci Officer', 3],
+  ['Worf', 'Tactical Officer', 2],
+  ['Quark', 'The Treasurer', 2]
+];
+for (const [name, role, level] of assignments) {
+  const authority = Q.authorityFor({ id: name.toLowerCase().replace(/\W+/g, '-'), name });
+  assert.deepStrictEqual([authority.role, authority.level, authority.listed], [role, level, true], name + ' resolves to assigned Bridge role');
+}
+assert.strictEqual(Q.authorityFor({ id: 'bridge-commander', name: 'Jean-Luc Picard' }).listed, true, 'Jean-Luc resolves to the Commander role');
+assert.strictEqual(Q.parseHierarchy(defaultHierarchy).entries.length - 1, 10, 'default roster includes every assigned AI crew member, excluding human Q');
+assert.strictEqual(Q.authorityFor({ id: 'chief', name: 'FIRST OFFICER' }).level, 2, 'Number Two remains compatible with the First Officer role');
 assert.strictEqual(Q.authorityFor({ id: 'bridge-tactical', name: 'TACTICAL OFFICER' }).level, 2);
 assert.strictEqual(Q.authorityFor({ id: 'new-agent', name: 'New Agent' }).level, 4);
 assert.strictEqual(Q.authorityFor({ id: 'new-agent', name: 'New Agent' }).listed, false);
@@ -54,7 +70,7 @@ assert.match(Q.promptClause({ id: 'new-agent', name: 'New Agent' }), /YOUR ROSTE
 assert.match(Q.promptClause(), /Only Q \(Level 0, the human Commander\) may alter the hierarchy/);
 delete global.App;
 assert.match(Q.promptClause(), /PRIME DIRECTIVE — PROJECT-WIDE OPERATING RULES:[\s\S]*Protect the crew and keep the station operational\./);
-assert.match(Q.promptClause(), /BRIDGE CREW HIERARCHY ROSTER \(Q REFERENCE\):[\s\S]*Chief Security Officer — Level 2/);
+assert.match(Q.promptClause(), /BRIDGE CREW HIERARCHY ROSTER \(Q REFERENCE\):[\s\S]*Tactical Officer — Level 2/);
 assert.strictEqual(Q.saveCommand('', 'status report', 'All systems nominal.').ok, true);
 assert.strictEqual(Q.saveCommand('', 'status report', 'Duplicate.').ok, false);
 assert.strictEqual(Q.saveCommand('', 'Status report', 'Case-sensitive command.').ok, true);
@@ -105,6 +121,22 @@ assert.strictEqual(reloaded.directive(), 'Restored directive.');
 assert.strictEqual(reloaded.hierarchy(), defaultHierarchy, 'older saved Q state receives the default hierarchy');
 assert.strictEqual(reloaded.hydrate({ directive: 'Restored directive.', hierarchy: defaultHierarchy.replace('Q — Level 0', 'The Commander — Level 0') }), true);
 assert.strictEqual(reloaded.hierarchy(), defaultHierarchy, 'invalid persisted rosters are replaced with the valid default');
+const legacyHierarchy = [
+  'Q — Level 0',
+  'The Commander — Level 1',
+  'The First Officer — Level 2',
+  'Chief Ops Officer — Level 3',
+  'Chief Security Officer — Level 2',
+  'Chief Comm Officer — Level 3',
+  'Chief Med Officer — Level 3',
+  'Chief Science Officer — Level 3',
+  'Chief Helm Officer — Level 3',
+  'Chief Engineer — Level 3',
+  'The Ambassador — Level 3',
+  'The Treasurer — Level 2'
+].join('\n');
+assert.strictEqual(reloaded.hydrate({ directive: 'Restored directive.', hierarchy: legacyHierarchy }), true);
+assert.strictEqual(reloaded.hierarchy(), defaultHierarchy, 'the shipped roster migrates to the assigned Theseus crew');
 const commanderDirective = 'Commander role directive fixture.';
 assert.strictEqual(reloaded.hydrate({
   directive: 'Restored directive.',
